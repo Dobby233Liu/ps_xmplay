@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "gdb",
+      "request": "attach",
+      "target": "localhost:3333",
+      "remote": true,
+      "cwd": "${workspaceFolder}/psexe",
+      "valuesFormatting": "parseText",
+      "stopAtConnect": true,
+      "gdbpath": "gdb-multiarch",
+      "windows": {
+        "gdbpath": "gdb-multiarch.exe"
+      },
+      "osx": {
+        "gdbpath": "gdb"
+      },
+      "executable": "${workspaceFolder}/psexe/xmplayer.elf",
+      "autorun": [
+        "monitor reset shellhalt",
+        "load xmplayer.elf",
+        "tbreak main",
+        "continue"
+      ]
+    }
+  ]
+}

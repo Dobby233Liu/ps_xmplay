@@ -1,0 +1,3 @@
+[submodule "psexe/nugget"]
+	path = psexe/nugget
+	url = https://github.com/pcsx-redux/nugget.git

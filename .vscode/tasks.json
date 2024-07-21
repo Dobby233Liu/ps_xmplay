@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Driver Debug",
+      "type": "shell",
+      "command": "make -C psexe BUILD=Debug",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Build Driver Release",
+      "type": "shell",
+      "command": "make -C psexe",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "Clean Driver",
+      "type": "shell",
+      "command": "make -C psexe clean",
+      "group": {
+        "kind": "build"
+      }
+    }
+  ]
+}

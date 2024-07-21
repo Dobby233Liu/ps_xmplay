@@ -1,0 +1,54 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "compilerPath": "${env:AppData}\\mips\\mips\\bin\\mipsel-none-elf-gcc.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++20",
+      "defines": [
+        "__STDC_HOSTED__ = 0",
+        "XM_BUILTIN",
+        "XM_FILENAME",
+        "XM_TYPE",
+        "XM_LOOP",
+        "XM_POSITION",
+        "XM_PANNING_TYPE"
+      ],
+      "includePath": [
+        "${env:AppData}/mips/mips/include",
+        "${workspaceFolder}/psexe/",
+        "${workspaceFolder}/psexe/nugget",
+        "${workspaceFolder}/psexe/xmplay/include",
+        "${workspaceFolder}/psexe/psyq/include"
+      ],
+      "intelliSenseMode": "gcc-x86"
+    },
+    {
+      "name": "linux",
+      "compilerPath": "mipsel-linux-gnu-gcc",
+      "cStandard": "c17",
+      "cppStandard": "c++20",
+      "defines": [
+        "__STDC_HOSTED__ = 0",
+        "XM_BUILTIN",
+        "XM_FILENAME",
+        "XM_TYPE",
+        "XM_LOOP",
+        "XM_POSITION",
+        "XM_PANNING_TYPE"
+      ],
+      "includePath": [
+        "/usr/mipsel-linux-gnu/include",
+        "/usr/local/mipsel-linux-gnu/include",
+        "/usr/mipsel-none-elf/include",
+        "/usr/local/mipsel-none-elf/include",
+        "${workspaceFolder}/psexe/",
+        "${workspaceFolder}/psexe/nugget",
+        "${workspaceFolder}/psexe/xmplay/include",
+        "${workspaceFolder}/psexe/psyq/include"
+      ],
+      "intelliSenseMode": "gcc-x86"
+    }
+  ],
+  "version": 4
+}

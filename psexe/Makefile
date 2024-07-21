@@ -1,0 +1,57 @@
+TARGET = xmplayer
+TYPE = ps-exe
+
+XM_BUILTIN ?=
+XM_DIR ?= songdata
+XM_TYPE_MUSIC = 0
+XM_TYPE_SFX = 1
+XM_PANNING_XM = 0
+XM_PANNING_S3M = 1
+
+ifneq ($(XM_BUILTIN),)
+include song.mk
+endif
+
+SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
+
+SRCS = \
+nugget/common/crt0/crt0.s \
+nugget/common/syscalls/printf.s \
+debug.c \
+main.c \
+song.c 
+ifneq ($(XM_BUILTIN),)
+SRCS += $(SONGDATA_OBJS)
+endif
+
+CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
+ifneq ($(XM_BUILTIN),)
+CPPFLAGS += -DXM_FILENAME="$(XM)" \
+-DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
+-DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
+endif
+LDFLAGS += -Lpsyq/lib -Lxmplay/lib
+LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu -lxmplay -Wl,--end-group
+
+include nugget/common.mk
+
+ifneq ($(XM_BUILTIN),)
+define SONG_TO_OBJ
+	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section .data=.rodata,alloc,load,readonly,data,contents -O $(FORMAT) -B mips $(1) $@
+endef
+
+# FIXME: can't rebuild
+
+song_xm.o: $(XM_DIR)/$(XM).xm
+	$(call SONG_TO_OBJ,$<)
+
+song_vh.o: $(XM_DIR)/$(XM).vh
+	$(call SONG_TO_OBJ,$<)
+
+song_vb.o: $(XM_DIR)/$(XM).vb
+	$(call SONG_TO_OBJ,$<)
+
+.PHONY: clean-songdata
+clean-songdata:
+	rm -f $(SONGDATA_OBJS)
+endif

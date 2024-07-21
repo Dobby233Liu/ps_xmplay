@@ -1,0 +1,13 @@
+*.o
+
+*.a
+!psyq/
+!xmplay/
+
+Overlay.*
+*.elf
+*.ps-exe
+
+*.map
+
+*.dep
