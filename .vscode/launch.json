@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
+      "name": "Debug Driver",
       "type": "gdb",
       "request": "attach",
       "target": "localhost:3333",

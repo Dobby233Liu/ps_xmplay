@@ -1,0 +1,68 @@
+Tag Format
+----------
+
+The tag consists of a series of lines of the format variable=value, as in the
+following example:
+
+  title=Earth Painting
+  artist=Yoko Shimomura
+  game=Legend of Mana
+  year=1999
+
+The tag is to be parsed as follows:
+
+- All characters 0x01-0x20 are considered whitespace
+- There must be no null (0x00) characters; behavior is undefined if a null
+  byte is present
+- 0x0A is the newline character
+- Additional lines of the form "variable=value" may follow
+- Variable names are case-insensitive and must be valid C identifiers
+- Whitespace at the beginning/end of the line and before/after the = are
+  ignored
+- Blank lines are ignored
+- Multiple-line variables must appear as consecutive lines using the same
+  variable name.  For instance:
+
+    comment=This is a
+    comment=multiple-line
+    comment=comment.
+
+- Tag text is to be encoded or decoded using the default system code page.
+
+Behavior is undefined if a variable name appears more than once, if a
+multiple-line variable is broken apart by an unrelated line, etc.
+
+The following variable names are predefined:
+
+- title, artist, game, year, genre, comment, copyright +
+  (These are self-explanatory.)
+
+- psfby, ssfby, dsfby +
+  The name of the person responsible for creating the .PSF (or .SSF or .DSF)
+  file.  This does not imply that said person wrote the music driver code.
+
+- volume +
+  Relative volume of the PSF as a simple scale coefficient.  1.0 is the
+  default.  It can by any real number, even negative.
+
+- length, fade +
+  Length of the song, and the length of the ending fadeout.
++
+These may be in one of three formats:
+
+    seconds.decimal
+    minutes:seconds.decimal
+    hours:minutes:seconds.decimal
++
+The decmial portion may be omitted.  Commas are also recognized as decimal
+separators.
+
+The following variables are reserved and should not be used:
+
+- Anything starting with an underscore (_) character +
+  These are reserved for information crucial to playing, i.e. the _lib tags
+  in MiniPSF files.
+
+- filedir, filename, and fileext have special meanings in Highly
+  Experimental.  While these variables may exist, they won't be usable in
+  title format strings.

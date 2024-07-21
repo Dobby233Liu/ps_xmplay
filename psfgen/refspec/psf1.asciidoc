@@ -1,0 +1,121 @@
+Version 0x01: Playstation (PSF1)
+--------------------------------
+
+Program section: PS-X EXE consumer-format executable file, including header. +
+Reserved section: Not used. May be ignored, removed, etc.
+
+.File extensions:
+- psf, psf1 (self-contained program)
+- minipsf, minipsf1 (program relying on extra library data)
+- psflib, psf1lib (library for use with minipsf files)
+
+In the case of a PSF1, the program section is an executable file for use with
+the original Playstation console.  It's responsible for initializing the SPU,
+loading samples, setting up interrupts, etc. - anything a real program must
+do.  It runs at the shell level and has full access to kernel functions.
+
+There are two important variations on PSF1: the MiniPSF and PSFLib which are
+described later.
+
+Uncompressed size of the executable must not exceed 2,033,664 bytes.
+
+The executable must be in the standard consumer "PS-X EXE" format, which is
+described below for reference.
+
+- First 0x800 bytes - header
+- Next N bytes - text section
+
+Header format:
+
+- 0x000 (8 bytes): ASCII "PS-X EXE"
+- 0x010 (4 bytes): Initial PC, little-endian unsigned long
+- 0x018 (4 bytes): Text section start address, little-endian unsigned long
+- 0x01C (4 bytes): Text section size, little-endian unsigned long
+- 0x030 (4 bytes): Initial SP ($29), little-endian unsigned long
+- 0x04C: ASCII marker: "Sony Computer Entertainment Inc. for North America area"
+  (or similar for other regions)
+
+Everything else is zero.
+
+Text section should be a multiple of 2048 bytes.
+
+The region specified by the ASCII marker at 0x4C should be used to determine
+the screen refresh rate and frequency of the VBlank interrupt (NTSC vs. PAL):
+
+- "North America" = 60Hz
+- "Japan" = 60Hz
+- "Europe" = 50Hz
+
+(please let me know if there are other regions I should include here)
+
+Also, if the "_refresh" tag is present, it specifies the refresh rate in Hz
+directly.  This tag overrides the region information in the EXE header.
+Currently only _refresh=50 and _refresh=60 are valid.
+
+
+PSF1: MiniPSF and PSFLib
+------------------------
+
+MiniPSF files are regular PSF1 files which import data from one or more
+PSFLib files residing in the same directory (for shared driver code, sound
+banks, etc.)
+
+PSFLib files are also regular PSF1 files.  They can also recursively import
+data from other PSFLib files.
+
+This is done via tag variables called _lib, _lib2, _lib3, etc.
+
+The proper way to load a minipsf is as follows:
+
+- Load the EXE data - this becomes the current EXE
+
+- Check for the presence of a "_lib" tag. +
+  If present:
+  * RECURSIVELY load the EXE data from the given library file
+    (make sure to limit recursion to avoid crashing - I limit it to 10 levels)
+  * Make the _lib EXE the current one.
+  * We will use the initial PC/SP from the _lib EXE.
+  * Superimpose the originally loaded PSF EXE on top of the current EXE using
+    its text start address and text size.
+
+- Check for the presence of "_libN" tags for N=2 and up (use "_lib%d")
+  * RECURSIVELY load and superimpose all these EXEs on top of the current
+    EXE.  Do not modify the current PC/SP.
+  * Start at N=2.  Stop at the first tag name that doesn't exist.
+
+- (done)
+
+EXEs must always be contiguous.  When superimposing one EXE on top of
+another, grow the target EXE start/end points as necessary and fill the
+unused space with zeroes.
+
+Filenames given in any _lib* tag are relative to the directory in which the
+PSF file itself resides.  Both forward and backward slashes should be
+interpreted as path separators.  For instance:
+
+- if C:\Something\Demo.minipsf contains "_lib=Hello/Library.psflib"
+- then the library is loaded from C:\Something\Hello\Library.psflib
+
+Filenames may contain spaces within, but no leading or trailing spaces.
+
+When determining whether a PSF1 file is a MiniPSF and will need additional
+data, you should use the presence of _lib* tags to decide, rather than the
+file extension.  It's a MiniPSF if it includes a _lib or a _lib2.
+
+Region information in all _lib EXE headers should be ignored; only the
+original EXE's region information should be considered when determining the
+refresh rate.  For instance, a "Europe area" MiniPSF which imports data from
+a "North America area" PSFLib would still be considered 50Hz.
+
+If any _refresh override tags are encountered during the PSF loading process,
+the first tag seen will take effect and override all subsequent tags as well
+as all EXE header region information.  For instance:
+
+- MiniPSF has _refresh=50, and PSFLib has no _refresh tag: +
+    50Hz override regardless of the EXE headers
+- MiniPSF has _refresh=50, and PSFLib has _refresh=60: +
+    50Hz override regardless of the EXE headers
+- MiniPSF has no _refresh tag, and PSFLib has _refresh=60: +
+    60Hz override regardless of the EXE headers
+- Neither the MiniPSF nor the PSFLib have _refresh tags: +
+    MiniPSF's EXE header is used to determine the refresh rate

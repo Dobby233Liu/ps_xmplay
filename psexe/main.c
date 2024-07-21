@@ -14,7 +14,7 @@ static unsigned char heap_head[0x20000];
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
 char spu_malloc_rec[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
 
-#define BIOS_VERSION_STRING 0xBFC7FF32
+// #define BIOS_VERSION_STRING 0xBFC7FF32
 
 void main() {
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
@@ -27,7 +27,8 @@ void main() {
 	SpuInitMalloc(MAX_SPU_MALLOC, spu_malloc_rec);
 	SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
-    XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
+    // XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
+    XM_OnceOffInit(XM_NTSC);
     XM_SetStereo();
 
     uint8_t *song_addr = malloc(XM_GetSongSize());

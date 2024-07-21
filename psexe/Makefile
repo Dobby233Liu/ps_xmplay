@@ -1,7 +1,7 @@
 TARGET = xmplayer
 TYPE = ps-exe
 
-XM_BUILTIN ?=
+XM_BUILTIN ?= true
 XM_DIR ?= songdata
 XM_TYPE_MUSIC = 0
 XM_TYPE_SFX = 1

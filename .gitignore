@@ -1,1 +1,6 @@
 .vscode/settings.json
+.venv
+__pycache__
+*.psf
+*.minipsf
+*.psflib

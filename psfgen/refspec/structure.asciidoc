@@ -1,0 +1,53 @@
+Basic File Structure
+--------------------
+
+All PSF files share the same basic stucture, described below.
+
+Alignment to any data type larger than a byte is not guaranteed in the PSF
+file.  Exercise appropriate caution.
+
+* First 3 bytes: ASCII signature: "PSF" (case sensitive)
+
+* Next 1 byte: Version byte +
+  The version byte is used to determine the type of PSF file.  It does NOT
+  affect the basic structure of the file in any way.
+  Currently accepted version bytes are:
+  ** 0x01: Playstation (PSF1)
+  ** 0x02: Playstation 2 (PSF2)
+  ** 0x11: Saturn (SSF) [TENTATIVE]
+  ** 0x12: Dreamcast (DSF) [TENTATIVE]
+
+* Next 4 bytes: Size of reserved area \(R), little-endian unsigned long
+
+* Next 4 bytes: Compressed program length (N), little-endian unsigned long +
+  This is the length of the program data _after_ compression.
+
+* Next 4 bytes: Compressed program CRC-32, little-endian unsigned long +
+  This is the CRC-32 of the program data _after_ compression.  Filling in
+  this value is mandatory, as a PSF file may be regarded as corrupt if it
+  does not match.
+
+* Next R bytes: Reserved area. +
+  May be empty if R is 0 bytes.
+
+* Next N bytes: Compressed program, in zlib compress() format. +
+  May be empty if N is 0 bytes.
+
+The following data is optional and may be omitted:
+
+* Next 5 bytes: ASCII signature: "[TAG]" (case sensitive) +
+  If these 5 bytes do not match, then the remainder of the file may be
+  regarded as invalid and discarded.
+
+* Remainder of file: Uncompressed ASCII tag data.
+
+Tag data may be subject to truncation, including removal of the excess data
+from the file itself, if it exceeds 50,000 bytes.  This is by design.
+
+For future compatibility, tag editors and compressors may assume that any
+PSF file uses this basic structure.  However, the reserved area must be left
+intact, and no assumptions may be made about the format or contents of either
+the uncompressed program or reserved sections without first checking the
+version byte.
+
+Information about zlib is available at http://www.gzip.org/zlib/.
