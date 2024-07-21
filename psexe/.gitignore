@@ -8,6 +8,8 @@ Overlay.*
 *.elf
 *.ps-exe
 
+*.vab
+
 *.map
 
 *.dep
