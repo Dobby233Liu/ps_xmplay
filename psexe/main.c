@@ -9,7 +9,8 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned char heap_head[0x20000];
+static unsigned long ram_size =    0x00200000;
+static unsigned long stack_size =  0x00004000;
 
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
 char spu_malloc_rec[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
@@ -20,7 +21,7 @@ void main() {
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap((unsigned long *)heap_head, sizeof(heap_head));
+    InitHeap3((void*)(0x80000000 + ram_size - stack_size), stack_size);
     if (!crit_section_already_entered) leaveCriticalSection();
 
     SpuInit();

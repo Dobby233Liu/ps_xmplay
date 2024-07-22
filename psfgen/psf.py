@@ -53,6 +53,8 @@ class PSF():
     _magic = b'PSF'
     _type: PSFType
 
+    libs: list[str]
+
     program: bytes
     reserved: bytes
 
@@ -61,13 +63,22 @@ class PSF():
     def __init__(self) -> None:
         super().__init__()
 
+        self.libs = []
         self.program = b''
         self.reserved = b''
         self.tags = PSFTags()
 
     @abstractmethod
     def _build_tags_internal(self: Self) -> None:
-        return { "utf8": True }
+        tags = { "utf8": True }
+
+        if len(self.libs) == 1:
+            tags["_lib"] = self.libs[0]
+        else:
+            for i, lib in enumerate(self.libs):
+                tags[f"_lib{i + 2}"] = lib
+
+        return tags
 
     def _build_tags(self: Self) -> str:
         tags = {}
@@ -133,10 +144,10 @@ if __name__ == "__main__":
 
     import libopenmpt
     song_length = 0
-    with open("psexe/songdata/friendinsideme.xm", "rb") as f:
+    with open("psexe/songdata/chapter1.xm", "rb") as f:
         mod = libopenmpt.Module(f)
         mod.subsong = 0
-        mod.repeat_count = 1
+        mod.repeat_count = 1 # FIXME the song length from libopenmpt doesn't respect this??
         mod.ctl["play.at_end"] = "stop"
         song_length = mod.length
 

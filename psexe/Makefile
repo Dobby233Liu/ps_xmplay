@@ -8,7 +8,7 @@ XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
 XM_PANNING_S3M = 1
 
-ifneq ($(XM_BUILTIN),)
+ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
 
@@ -20,12 +20,12 @@ nugget/common/syscalls/printf.s \
 debug.c \
 main.c \
 song.c 
-ifneq ($(XM_BUILTIN),)
+ifeq ($(XM_BUILTIN),true)
 SRCS += $(SONGDATA_OBJS)
 endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
-ifneq ($(XM_BUILTIN),)
+ifeq ($(XM_BUILTIN),true)
 CPPFLAGS += -DXM_FILENAME="$(XM)" \
 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
@@ -35,7 +35,7 @@ LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu -lxmplay -Wl,--end-grou
 
 include nugget/common.mk
 
-ifneq ($(XM_BUILTIN),)
+ifeq ($(XM_BUILTIN),true)
 define SONG_TO_OBJ
 	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section .data=.rodata,alloc,load,readonly,data,contents -O $(FORMAT) -B mips $(1) $@
 endef

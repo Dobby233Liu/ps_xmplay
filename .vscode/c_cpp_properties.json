@@ -12,7 +12,10 @@
         "XM_TYPE",
         "XM_LOOP",
         "XM_POSITION",
-        "XM_PANNING_TYPE"
+        "XM_PANNING_TYPE",
+        "MAX_PXM_SIZE",
+        "MAX_VH_SIZE",
+        "MAX_VB_SIZE"
       ],
       "includePath": [
         "${env:AppData}/mips/mips/include",
@@ -35,7 +38,10 @@
         "XM_TYPE",
         "XM_LOOP",
         "XM_POSITION",
-        "XM_PANNING_TYPE"
+        "XM_PANNING_TYPE",
+        "MAX_PXM_SIZE",
+        "MAX_VH_SIZE",
+        "MAX_VB_SIZE"
       ],
       "includePath": [
         "/usr/mipsel-linux-gnu/include",
