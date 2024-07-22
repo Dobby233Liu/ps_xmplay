@@ -2,6 +2,7 @@ from abc import abstractmethod
 import collections
 import enum
 import io
+from math import floor
 import struct
 from typing import Self, Any, Optional
 import zlib
@@ -21,12 +22,23 @@ class PSFTags(collections.UserDict):
             return value and "1" or "0"
         elif key in ["length", "fade"]:
             if isinstance(value, datetime.timedelta):
-                seconds = value.seconds + value.days * 86400
-                if seconds < 60:
-                    return f"{seconds:02}.{value.microseconds // 100000:02}"
-                if seconds < 3600:
-                    return f"{seconds // 60 % 60:02}:{seconds % 60:02}.{value.microseconds // 100000:02}"
-                return f"{seconds // 3600:02}:{seconds // 60 % 60:02}:{seconds % 60:02}.{value.microseconds // 100000:02}"
+                seconds = value.total_seconds()
+            elif isinstance(value, float):
+                seconds = value
+            elif isinstance(value, int):
+                seconds = float(value)
+            if seconds < 60:
+                return f"{seconds:06.3f}"
+            elif seconds < 3600:
+                minutes = seconds // 60
+                seconds -= minutes * 60
+                return f"{floor(minutes):02}:{seconds:06.3f}"
+            else:
+                hours = seconds // 3600
+                seconds -= hours * 3600
+                minutes = seconds // 60
+                seconds -= minutes * 60
+                return f"{floor(hours):02}:{floor(minutes):02}:{seconds:06.3f}"
 
         return str(value)
 
@@ -119,8 +131,19 @@ if __name__ == "__main__":
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
     elf.strip()
 
+    import libopenmpt
+    song_length = 0
+    with open("psexe/songdata/friendinsideme.xm", "rb") as f:
+        mod = libopenmpt.Module(f)
+        mod.subsong = 0
+        mod.repeat_count = 1
+        mod.ctl["play.at_end"] = "stop"
+        song_length = mod.length
+
     with psexe.elf_to_psexe(elf) as p:
-        psf1 = PSF1()
-        psf1.program = p.read()
+        psf = PSF1()
+        psf.program = p.read()
+        psf.tags["length"] = song_length
+        psf.tags["fade"] = 10
         with open("xmplayer.psf", "wb") as psf_out:
-            psf1.write(psf_out)
+            psf.write(psf_out)

@@ -1,4 +1,4 @@
-XM ?= chapter4
+XM ?= friendinsideme
 
 XM_TYPE ?= $(XM_TYPE_MUSIC)
 XM_LOOP ?= 1
