@@ -131,30 +131,3 @@ class PSF1(PSF):
         ret = super()._build_tags_internal()
         ret.update({ "_refresh": self.refresh_rate })
         return ret
-
-
-if __name__ == "__main__":
-    import psexe
-    import lief
-
-    lets_go_gambling_aw_dangit = lief.ELF.ParserConfig()
-    lets_go_gambling_aw_dangit.parse_notes = False
-    elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
-    elf.strip()
-
-    import libopenmpt
-    song_length = 0
-    with open("psexe/songdata/chapter1.xm", "rb") as f:
-        mod = libopenmpt.Module(f)
-        mod.subsong = 0
-        mod.repeat_count = 1 # FIXME the song length from libopenmpt doesn't respect this??
-        mod.ctl["play.at_end"] = "stop"
-        song_length = mod.length
-
-    with psexe.elf_to_psexe(elf) as p:
-        psf = PSF1()
-        psf.program = p.read()
-        psf.tags["length"] = song_length
-        psf.tags["fade"] = 10
-        with open("xmplayer.psf", "wb") as psf_out:
-            psf.write(psf_out)

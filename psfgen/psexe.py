@@ -26,7 +26,7 @@ def elf_to_psexe(elf: lief.ELF.Binary) -> io.BytesIO:
             exe_dat = exe.read()
     finally:
         os.close(fd)
-        os.remove(exe_fn)
+        #os.remove(exe_fn)
 
     assert exe_dat[:len(PSX_EXE_MAGIC)] == PSX_EXE_MAGIC
 
