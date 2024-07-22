@@ -190,7 +190,7 @@ class Module():
 
     def _err(code: c_int, user: c_void_p) -> c_int:
         # TODO
-        return ErrorFuncResult.value
+        return ErrorFuncResult.Default.value
 
     def _raise_last_error(self):
         code = self._last_error_ptr.value
