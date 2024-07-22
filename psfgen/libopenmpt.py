@@ -40,9 +40,6 @@ class _StreamCallbacks(Structure):
 
     _stream: io.BytesIO
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-
     @classmethod
     def from_stream(cls, stream: io.BytesIO):
         self = cls()
