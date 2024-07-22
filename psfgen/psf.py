@@ -17,7 +17,6 @@ class PSFType(enum.IntEnum):
 class PSFTags(collections.UserDict):
     @staticmethod
     def _value_transliterate(value: Any, key: Optional[Any] = None) -> str:
-        a = 1
         if isinstance(value, bool):
             return value and "1" or "0"
         elif key in ["length", "fade"]:
@@ -33,7 +32,7 @@ class PSFTags(collections.UserDict):
 
     def __setitem__(self, key: Any, value: Any) -> None:
         keystr = str(key)
-        if keystr in ["filedir", "filename", "fileext"]:
+        if keystr.startswith("_") or keystr in ["filedir", "filename", "fileext"]:
             raise KeyError("Reserved tag name")
 
         return self.data.__setitem__(keystr, self._value_transliterate(value, key))
@@ -55,17 +54,16 @@ class PSF():
         self.tags = PSFTags()
 
     @abstractmethod
-    def _build_tags_extension(self: Self, tags: PSFTags[str, str]) -> None:
-        pass
+    def _build_tags_internal(self: Self) -> None:
+        return { "utf8": True }
 
     def _build_tags(self: Self) -> str:
-        tags = self.tags.copy()
-        self._build_tags_extension(tags)
+        tags = {}
+        tags.update({ key: PSFTags._value_transliterate(value) for key, value in self._build_tags_internal().items() })
+        tags.update(self.tags)
 
         if len(tags) == 0:
             return None
-
-        tags["utf8"] = True
 
         return "\n".join(
             "\n".join(
@@ -106,8 +104,10 @@ class PSF1(PSF):
 
         self.refresh_rate = PSF1RefreshRates.NTSC
 
-    def _build_tags_extension(self: Self, tags: PSFTags[str, str]) -> None:
-        tags["_refresh"] = self.refresh_rate
+    def _build_tags_internal(self: Self) -> None:
+        ret = super()._build_tags_internal()
+        ret.update({ "_refresh": self.refresh_rate })
+        return ret
 
 
 if __name__ == "__main__":
