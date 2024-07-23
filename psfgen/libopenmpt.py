@@ -124,6 +124,10 @@ LIB.openmpt_module_set_repeat_count.argtypes = [openmpt_module, c_int32]
 LIB.openmpt_module_set_repeat_count.restype = c_bool
 
 
+LIB.openmpt_module_read_mono.argtypes = [openmpt_module, c_int32, c_size_t, POINTER(c_int16)]
+LIB.openmpt_module_read_mono.restype = c_size_t
+
+
 class Module():
     class _Ctl():
         def __init__(self, module: "Module", *args: Any, **kwargs: Any) -> None:
@@ -247,3 +251,17 @@ class Module():
     @repeat_count.setter
     def repeat_count(self, value: int) -> None:
         LIB.openmpt_module_set_repeat_count(self._module, value)
+
+
+    # i'm sorry
+    def estimate_duration(self) -> float:
+        sample_rate = 44100
+        sample_buffer = (c_int16 * (sample_rate // 10))()
+        total_samples = 0
+
+        while (rendered_samples := LIB.openmpt_module_read_mono(self._module, sample_rate, len(sample_buffer), sample_buffer)) != 0:
+            if rendered_samples < 0:
+                self._raise_last_error()
+            total_samples += rendered_samples
+
+        return total_samples / sample_rate
