@@ -38,6 +38,8 @@ def change_song(exe: lief.ELF.Binary, pxm: io.BytesIO, vh: io.BytesIO, vb: io.By
     sbss: lief.ELF.Section = exe.get_section(".sbss")
     # elf.next_virtual_address is 0 for some reason so
     songdata_sect.virtual_address = sbss.virtual_address + sbss.size
+    if songdata_sect.virtual_address % songdata_sect.alignment != 0:
+        songdata_sect.virtual_address += songdata_sect.alignment - songdata_sect.virtual_address % songdata_sect.alignment
 
     content = bytearray()
     def align_8():
@@ -58,7 +60,7 @@ def change_song(exe: lief.ELF.Binary, pxm: io.BytesIO, vh: io.BytesIO, vb: io.By
     exe.add(songdata_sect, loaded=True)
 
     exe_header = psexe.PSXExeHeader.from_buffer_copy(exe.get_content_from_virtual_address(0x8000f800, sizeof(psexe.PSXExeHeader)))
-    exe_header.text_size += len(content)
+    exe_header.text_size += songdata_sect.virtual_address - (sbss.virtual_address + sbss.size) + songdata_sect.size
     exe.patch_address(0x8000f800, list(bytearray(exe_header)))
 
     change_song_params(exe, pxm_addr, vh_addr, vb_addr, type, loop, position, panning_type)

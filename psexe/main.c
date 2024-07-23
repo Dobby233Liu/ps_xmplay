@@ -9,23 +9,24 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned long ram_size =    0x00200000;
-static unsigned long stack_size =  0x00004000;
+static unsigned long heap[0x4000];
 
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
-char spu_malloc_rec[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
+static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
 
 #define BIOS_VERSION_STRING 0xBFC7FF32
 
 void main() {
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
+    assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "xm invalid");
+    assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "vab invalid");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap3((void*)(0x80000000 + ram_size - stack_size), stack_size);
+    InitHeap3(heap, sizeof(heap));
     if (!crit_section_already_entered) leaveCriticalSection();
 
     SpuInit();
-	SpuInitMalloc(MAX_SPU_MALLOC, spu_malloc_rec);
+	SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
 	SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
     XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
@@ -45,6 +46,7 @@ void main() {
 
     int song_id = XM_Init(voice_bank_id, 0, 0, 0, song_info.loop, -1, song_info.type, song_info.position);
     assert(song_id != -1, "song init failed");
+    XM_SetMasterVol(song_id, 128);
 
     while (1) ;
 
