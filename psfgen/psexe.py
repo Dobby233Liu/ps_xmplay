@@ -49,6 +49,7 @@ class PSXExeHeader(LittleEndianStructure):
         self.stack_size = 0
         self.padding = b"\0" * 1992
 
+
 # This is wholeheartedly a hack
 def elf_to_psexe(elf: lief.ELF.Binary) -> io.BytesIO:
     fd, exe_fn = tempfile.mkstemp()

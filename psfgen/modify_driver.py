@@ -1,8 +1,6 @@
 from ctypes import *
 from enum import IntEnum
-import io
 import subprocess
-from typing import Optional
 import lief
 import psexe
 import psf

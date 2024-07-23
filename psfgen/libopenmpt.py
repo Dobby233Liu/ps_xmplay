@@ -4,6 +4,10 @@ import os
 import io
 from typing import Any
 
+"""
+Very incomplete libopenmpt interop
+"""
+
 LIB = None
 try:
     if os.name == "nt":
