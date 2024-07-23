@@ -17,12 +17,9 @@ def main():
 
             lib_fn = f"{info["xm"]}.psflib"
             print(lib_fn)
-            path_pre = f"songdata/{info["xm"]}"
             path_timing = f"songdata/timing/{info["xm"]}.xm"
-            with open(path_pre+".xm", "rb") as pxm, open(path_pre+".vh", "rb") as vh, open(path_pre+".vb", "rb") as vb, \
-                open("out/" + lib_fn, "wb") as libf:
-                lib, lib_psf = modify_driver.make_psflib(pxm, vh, vb)
-                #lib.write(f"out/{info["xm"]}.elf")
+            with open("out/" + lib_fn, "wb") as libf:
+                lib, lib_psf = modify_driver.make_psflib(info["xm"])
                 lib_psf.write(libf)
                 xm[info["xm"]][0] = lib
                 xm[info["xm"]][1] = lib_fn

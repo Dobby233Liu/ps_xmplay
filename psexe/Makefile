@@ -26,7 +26,7 @@ endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
 ifeq ($(XM_BUILTIN),true)
-CPPFLAGS += -DXM_FILENAME="$(XM)" \
+CPPFLAGS += -DXM_FILENAME="$(subst .,_,$(subst -,_,$(XM)))" \
 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif

@@ -31,13 +31,13 @@ class PSXExeHeader(LittleEndianStructure):
         ("padding", c_char * 1992) # zeroed
     ]
 
-    def __init__(self, entrypoint: int, text_addr: int, text_size: int):
+    def __init__(self, text_addr: int, text_size: int):
         super().__init__()
 
         self.magic = MAGIC
         self.text_off = 0
         self.data_off = 0
-        self.entrypoint = entrypoint
+        self.entrypoint = 0x80010000
         self.gp_init = 0
         self.text_addr = text_addr
         self.text_size = text_size

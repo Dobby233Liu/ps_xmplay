@@ -9,10 +9,10 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned long heap[0x4000];
+static unsigned long heap[0x10000];
 
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
-static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
+static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
 
 #define BIOS_VERSION_STRING 0xBFC7FF32
 
@@ -46,7 +46,6 @@ void main() {
 
     int song_id = XM_Init(voice_bank_id, 0, 0, 0, song_info.loop, -1, song_info.type, song_info.position);
     assert(song_id != -1, "song init failed");
-    XM_SetMasterVol(song_id, 128);
 
     while (1) ;
 
