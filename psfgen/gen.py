@@ -21,6 +21,7 @@ def main():
             with open(path_pre+".xm", "rb") as pxm, open(path_pre+".vh", "rb") as vh, open(path_pre+".vb", "rb") as vb, \
                 open("out/" + lib_fn, "wb") as libf:
                 lib, lib_psf = modify_driver.make_psflib(pxm, vh, vb)
+                #lib.write(f"out/{info["xm"]}.elf")
                 lib_psf.write(libf)
                 xm[info["xm"]][0] = lib
                 xm[info["xm"]][1] = lib_fn

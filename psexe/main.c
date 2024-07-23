@@ -29,7 +29,6 @@ void main() {
 	SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
     XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
-    //XM_OnceOffInit(XM_NTSC);
     VSyncCallback(XM_Update);
     XM_SetStereo();
 

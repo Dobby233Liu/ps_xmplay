@@ -29,6 +29,8 @@ class SongInfoStruct(LittleEndianStructure):
 
 def change_song(exe: lief.ELF.Binary, pxm: io.BytesIO, vh: io.BytesIO, vb: io.BytesIO,
                        type: XMType, loop: bool, position: int, panning_type: XMPanningType):
+    # FIXME: This makes the program refuse to run in any other emulator than Highly Experimental
+
     songdata_sect: lief.ELF.Section = lief.ELF.Section(".songdata", lief._lief.ELF.SECTION_TYPES.PROGBITS)
     songdata_sect += lief.ELF.SECTION_FLAGS.ALLOC
     songdata_sect.alignment = 8
@@ -102,8 +104,7 @@ def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
     assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
     assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
     skip_ptrs = sizeof(c_uint32) * 3
-    text_addr = song_info.value
-    text_addr += skip_ptrs
+    text_addr = song_info.value + skip_ptrs
 
     info_pretrunc = SongInfoStruct()
     info_pretrunc.type = type
