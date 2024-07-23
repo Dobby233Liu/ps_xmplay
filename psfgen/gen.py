@@ -16,6 +16,7 @@ def main():
             xm[info["xm"]] = [None, None, None]
 
             lib_fn = f"{info["xm"]}.psflib"
+            print(lib_fn)
             path_pre = f"songdata/{info["xm"]}"
             path_timing = f"songdata/timing/{info["xm"]}.xm"
             with open(path_pre+".xm", "rb") as pxm, open(path_pre+".vh", "rb") as vh, open(path_pre+".vb", "rb") as vb, \

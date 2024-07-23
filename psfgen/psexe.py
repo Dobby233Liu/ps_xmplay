@@ -19,15 +19,15 @@ MAGIC = b"PS-X EXE"
 class PSXExeHeader(LittleEndianStructure):
     _fields_ = [
         ("magic", c_char * 8),
-        ("text_off", c_int32), # zeroed
-        ("data_off", c_int32), # zeroed
-        ("entrypoint", c_int32), # where our data starts??
-        ("gp_init", c_int32), # zeroed
-        ("text_addr", c_int32), ("text_size", c_int32),
-        ("data_addr", c_int32), ("data_size", c_int32), # zeroed
-        ("bss_addr", c_int32), ("bss_size", c_int32), # zeroed
-        ("stack_addr", c_int32), # 0x801FFF00
-        ("stack_size", c_int32), # zeroed
+        ("text_off", c_uint32), # zeroed
+        ("data_off", c_uint32), # zeroed
+        ("entrypoint", c_uint32), # where our data starts??
+        ("gp_init", c_uint32), # zeroed
+        ("text_addr", c_uint32), ("text_size", c_uint32),
+        ("data_addr", c_uint32), ("data_size", c_uint32), # zeroed
+        ("bss_addr", c_uint32), ("bss_size", c_uint32), # zeroed
+        ("stack_addr", c_uint32), # 0x801FFF00
+        ("stack_size", c_uint32), # zeroed
         ("padding", c_char * 1992) # zeroed
     ]
 
@@ -48,7 +48,6 @@ class PSXExeHeader(LittleEndianStructure):
         self.stack_addr = 0x801FFF00
         self.stack_size = 0
         self.padding = b"\0" * 1992
-
 
 # This is wholeheartedly a hack
 def elf_to_psexe(elf: lief.ELF.Binary) -> io.BytesIO:

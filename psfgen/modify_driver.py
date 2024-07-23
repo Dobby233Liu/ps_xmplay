@@ -57,6 +57,10 @@ def change_song(exe: lief.ELF.Binary, pxm: io.BytesIO, vh: io.BytesIO, vb: io.By
     songdata_sect.size = len(content)
     exe.add(songdata_sect, loaded=True)
 
+    exe_header = psexe.PSXExeHeader.from_buffer_copy(exe.get_content_from_virtual_address(0x8000f800, sizeof(psexe.PSXExeHeader)))
+    exe_header.text_size += len(content)
+    exe.patch_address(0x8000f800, list(bytearray(exe_header)))
+
     change_song_params(exe, pxm_addr, vh_addr, vb_addr, type, loop, position, panning_type)
 
 def change_song_params(exe: lief.ELF.Binary,
