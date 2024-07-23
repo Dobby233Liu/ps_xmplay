@@ -29,15 +29,18 @@ def main():
                 xm[info["xm"]][2] = libopenmpt.Module(open(path_timing, "rb"))
 
         song_length = 180.0
+        loop = info.get("loop", True)
         if (subsong := info.get("rough_xm_subsong", None)) is not None:
             mod = xm[info["xm"]][2]
             mod.subsong = subsong
-            mod.repeat_count = 1 # FIXME the song length from libopenmpt doesn't respect this??
+            if loop:
+                mod.repeat_count = 1
+            else:
+                mod.repeat_count = 0
             mod.ctl["play.at_end"] = "stop"
             song_length = mod.estimate_duration() or 180.0
 
         with open(f"out/{song_name}.minipsf", "wb") as minif:
-            loop = info.get("loop", True)
             psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], modify_driver.XMPanningType.XM)
             if song_length:
                 psf1.tags["length"] = song_length
