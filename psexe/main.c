@@ -9,7 +9,7 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned long heap[0x10000];
+static unsigned long heap[0x8000];
 
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
 static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];

@@ -45,6 +45,8 @@ cd path/to/ps_xmplay
 python psfgen/gen.py
 ```
 
+Output goes in out/ folder
+
 > [!WARNING]
 > You **must** run gen.py in the project root
 
