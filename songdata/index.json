@@ -2,7 +2,8 @@
     "SONG_TITLE": {
         "xm": "sb-title",
         "position": 0,
-        "rough_xm_subsong": 0
+        "rough_xm_subsong": 0,
+        "loop": false
     },
     "SONG_OPTIONS": {
         "xm": "sb-title",
