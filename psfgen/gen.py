@@ -31,8 +31,8 @@ def main():
 
         song_length = 3.0 * 60
         loop = info.get("loop", True)
-        if (subsong := info.get("rough_xm_subsong", None)) is not None:
-            mod = bank_info[info["xm"]][2]
+        mod = bank_info[info["xm"]][2]
+        if (subsong := info.get("rough_xm_subsong", None)) is not None and mod:
             mod.subsong = subsong
             if loop:
                 mod.repeat_count = 1
