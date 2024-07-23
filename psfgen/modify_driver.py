@@ -116,6 +116,7 @@ def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
     info_pretrunc.panning_type = panning_type
     text = bytes(info_pretrunc)[skip_ptrs:]
 
+    # That's right we're going to manually assemble one just for the lib
     exe_hdr = psexe.PSXExeHeader(0, text_addr, len(text))
     psf1.program += bytes(exe_hdr)
     psf1.program += text

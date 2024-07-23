@@ -16,7 +16,6 @@ MAGIC = b"PS-X EXE"
 
 
 
-# That's right we're going to manually assemble one just for the lib
 class PSXExeHeader(LittleEndianStructure):
     _fields_ = [
         ("magic", c_char * 8),
