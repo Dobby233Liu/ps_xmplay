@@ -50,7 +50,8 @@ fb2k PSF players.
 
 You will need to tag the PSFs yourself.
 
-This was never supposed for anybody else to use, if you hit any issues, feel free to open an issue and I'll try to help you out.
+This was never supposed for anybody else to use, if you hit any issues, feel free to open an issue or ask on the HCS64
+Discord server, and I'll try to help you out.
 PRs are also welcome.
 
 ## License
