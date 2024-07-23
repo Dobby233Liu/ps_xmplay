@@ -55,6 +55,10 @@ Output goes in out/ folder
 SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care though - as long as it works in the two
 fb2k PSF players.
 
+If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
+If it's caused by an assertion failure a message should show up then.
+The debugger may or may not be able to help, personally I couldn't figure it out.
+
 You will need to tag the PSFs yourself.
 
 This was never supposed for anybody else to use, if you hit any issues, feel free to open an issue or ask on the HCS64
