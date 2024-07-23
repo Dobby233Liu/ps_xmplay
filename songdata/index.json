@@ -17,12 +17,14 @@
     "SONG_GAMECOMPLETE": {
         "xm": "sb-title",
         "position": 20,
-        "rough_xm_subsong": 2
+        "rough_xm_subsong": 2,
+        "loop": false
     },
     "SONG_GAMEOVER": {
         "xm": "sb-title",
         "position": 35,
-        "rough_xm_subsong": 3
+        "rough_xm_subsong": 3,
+        "loop": false
     },
     "SONG_PARTY": {
         "xm": "sb-title",

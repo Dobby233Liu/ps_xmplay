@@ -94,13 +94,9 @@ def make_psflib(pxm: io.BytesIO, vh: io.BytesIO, vb: io.BytesIO) -> psf.PSF1:
 
 
 def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
-                 type: XMType, loop: bool, position: int, panning_type: XMPanningType,
-                 song_length: Optional[float] = 0):
+                 type: XMType, loop: bool, position: int, panning_type: XMPanningType):
     psf1 = psf.PSF1()
     psf1.libs.append(lib_fn)
-    if song_length:
-        psf1.tags["length"] = song_length
-        psf1.tags["fade"] = 10
 
     song_info: lief.ELF.Symbol = lib.get_symbol("song_info")
     assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"

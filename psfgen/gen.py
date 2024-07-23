@@ -36,7 +36,12 @@ def main():
             song_length = mod.length
 
         with open(f"out/{song_name}.minipsf", "wb") as minif:
-            psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, True, info["position"], modify_driver.XMPanningType.XM, song_length)
+            loop = info.get("loop", True)
+            psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], modify_driver.XMPanningType.XM)
+            if song_length:
+                psf1.tags["length"] = song_length
+            if loop:
+                psf1.tags["fade"] = 10
             psf1.write(minif)
 
 if __name__ == "__main__":
