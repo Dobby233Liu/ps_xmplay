@@ -13,39 +13,40 @@
     "SONG_MEMORYCARD": {
         "xm": "sb-title",
         "position": 19,
-        "rough_xm_subsong": 2
+        "rough_xm_subsong": 2,
+        "loop": false
     },
     "SONG_GAMECOMPLETE": {
         "xm": "sb-title",
         "position": 20,
-        "rough_xm_subsong": 2,
+        "rough_xm_subsong": 3,
         "loop": false
     },
     "SONG_GAMEOVER": {
         "xm": "sb-title",
         "position": 35,
-        "rough_xm_subsong": 3,
+        "rough_xm_subsong": 4,
         "loop": false
     },
     "SONG_PARTY": {
         "xm": "sb-title",
         "position": 37,
-        "rough_xm_subsong": 4
+        "rough_xm_subsong": 5
     },
     "SONG_MEMCARD2": {
         "xm": "sb-title",
         "position": 44,
-        "rough_xm_subsong": 5
+        "rough_xm_subsong": 6
     },
     "SONG_MAPSCREEN": {
         "xm": "sb-title",
         "position": 47,
-        "rough_xm_subsong": 6
+        "rough_xm_subsong": 7
     },
     "SONG_SHOPSCREEN": {
         "xm": "sb-title",
         "position": 51,
-        "rough_xm_subsong": 7
+        "rough_xm_subsong": 8
     },
     "SONG_FMA": {
         "xm": "fma",
