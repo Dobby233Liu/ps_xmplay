@@ -1,0 +1,187 @@
+{
+    "SONG_TITLE": {
+        "xm": "sb-title",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_OPTIONS": {
+        "xm": "sb-title",
+        "position": 10,
+        "rough_xm_subsong": 1
+    },
+    "SONG_MEMORYCARD": {
+        "xm": "sb-title",
+        "position": 19,
+        "rough_xm_subsong": 2
+    },
+    "SONG_GAMECOMPLETE": {
+        "xm": "sb-title",
+        "position": 20,
+        "rough_xm_subsong": 2
+    },
+    "SONG_GAMEOVER": {
+        "xm": "sb-title",
+        "position": 35,
+        "rough_xm_subsong": 3
+    },
+    "SONG_PARTY": {
+        "xm": "sb-title",
+        "position": 37,
+        "rough_xm_subsong": 4
+    },
+    "SONG_MEMCARD2": {
+        "xm": "sb-title",
+        "position": 44,
+        "rough_xm_subsong": 5
+    },
+    "SONG_MAPSCREEN": {
+        "xm": "sb-title",
+        "position": 47,
+        "rough_xm_subsong": 6
+    },
+    "SONG_SHOPSCREEN": {
+        "xm": "sb-title",
+        "position": 51,
+        "rough_xm_subsong": 7
+    },
+    "SONG_FMA": {
+        "xm": "fma",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_FMA_old": {
+        "xm": "fma.old",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER1_LEVEL1": {
+        "xm": "chapter1",
+        "position": 25,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER1_LEVEL2": {
+        "xm": "chapter1",
+        "position": 45,
+        "rough_xm_subsong": 3
+    },
+    "SONG_CHAPTER1_LEVEL3": {
+        "xm": "chapter1",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER1_LEVEL4": {
+        "xm": "chapter1",
+        "position": 44,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER1_BOSS": {
+        "xm": "chapter1",
+        "position": 64,
+        "rough_xm_subsong": 4
+    },
+    "SONG_CHAPTER2_LEVEL1": {
+        "xm": "chapter2",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER2_LEVEL2": {
+        "xm": "chapter2",
+        "position": 22,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER2_LEVEL4": {
+        "xm": "chapter2",
+        "position": 46,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER2_BOSS": {
+        "xm": "chapter2",
+        "position": 62,
+        "rough_xm_subsong": 3
+    },
+    "SONG_CHAPTER3_LEVEL1": {
+        "xm": "chapter3",
+        "position": 24,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER3_LEVEL2": {
+        "xm": "chapter3",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER3_LEVEL4": {
+        "xm": "chapter3",
+        "position": 11,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER3_BOSS_ASLEEP": {
+        "xm": "chapter3",
+        "position": 33,
+        "rough_xm_subsong": 3
+    },
+    "SONG_CHAPTER3_BOSS_AWAKE": {
+        "xm": "chapter3",
+        "position": 34,
+        "rough_xm_subsong": 4
+    },
+    "SONG_CHAPTER4_LEVEL1": {
+        "xm": "chapter4",
+        "position": 27,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER4_LEVEL2": {
+        "xm": "chapter4",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER4_LEVEL3": {
+        "xm": "chapter4",
+        "position": 44,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER4_BOSS": {
+        "xm": "chapter4",
+        "position": 60,
+        "rough_xm_subsong": 3
+    },
+    "SONG_CHAPTER5_LEVEL1": {
+        "xm": "chapter5",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER5_LEVEL2": {
+        "xm": "chapter5",
+        "position": 20,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER5_LEVEL4": {
+        "xm": "chapter5",
+        "position": 42,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER5_BOSS": {
+        "xm": "chapter5",
+        "position": 62,
+        "rough_xm_subsong": 3
+    },
+    "SONG_CHAPTER6_ROLLERCOASTER": {
+        "xm": "chapter6",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "SONG_CHAPTER6_BIGWHEEL": {
+        "xm": "chapter6",
+        "position": 12,
+        "rough_xm_subsong": 1
+    },
+    "SONG_CHAPTER6_GHOSTTRAIN": {
+        "xm": "chapter6",
+        "position": 21,
+        "rough_xm_subsong": 2
+    },
+    "SONG_CHAPTER6_BIGTOP": {
+        "xm": "chapter6",
+        "position": 43,
+        "rough_xm_subsong": 3
+    }
+}

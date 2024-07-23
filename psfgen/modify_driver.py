@@ -122,22 +122,3 @@ def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
     psf1.program += text
 
     return psf1
-
-
-if __name__ == "__main__":
-    lib_fn = "xmplayer.psflib"
-    with open("songdata/chapter1.xm", "rb") as pxm, open("songdata/chapter1.vh", "rb") as vh, open("songdata/chapter1.vb", "rb") as vb, \
-        open(lib_fn, "wb") as libf:
-        lib, lib_psf = make_psflib(pxm, vh, vb)
-        lib_psf.write(libf)
-
-    import libopenmpt
-    with open("songdata/chapter1_notbroken.xm", "rb") as f:
-        mod = libopenmpt.Module(f)
-        mod.subsong = 1
-        mod.repeat_count = 1 # FIXME the song length from libopenmpt doesn't respect this??
-        mod.ctl["play.at_end"] = "stop"
-        song_length = mod.length
-
-    with open("xmplayer.minipsf", "wb") as minif:
-        make_minipsf(lib, lib_fn, XMType.Music, True, 25, XMPanningType.XM, song_length).write(minif)

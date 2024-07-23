@@ -50,6 +50,10 @@ class _StreamCallbacks(Structure):
         self._tell = cls._tell_proc(lambda ptr: stream.tell())
         return self
 
+    def __del__(self):
+        if not self._stream.closed:
+            self._stream.close()
+
 
 openmpt_module = c_void_p # it's some kind of struct alright
 
@@ -182,15 +186,15 @@ class Module():
     def __del__(self):
         LIB.openmpt_module_destroy(self._module)
 
-    def _log(message: c_char_p, user: c_void_p):
-        print(message.value.decode("utf-8"))
+    def _log(self, message: c_char_p, user: c_void_p):
+        print(message.decode("utf-8"))
 
-    def _err(code: c_int, user: c_void_p) -> c_int:
+    def _err(self, code: c_int, user: c_void_p) -> c_int:
         # TODO
         return ErrorFuncResult.Default.value
 
     def _raise_last_error(self):
-        code = self._last_error_ptr.value
+        code = self._last_error_ptr
         if code == 0:
             assert False
         msg = self._last_error_msg_ptr.value.decode("utf-8")
