@@ -12,7 +12,7 @@ try:
         LIB = CDLL("libopenmpt.so")
 except OSError:
     if os.name == "nt":
-        LIB = CDLL(os.path.join(os.path.dirname(__file__), "libopenmpt.dll"))
+        LIB = CDLL(os.path.join(os.path.dirname(__file__), "lib/libopenmpt.dll"))
 if not LIB:
     raise OSError("Please install libopenmpt")
 
