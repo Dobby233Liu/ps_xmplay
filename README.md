@@ -3,6 +3,10 @@
 Extremely duct-tapey PSF driver and maker kit for SpongeBob SquarePants: SuperSponge.
 Possibly applible to other games using the Jason Page XMPlay library.
 
+> [!NOTE]
+> The following documentation is a best-effort attempt to describe my process.
+> It has been 3 days I forgot how I set this up in the first place
+
 ## Prerequisites
 
 Software:
@@ -41,11 +45,12 @@ cd path/to/ps_xmplay
 python psfgen/gen.py
 ```
 
-You **must** run gen.py in the project root
+> [!WARNING]
+> You **must** run gen.py in the project root
 
 ## Flaws
 
-SBSPSS PSFs are half-broken in DuckStation as of July 2024, I don't really care though - as long as it works in the two
+SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care though - as long as it works in the two
 fb2k PSF players.
 
 You will need to tag the PSFs yourself.
