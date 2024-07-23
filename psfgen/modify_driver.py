@@ -1,6 +1,10 @@
 from ctypes import *
 from enum import IntEnum
+import io
+from typing import Optional
 import lief
+import psexe
+import psf
 
 
 class XMType(IntEnum):
@@ -23,60 +27,116 @@ class SongInfoStruct(LittleEndianStructure):
     ]
 
 
-def change_song_params(exe: lief.ELF.Binary, type: XMType, loop: bool, position: int, panning_type: XMPanningType):
-    pass
+def change_song(exe: lief.ELF.Binary, pxm: io.BytesIO, vh: io.BytesIO, vb: io.BytesIO,
+                       type: XMType, loop: bool, position: int, panning_type: XMPanningType):
+    songdata_sect: lief.ELF.Section = lief.ELF.Section(".songdata", lief._lief.ELF.SECTION_TYPES.PROGBITS)
+    songdata_sect += lief.ELF.SECTION_FLAGS.ALLOC
+    songdata_sect.alignment = 8
+
+    sbss: lief.ELF.Section = exe.get_section(".sbss")
+    # elf.next_virtual_address is 0 for some reason so
+    songdata_sect.virtual_address = sbss.virtual_address + sbss.size
+
+    content = bytearray()
+    def align_8():
+        nonlocal content
+        if len(content) % songdata_sect.alignment != 0:
+            content += b"\0" * (songdata_sect.alignment - len(content) % songdata_sect.alignment)
+    pxm_addr = songdata_sect.virtual_address + len(content)
+    content += pxm.read()
+    align_8()
+    vh_addr = songdata_sect.virtual_address + len(content)
+    content += vh.read()
+    align_8()
+    vb_addr = songdata_sect.virtual_address + len(content)
+    content += vb.read()
+
+    songdata_sect.content = content
+    songdata_sect.size = len(content)
+    exe.add(songdata_sect, loaded=True)
+
+    change_song_params(exe, pxm_addr, vh_addr, vb_addr, type, loop, position, panning_type)
+
+def change_song_params(exe: lief.ELF.Binary,
+                       pxm_ptr: int, vh_ptr: int, vb_ptr: int,
+                       type: XMType, loop: bool, position: int, panning_type: XMPanningType):
+    song_info: lief.ELF.Symbol = exe.get_symbol("song_info")
+    assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
+    assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
+
+    song_info_loc = song_info.value - song_info.section.virtual_address
+    old_song_info_data = SongInfoStruct.from_buffer_copy(song_info.section.content[song_info_loc:song_info_loc + sizeof(SongInfoStruct)])
+    song_info_data = SongInfoStruct(
+        pxm_ptr=pxm_ptr or old_song_info_data.pxm_ptr,
+        vh_ptr=vh_ptr or old_song_info_data.vh_ptr,
+        vb_ptr=vb_ptr or old_song_info_data.vb_ptr,
+        type=type or old_song_info_data.type,
+        loop=loop is None and old_song_info_data.loop or loop,
+        position=position or old_song_info_data.position,
+        panning_type=panning_type or old_song_info_data.panning_type
+    )
+    exe.patch_address(song_info.value, bytearray(song_info_data))
 
 
-if __name__ == "__main__":
-    import psexe
-    import psf
-
+def _load_driver() -> lief.ELF.Binary:
     lets_go_gambling_aw_dangit = lief.ELF.ParserConfig()
     lets_go_gambling_aw_dangit.parse_notes = False
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
+    return elf
 
-    song_info: lief.ELF.Symbol = elf.get_symbol("song_info")
+def make_psflib(pxm: io.BytesIO, vh: io.BytesIO, vb: io.BytesIO) -> psf.PSF1:
+    exe = _load_driver()
+    change_song(exe, pxm, vh, vb, XMType.Music, False, 0, XMPanningType.XM)
+    with psexe.elf_to_psexe(exe) as p:
+        psf1 = psf.PSF1()
+        psf1.program = p.read()
+    return exe, psf1
+
+
+def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
+                 type: XMType, loop: bool, position: int, panning_type: XMPanningType,
+                 song_length: Optional[float] = 0):
+    psf1 = psf.PSF1()
+    psf1.libs.append(lib_fn)
+    if song_length:
+        psf1.tags["length"] = song_length
+        psf1.tags["fade"] = 10
+
+    song_info: lief.ELF.Symbol = lib.get_symbol("song_info")
     assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
     assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
-    song_info_sect: lief.ELF.Section = song_info.section
-    song_info_loc = song_info.value - song_info_sect.virtual_address
+    skip_ptrs = sizeof(c_uint32) * 3
+    text_addr = song_info.value
+    text_addr += skip_ptrs
 
-    rodata: lief.ELF.Section = elf.get_section(".rodata")
-    newcontent = bytearray(rodata.content)
-    pxm_addr = rodata.virtual_address + rodata.size
-    with open("psexe/songdata/chapter1.xm", "rb") as f:
-        buf = f.read()
-        newcontent.extend(buf)
-    vh_addr = rodata.virtual_address + rodata.size
-    with open("psexe/songdata/chapter1.vh", "rb") as f:
-        buf = f.read()
-        newcontent.extend(buf)
-    vb_addr = rodata.virtual_address + rodata.size
-    with open("psexe/songdata/chapter1.vb", "rb") as f:
-        buf = f.read()
-        newcontent.extend(buf)
-    rodata.content = newcontent
+    info_pretrunc = SongInfoStruct()
+    info_pretrunc.type = type
+    info_pretrunc.loop = loop
+    info_pretrunc.position = position
+    info_pretrunc.panning_type = panning_type
+    text = bytes(info_pretrunc)[skip_ptrs:]
 
-    song_info_data = SongInfoStruct(pxm_ptr=pxm_addr, vh_ptr=vh_addr, vb_ptr=vb_addr, type=0, loop=1, position=0, panning_type=0)
-    newcontent2 = bytearray(song_info_sect.content)
-    newcontent2[song_info_loc:song_info_loc + song_info.size] = song_info_data
-    song_info_data.content = newcontent2
+    exe_hdr = psexe.PSXExeHeader(0, text_addr, len(text))
+    psf1.program += bytes(exe_hdr)
+    psf1.program += text
 
-    elf.strip()
+    return psf1
+
+
+if __name__ == "__main__":
+    lib_fn = "xmplayer.psflib"
+    with open("songdata/chapter1.xm", "rb") as pxm, open("songdata/chapter1.vh", "rb") as vh, open("songdata/chapter1.vb", "rb") as vb, \
+        open(lib_fn, "wb") as libf:
+        lib, lib_psf = make_psflib(pxm, vh, vb)
+        lib_psf.write(libf)
 
     import libopenmpt
-    song_length = 0
-    with open("psexe/songdata/chapter1.xm", "rb") as f:
+    with open("songdata/chapter1_notbroken.xm", "rb") as f:
         mod = libopenmpt.Module(f)
-        mod.subsong = 0
+        mod.subsong = 1
         mod.repeat_count = 1 # FIXME the song length from libopenmpt doesn't respect this??
         mod.ctl["play.at_end"] = "stop"
         song_length = mod.length
 
-    with psexe.elf_to_psexe(elf) as p:
-        psf = psf.PSF1()
-        psf.program = p.read()
-        psf.tags["length"] = song_length
-        psf.tags["fade"] = 10
-        with open("xmplayer.psf", "wb") as psf_out:
-            psf.write(psf_out)
+    with open("xmplayer.minipsf", "wb") as minif:
+        make_minipsf(lib, lib_fn, XMType.Music, True, 25, XMPanningType.XM, song_length).write(minif)
