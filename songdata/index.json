@@ -76,7 +76,8 @@
     "SONG_CHAPTER1_LEVEL4": {
         "xm": "chapter1",
         "position": 44,
-        "rough_xm_subsong": 2
+        "rough_xm_subsong": 2,
+        "length": "3:14.32"
     },
     "SONG_CHAPTER1_BOSS": {
         "xm": "chapter1",
