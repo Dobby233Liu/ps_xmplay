@@ -20,7 +20,7 @@ class PSFTags(collections.UserDict):
     def _value_transliterate(value: Any, key: Optional[Any] = None) -> str:
         if isinstance(value, bool):
             return value and "1" or "0"
-        elif key in ["length", "fade"] and not isinstance(key, str):
+        elif key in ["length", "fade"] and not isinstance(value, str):
             if isinstance(value, datetime.timedelta):
                 seconds = value.total_seconds()
             elif isinstance(value, float):
