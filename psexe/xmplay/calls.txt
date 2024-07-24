@@ -65,7 +65,7 @@ int XM_Init (VabID,XM_ID,FirstChannel,Loop,PlayMask,SongType,SFXPatternNum);
 				 3 will play the first 2 channels
 				 5 will play channels 0 and 3 only
 				This allows for multi or single channel SFX
-				0 = PAUSE TUNE (So it wont start straigt away)
+				0 = PAUSE TUNE (So it wont start straight away)
 				    Use XM_PlayStart to start tune.
 		SongType	XM_Music or XM_SFX
 		SFXPatternNum	1) Pattern to use as a SFX.
@@ -128,6 +128,21 @@ void XM_Update();
 		Nothing.
 
 ----------------------------------------------------------------------------
+
+void XM_Update2(Speed);
+
+	Description:
+				Updates XM Player (up to 24 songs/SFX)
+				Must be called n times per frame
+				Keeps better time than XM_Update()
+				(Depending on XM_OnceOffInit)
+	Requires:
+		Speed (amount of times routine is called per frame..)
+	Returns:
+		Nothing.
+
+----------------------------------------------------------------------------
+
 void XM_Pause(Song_ID);
 
 	Description:
@@ -695,4 +710,3 @@ void XM_SetStereo(void);
 ----------------------------------------------------------------------------
 
 End-Of-File
-

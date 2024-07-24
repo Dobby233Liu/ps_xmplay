@@ -1,10 +1,14 @@
-#pragma once
+#ifndef XMPlayer
+#define XMPlayer
 
 extern int JPPer;
 
 extern int XMTime1;
 extern int XMTime2;
 extern int XMTime3;
+
+#define XM_PROCESSING 0
+#define XM_NOT_PROCESSED 1
 
 #define XM_NTSC 0				/* Machine type */
 #define XM_PAL 1
@@ -55,6 +59,9 @@ typedef struct XM_Feedback
 		int		ActiveVoices;
 } XM_Feedback;
 
+#ifdef __cplusplus			/* Added by MikeA */
+extern "C" {
+#endif
 
 void XM_Restart(int Song_ID);
 void XM_Pause(int Song_ID);
@@ -66,7 +73,7 @@ void XM_SetSongPos(int Song_ID,unsigned short pos);
 int InitXMData(unsigned char *mpp,int XM_ID,int S3MPan);
 int XM_VABInit(unsigned char* VHData,unsigned char* VBData);
 void XM_OnceOffInit(int PAL);
-void XM_GetFeedback(int Song_ID,XM_Feedback* Feedback);
+int XM_GetFeedback(int Song_ID,XM_Feedback* Feedback);
 void XM_GetHeaderInfo(int XM_ID,XM_HeaderInfo* HeaderInfo);
 int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 				 int Loop,int PlayMask,int PlayType,int SFXNum);
@@ -110,3 +117,12 @@ void XM_FreeAllFileHeaderIDs(void);
 void XM_FreeFileHeaderID(void);
 void XM_SetFileHeaderAddress(unsigned char *Address);
 int XM_GetFileHeaderSize(void);
+void XM_Update2(int speed);
+
+
+void SetTranspose(int a);
+
+#ifdef __cplusplus			/* Added by MikeA */
+}
+#endif
+#endif
