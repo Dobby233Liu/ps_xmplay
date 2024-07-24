@@ -26,8 +26,27 @@ void main() {
     if (!crit_section_already_entered) leaveCriticalSection();
 
     SpuInit();
-	SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
-	SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
+
+#if 0
+    // this clears SPU memory
+    // appears to help the DuckStation situation? but is kind of slow
+    SpuSetTransferStartAddr(0);
+    SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
+    SpuSetTransferCallback(NULL);
+    SpuWrite0(512 * 1024);
+    SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
+#endif
+
+    SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
+    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
+
+#if 0
+    // according to LibRef, this should be off by default
+    SpuEnv env;
+    env.mask = SPU_ENV_EVENT_QUEUEING;
+    env.queueing = SPU_OFF;
+    SpuSetEnv(&env);
+#endif
 
     XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
     VSyncCallback(XM_Update);
@@ -47,7 +66,8 @@ void main() {
     int song_id = XM_Init(voice_bank_id, 0, 0, 0, song_info.loop, -1, song_info.type, song_info.position);
     assert(song_id != -1, "song init failed");
 
-    while (1) ;
+    while (1)
+        asm("");
 
     XM_Exit();
     XM_FreeAllSongIDs();

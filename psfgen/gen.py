@@ -20,6 +20,7 @@ def main():
             lib_fn = f"{info["xm"]}.psflib"
             print(lib_fn)
             path_timing = f"songdata/timing/{info["xm"]}.xm"
+            os.makedirs("out", exist_ok=True)
             with open("out/" + lib_fn, "wb") as libf:
                 lib, lib_psf = modify_driver.make_psflib(info["xm"])
                 lib_psf.write(libf)
