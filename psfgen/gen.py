@@ -44,6 +44,7 @@ def main():
 
         with open(f"out/{song_name}.minipsf", "wb") as minif:
             psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], modify_driver.XMPanningType.XM)
+            psf1.tags["origfilename"] = song_name
             if song_length:
                 psf1.tags["length"] = song_length
             if loop:
