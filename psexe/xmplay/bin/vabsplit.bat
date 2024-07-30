@@ -1,3 +1,3 @@
 @echo off
-%~dp0\msdos %~dp0\..\..\psyq\bin\vabsplit.exe %*
+%~dp0..\..\psyq\bin\msdos %~dp0vabsplit.exe %*
 exit /b %errorlevel%
