@@ -2,7 +2,7 @@ TARGET = xmplayer
 TYPE = ps-exe
 
 XM_BUILTIN ?= false
-XM_DIR ?= ../songdata
+XM_DIR ?= songdata
 XM_TYPE_MUSIC = 0
 XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
@@ -12,7 +12,7 @@ ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
 
-XMPLAY_VARIANT ?= sbspss
+XMPLAY_VARIANT ?= sbspss # 2000/08
 
 SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
 
@@ -28,7 +28,7 @@ endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
 ifeq ($(XM_BUILTIN),true)
-CPPFLAGS += -DXM_FILENAME="$(subst .,_,$(subst -,_,$(XM)))" \
+CPPFLAGS += -DXM_DIR="$(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR))))" -DXM_FILENAME="$(subst .,_,$(subst -,_,$(XM)))" \
 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif
@@ -50,13 +50,13 @@ endef
 
 # FIXME: can't rebuild
 
-song_xm.o: $(XM_DIR)/$(XM).xm
+song_xm.o: ../$(XM_DIR)/$(XM).xm
 	$(call SONG_TO_OBJ,$<)
 
-song_vh.o: $(XM_DIR)/$(XM).vh
+song_vh.o: ../$(XM_DIR)/$(XM).vh
 	$(call SONG_TO_OBJ,$<)
 
-song_vb.o: $(XM_DIR)/$(XM).vb
+song_vb.o: ../$(XM_DIR)/$(XM).vb
 	$(call SONG_TO_OBJ,$<)
 
 .PHONY: clean-songdata

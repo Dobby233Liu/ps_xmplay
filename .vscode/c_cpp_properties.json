@@ -8,6 +8,7 @@
       "defines": [
         "__STDC_HOSTED__ = 0",
         "XM_BUILTIN",
+        "XM_DIR",
         "XM_FILENAME",
         "XM_TYPE",
         "XM_LOOP",
@@ -34,6 +35,7 @@
       "defines": [
         "__STDC_HOSTED__ = 0",
         "XM_BUILTIN",
+        "XM_DIR",
         "XM_FILENAME",
         "XM_TYPE",
         "XM_LOOP",

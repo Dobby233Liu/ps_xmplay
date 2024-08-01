@@ -1,6 +1,7 @@
 from ctypes import *
 from enum import IntEnum
 import subprocess
+from typing import Optional
 import lief
 import psexe
 import psf
@@ -32,8 +33,8 @@ def _load_driver() -> lief.ELF.Binary:
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
     return elf
 
-def make_psflib(xm: str) -> psf.PSF1:
-    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", f"XM={xm}", "clean", "all"], check=True)
+def make_psflib(xm: str, xm_dir: Optional[str] = "songdata") -> psf.PSF1:
+    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", f"XM_DIR={xm_dir}", f"XM={xm}", "clean", "all"], check=True)
     exe = _load_driver()
     with psexe.elf_to_psexe(exe) as p:
         psf1 = psf.PSF1()

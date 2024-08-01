@@ -5,8 +5,11 @@ import libopenmpt
 import lief
 
 
+SONGDATA_DIR = "songdata/may14"
+
+
 def main():
-    with open("songdata/index.json", "r") as f:
+    with open(f"{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
 
     bank_info: list[tuple[lief.ELF.Binary, str, libopenmpt.Module]] = {}
@@ -19,10 +22,10 @@ def main():
 
             lib_fn = f"{info["xm"]}.psflib"
             print(lib_fn)
-            path_timing = f"songdata/timing/{info["xm"]}.xm"
+            path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.xm"
             os.makedirs("out", exist_ok=True)
             with open("out/" + lib_fn, "wb") as libf:
-                lib, lib_psf = modify_driver.make_psflib(info["xm"])
+                lib, lib_psf = modify_driver.make_psflib(info["xm"], SONGDATA_DIR)
                 lib_psf.write(libf)
 
             if os.path.exists(path_timing):
