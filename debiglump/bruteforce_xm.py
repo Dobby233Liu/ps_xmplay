@@ -3,7 +3,7 @@ from lump import BigLump, FAT
 
 XM_MAGIC = b'Extended Module:'
 VAB_MAGIC = b'pBAV'
-KNOWN_XM_NAMES = ["CHAPTER1", "CHAPTER2", "CHAPTER3", "CHAPTER4", "CHAPTER5", "CHAPTER6", "SB-TITLE", "FMA", "INGAME"]
+KNOWN_XM_NAMES = ["CHAPTER1", "CHAPTER2", "CHAPTER3", "CHAPTER4", "CHAPTER5", "CHAPTER6", "SB-TITLE", "INGAME"]
 
 
 with open("debiglump/BIGLUMP.BIN", "rb") as bls:
