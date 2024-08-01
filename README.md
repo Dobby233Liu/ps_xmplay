@@ -58,7 +58,7 @@ SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care 
 fb2k PSF players.
 
 The volume leveling in the SBSPSS version of xmplay is pretty broken.
-In the future I may include a feature to enable using the PSY-Q SDK 4.6 version of it.
+Try switching to the PSY-Q SDK 4.6 version of it if things sound wrong.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
 If it's caused by an assertion failure a message should show up then.

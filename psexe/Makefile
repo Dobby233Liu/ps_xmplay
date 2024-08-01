@@ -12,6 +12,8 @@ ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
 
+XMPLAY_VARIANT ?= sbspss
+
 SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
 
 SRCS = \
@@ -31,7 +33,13 @@ CPPFLAGS += -DXM_FILENAME="$(subst .,_,$(subst -,_,$(XM)))" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
-LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu -lxmplay -Wl,--end-group
+LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu
+ifneq ($(XMPLAY_VARIANT),)
+LDFLAGS += -lxmplay_$(XMPLAY_VARIANT)
+else
+LDFLAGS += -lxmplay
+endif
+LDFLAGS += -Wl,--end-group
 
 include nugget/common.mk
 
