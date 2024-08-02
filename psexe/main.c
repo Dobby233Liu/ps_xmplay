@@ -58,7 +58,11 @@ void main() {
 
     int xm_data_id = InitXMData(song_info.pxm_ptr, 0, song_info.panning_type);
 
-    int song_id = XM_Init(voice_bank_id, xm_data_id, -1, 1, song_info.loop, -1, song_info.type, song_info.position);
+    int song_id = XM_Init(
+        voice_bank_id, xm_data_id, -1,
+        1, // HACK: this leaves ch0 empty but gets rid of a terrible bug
+        song_info.loop, -1, song_info.type, song_info.position
+    );
     assert(song_id != -1, "song init failed");
 
 #ifndef XMPLAY_WORSE_TIMING
