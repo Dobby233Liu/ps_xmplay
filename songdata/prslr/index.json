@@ -1,0 +1,164 @@
+{
+    "complete_0": {
+        "xm": "complete",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "complete_1": {
+        "xm": "complete",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 14
+    },
+    "gameover": {
+        "xm": "gameover",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level1_0": {
+        "xm": "level1",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level1_1": {
+        "xm": "level1",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 26
+    },
+    "level1_2": {
+        "xm": "level1",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 36
+    },
+    "level2_0": {
+        "xm": "level2",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level2_1": {
+        "xm": "level2",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 16
+    },
+    "level2_2": {
+        "xm": "level2",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 21
+    },
+    "level3_0": {
+        "xm": "level3",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level3_1": {
+        "xm": "level3",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 14
+    },
+    "level3_2": {
+        "xm": "level3",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 21
+    },
+    "level4_0": {
+        "xm": "level4",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level4_1": {
+        "xm": "level4",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 21
+    },
+    "level4_2": {
+        "xm": "level4",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 24
+    },
+    "level5_0": {
+        "xm": "level5",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level5_1": {
+        "xm": "level5",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 39
+    },
+    "level5_2": {
+        "xm": "level5",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 48
+    },
+    "level6_0": {
+        "xm": "level6",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level6_1": {
+        "xm": "level6",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 20
+    },
+    "level6_2": {
+        "xm": "level6",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 24
+    },
+    "level7_0": {
+        "xm": "level7",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "level7_1": {
+        "xm": "level7",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 23
+    },
+    "level7_2": {
+        "xm": "level7",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 27
+    },
+    "levelcomplete": {
+        "xm": "levelcomplete",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "megazord": {
+        "xm": "megazord",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "unused": {
+        "xm": "unused",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    }
+}
