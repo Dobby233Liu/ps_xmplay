@@ -9,7 +9,7 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned long heap[0x8000];
+static unsigned char heap[0x40000];
 
 #define MAX_SPU_MALLOC 200 // in sync with SBSPSS
 static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
@@ -22,12 +22,12 @@ void main() {
     assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "vab invalid");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap3(heap, sizeof(heap));
+    InitHeap3((unsigned long*)heap, sizeof(heap));
     if (!crit_section_already_entered) leaveCriticalSection();
 
     SpuInit();
 
-#if 0
+#if 1
     // this clears SPU memory
     // appears to help the DuckStation situation? but is kind of slow
     SpuSetTransferStartAddr(0);
@@ -40,7 +40,7 @@ void main() {
     SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
-#if 0
+#if 1
     // according to LibRef, this should be off by default
     SpuEnv env;
     env.mask = SPU_ENV_EVENT_QUEUEING;
