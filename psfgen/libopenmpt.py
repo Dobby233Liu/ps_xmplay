@@ -162,10 +162,10 @@ class Module():
                 ok = LIB.openmpt_module_ctl_set_text(self._module._module, key.encode("utf-8"), value.encode("utf-8"))
             elif isinstance(value, float):
                 ok = LIB.openmpt_module_ctl_set_floatingpoint(self._module._module, key.encode("utf-8"), value)
-            elif isinstance(value, int):
-                ok = LIB.openmpt_module_ctl_set_integer(self._module._module, key.encode("utf-8"), value)
             elif isinstance(value, bool):
                 ok = LIB.openmpt_module_ctl_set_boolean(self._module._module, key.encode("utf-8"), value)
+            elif isinstance(value, int):
+                ok = LIB.openmpt_module_ctl_set_integer(self._module._module, key.encode("utf-8"), value)
             else:
                 raise TypeError(f"Unsupported type {type(value)}")
             if not ok:
