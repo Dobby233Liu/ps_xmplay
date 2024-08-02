@@ -55,6 +55,9 @@ Output goes in out/ folder
 
 ## Flaws
 
+SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care though - as long as it works in the two
+fb2k PSF players.
+
 SBSPSS appears to use a newer version of xmplay.lib that has some bugs fixed.
 I'm sorry for the misinformation that it was more broken that the older version,
 that was a mistake in my code.
