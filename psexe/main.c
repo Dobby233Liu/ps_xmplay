@@ -27,7 +27,7 @@ void main() {
 
     SpuInit();
 
-#if 1
+#if 0
     // this clears SPU memory
     // appears to help the DuckStation situation? but is kind of slow
     SpuSetTransferStartAddr(0);
@@ -39,14 +39,6 @@ void main() {
 
     SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
-
-#if 1
-    // according to LibRef, this should be off by default
-    SpuEnv env;
-    env.mask = SPU_ENV_EVENT_QUEUEING;
-    env.queueing = SPU_OFF;
-    SpuSetEnv(&env);
-#endif
 
     XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
     VSyncCallback(XM_Update);
