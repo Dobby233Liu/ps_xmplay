@@ -12,7 +12,7 @@ def main():
             timing_fnn = path.splitext(path.basename(timing_fn))[0]
             timing = libopenmpt.Module(timing_f)
             for i in range(timing.num_subsongs):
-                minipsf_fn = timing_fnn + ("_" + str(i) if not timing.num_subsongs == 1 else "")
+                minipsf_fn = timing_fnn + ("_" + str(i) if timing.num_subsongs != 1 else "")
                 index[minipsf_fn] = {
                     "xm": timing_fnn,
                     "rough_xm_subsong": i,
