@@ -20,6 +20,7 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "panning_type": 1,
-        "module_ext": "it"
+        "module_ext": "it",
+        "xmplay_variant": "46"
     }
 }

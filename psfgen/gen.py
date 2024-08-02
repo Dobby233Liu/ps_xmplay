@@ -26,7 +26,10 @@ def main():
             path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
             os.makedirs("out", exist_ok=True)
             with open("out/" + lib_fn, "wb") as libf:
-                lib, lib_psf = modify_driver.make_psflib(info["xm"], SONGDATA_DIR, XMPLAY_VARIANT)
+                lib, lib_psf = modify_driver.make_psflib(info["xm"], SONGDATA_DIR,
+                                                         # HACK
+                                                         info.get("xmplay_variant", XMPLAY_VARIANT)
+                                                        )
                 lib_psf.write(libf)
 
             if os.path.exists(path_timing):
