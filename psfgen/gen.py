@@ -53,8 +53,7 @@ def main():
             psf1.tags["origfilename"] = song_name
             if song_length:
                 psf1.tags["length"] = song_length
-            if loop:
-                psf1.tags["fade"] = 10
+            psf1.tags["fade"] = 10 if loop else 0
             psf1.write(minif)
 
 if __name__ == "__main__":
