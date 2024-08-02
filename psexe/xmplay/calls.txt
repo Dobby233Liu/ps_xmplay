@@ -129,7 +129,7 @@ void XM_Update();
 
 ----------------------------------------------------------------------------
 
-void XM_Update2(Speed);
+void XM_Update2(Speed); /* dobby: SBSPSS version only */
 
 	Description:
 				Updates XM Player (up to 24 songs/SFX)

@@ -32,6 +32,9 @@ CPPFLAGS += -DXM_DIR="$(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR))))" -DXM_FIL
 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif
+ifeq ($(XMPLAY_VARIANT),sbspss)
+CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
+endif
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
 LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu
 ifneq ($(XMPLAY_VARIANT),)

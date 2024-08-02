@@ -1,5 +1,4 @@
-#ifndef XMPlayer
-#define XMPlayer
+#pragma once
 
 extern int JPPer;
 
@@ -7,6 +6,7 @@ extern int XMTime1;
 extern int XMTime2;
 extern int XMTime3;
 
+// dobby: Added in SBSPSS version
 #define XM_PROCESSING 0
 #define XM_NOT_PROCESSED 1
 
@@ -59,10 +59,6 @@ typedef struct XM_Feedback
 		int		ActiveVoices;
 } XM_Feedback;
 
-#ifdef __cplusplus			/* Added by MikeA */
-extern "C" {
-#endif
-
 void XM_Restart(int Song_ID);
 void XM_Pause(int Song_ID);
 void XM_Exit(void);
@@ -73,6 +69,7 @@ void XM_SetSongPos(int Song_ID,unsigned short pos);
 int InitXMData(unsigned char *mpp,int XM_ID,int S3MPan);
 int XM_VABInit(unsigned char* VHData,unsigned char* VBData);
 void XM_OnceOffInit(int PAL);
+// dobby: Return type was labeled as void in the SDK 4.6 version
 int XM_GetFeedback(int Song_ID,XM_Feedback* Feedback);
 void XM_GetHeaderInfo(int XM_ID,XM_HeaderInfo* HeaderInfo);
 int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
@@ -117,12 +114,8 @@ void XM_FreeAllFileHeaderIDs(void);
 void XM_FreeFileHeaderID(void);
 void XM_SetFileHeaderAddress(unsigned char *Address);
 int XM_GetFileHeaderSize(void);
+
+#ifdef XMPLAY_VARIANT_SBSPSS
 void XM_Update2(int speed);
-
-
 void SetTranspose(int a);
-
-#ifdef __cplusplus			/* Added by MikeA */
-}
-#endif
 #endif
