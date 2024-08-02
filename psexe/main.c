@@ -61,18 +61,17 @@ void main() {
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
     assert(voice_bank_id != -1, "voice load failed");
 
-    InitXMData(song_info.pxm_ptr, 0, song_info.panning_type);
+    int xm_data_id = InitXMData(song_info.pxm_ptr, 0, song_info.panning_type);
 
-    int song_id = XM_Init(voice_bank_id, 0, 0, 0, song_info.loop, -1, song_info.type, song_info.position);
+    int song_id = XM_Init(voice_bank_id, xm_data_id, -1, 1, song_info.loop, -1, song_info.type, song_info.position);
     assert(song_id != -1, "song init failed");
 
     while (1)
         asm("");
 
     XM_Exit();
-    XM_FreeAllSongIDs();
-    XM_FreeFileHeaderID();
-
     free(file_header_addr);
     free(song_addr);
+    XM_FreeAllSongIDs();
+    XM_FreeFileHeaderID();
 }
