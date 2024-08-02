@@ -63,6 +63,8 @@ void main() {
 
 #ifndef XMPLAY_WORSE_TIMING
     VSyncCallback(XM_Update);
+    while (1)
+        asm("");
 #else
 #ifndef XMPLAY_VARIANT_SBSPSS
 #error Only the SBSPSS version of xmplay.lib includes XM_Update2, which is necessary for this hack to function
