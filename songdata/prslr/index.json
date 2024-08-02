@@ -1,11 +1,11 @@
 {
-    "complete_0": {
+    "complete": {
         "xm": "complete",
         "rough_xm_subsong": 0,
-        "loop": true,
+        "loop": false,
         "position": 0
     },
-    "complete_1": {
+    "credits": {
         "xm": "complete",
         "rough_xm_subsong": 1,
         "loop": true,
@@ -14,130 +14,130 @@
     "gameover": {
         "xm": "gameover",
         "rough_xm_subsong": 0,
-        "loop": true,
+        "loop": false,
         "position": 0
     },
-    "level1_0": {
+    "level1_stage": {
         "xm": "level1",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level1_1": {
+    "level1_boss": {
         "xm": "level1",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 26
     },
-    "level1_2": {
+    "level1_briefing": {
         "xm": "level1",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 36
     },
-    "level2_0": {
+    "level2_stage": {
         "xm": "level2",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level2_1": {
+    "level2_boss": {
         "xm": "level2",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 16
     },
-    "level2_2": {
+    "level2_briefing": {
         "xm": "level2",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 21
     },
-    "level3_0": {
+    "level3_stage": {
         "xm": "level3",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level3_1": {
+    "level3_boss": {
         "xm": "level3",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 14
     },
-    "level3_2": {
+    "level3_briefing": {
         "xm": "level3",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 21
     },
-    "level4_0": {
+    "level4_stage": {
         "xm": "level4",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level4_1": {
+    "level4_boss": {
         "xm": "level4",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 21
     },
-    "level4_2": {
+    "level4_briefing": {
         "xm": "level4",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 24
     },
-    "level5_0": {
+    "level5_stage": {
         "xm": "level5",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level5_1": {
+    "level5_boss": {
         "xm": "level5",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 39
     },
-    "level5_2": {
+    "level5_briefing": {
         "xm": "level5",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 48
     },
-    "level6_0": {
+    "level6_stage": {
         "xm": "level6",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level6_1": {
+    "level6_boss": {
         "xm": "level6",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 20
     },
-    "level6_2": {
+    "level6_briefing": {
         "xm": "level6",
         "rough_xm_subsong": 2,
         "loop": true,
         "position": 24
     },
-    "level7_0": {
+    "level7_stage": {
         "xm": "level7",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
     },
-    "level7_1": {
+    "level7_boss": {
         "xm": "level7",
         "rough_xm_subsong": 1,
         "loop": true,
         "position": 23
     },
-    "level7_2": {
+    "level7_briefing": {
         "xm": "level7",
         "rough_xm_subsong": 2,
         "loop": true,
@@ -146,7 +146,7 @@
     "levelcomplete": {
         "xm": "levelcomplete",
         "rough_xm_subsong": 0,
-        "loop": true,
+        "loop": false,
         "position": 0
     },
     "megazord": {
