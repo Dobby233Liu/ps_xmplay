@@ -1,0 +1,25 @@
+{
+    "megalovania": {
+        "xm": "megalovania",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "friendinsideme_youvegota": {
+        "xm": "friendinsideme",
+        "position": 0,
+        "rough_xm_subsong": 0
+    },
+    "friendinsideme_friendinsideme": {
+        "xm": "friendinsideme",
+        "position": 10,
+        "rough_xm_subsong": 1,
+        "loop": false
+    },
+    "revx": {
+        "xm": "revx",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "panning_type": 1,
+        "module_ext": "it"
+    }
+}

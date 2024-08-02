@@ -5,7 +5,7 @@ import libopenmpt
 import lief
 
 
-SONGDATA_DIR = "songdata/retail"
+SONGDATA_DIR = "songdata/test"
 XMPLAY_VARIANT = "sbspss"
 
 
@@ -23,7 +23,7 @@ def main():
 
             lib_fn = f"{info["xm"]}.psflib"
             print(lib_fn)
-            path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.xm"
+            path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
             os.makedirs("out", exist_ok=True)
             with open("out/" + lib_fn, "wb") as libf:
                 lib, lib_psf = modify_driver.make_psflib(info["xm"], SONGDATA_DIR, XMPLAY_VARIANT)
@@ -48,12 +48,14 @@ def main():
             mod.ctl["play.at_end"] = "stop"
             song_length = mod.estimate_duration() or song_length
 
+        panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
+
         with open(f"out/{song_name}.minipsf", "wb") as minif:
-            psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], modify_driver.XMPanningType.XM)
+            psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], panning_type)
             psf1.tags["origfilename"] = song_name
             if song_length:
                 psf1.tags["length"] = song_length
-            psf1.tags["fade"] = 10 if loop else 0
+            psf1.tags["fade"] = info.get("fade", 10) if loop else 0
             psf1.write(minif)
 
 if __name__ == "__main__":
