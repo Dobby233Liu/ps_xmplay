@@ -1,0 +1,4 @@
+* revx.it is [v17-revengeofcats.it](https://modarchive.org/index.php?request=view_by_moduleid&query=59025) by Skaven252; it's here because it was included in PSY-Q SDK 4.6 as the demo track for xmplay.lib
+* megalovania.xm is originally composed by Toby Fox and supposedly arranged by loypoll? (yeahhhh) And I did the quick MIDI to XM conversion with the gm.dls soundfont.
+* friendinsideme.xm is a sloppy edit of toy3i.mod by Traveller's Tales
+* viraxor_-_a_cube_made_of_circles.xm can be found [here](https://modarchive.org/index.php?request=view_by_moduleid&query=207395)
