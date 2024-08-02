@@ -15,14 +15,18 @@ with open("debiglump/BIGLUMP.BIN", "rb") as bls:
         if fat.read(bls, len(XM_MAGIC)) != XM_MAGIC:
             continue
         # xm -> vb -> vh
-        known_modules[id] = (fat, bl.fat[id + 2], bl.fat[id + 1])
-        assert known_modules[id][1].read(bls, 4) == VAB_MAGIC
+        if known_modules[id][1].read(bls, 4) == VAB_MAGIC:
+            known_modules[id] = (fat, bl.fat[id + 2], bl.fat[id + 1])
+        else:
+            print("WARNING: track doesn't have corresponding vab")
+            known_modules[id] = (fat, None, None)
 
     for (id, (xm, vh, vb)), i in zip(known_modules.items(), range(len(known_modules))):
         outname = KNOWN_XM_NAMES[i]
         with open(f"debiglump/out2/{outname}.xm", "wb") as f:
             f.write(xm.read(bls))
-        with open(f"debiglump/out2/{outname}.vh", "wb") as f:
-            f.write(vh.read(bls))
-        with open(f"debiglump/out2/{outname}.vb", "wb") as f:
-            f.write(vb.read(bls))
+        if vh:
+            with open(f"debiglump/out2/{outname}.vh", "wb") as f:
+                f.write(vh.read(bls))
+            with open(f"debiglump/out2/{outname}.vb", "wb") as f:
+                f.write(vb.read(bls))
