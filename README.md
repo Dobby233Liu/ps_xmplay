@@ -24,7 +24,8 @@ pip install -r requirements.txt
 * VSCode could make development slightly easier.
 
 Data:
-* All data reside in songdata folder, repo comes with SBSPSS data files.
+* All data reside in a subfolder of the songdata folder, repo comes with SBSPSS data files.
+** Change subfolder name in psfgen/gen.py
 * Root of the folder should contain the pxm/vb/vh's. All filenames should be in lowercase, and the pxm's has to be have the xm extension.
 * timing folder should contain \[conv\]'d/original xm files in correspondence to the pxm files, this is used for timing the PSFs.
 * /index.json should contain:
