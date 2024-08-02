@@ -40,8 +40,11 @@ void main() {
     SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
+#ifndef XMPLAY_WORSE_TIMING
     XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
-    VSyncCallback(XM_Update);
+#else // we make a bold assumption here
+    XM_OnceOffInit(XM_NTSC);
+#endif
     XM_SetStereo();
 
     uint8_t *song_addr = malloc(XM_GetSongSize());
@@ -58,8 +61,17 @@ void main() {
     int song_id = XM_Init(voice_bank_id, xm_data_id, -1, 1, song_info.loop, -1, song_info.type, song_info.position);
     assert(song_id != -1, "song init failed");
 
-    while (1)
-        asm("");
+#ifndef XMPLAY_WORSE_TIMING
+    VSyncCallback(XM_Update);
+#else
+#ifndef XMPLAY_VARIANT_SBSPSS
+#error Only the SBSPSS version of xmplay.lib includes XM_Update2, which is necessary for this hack to function
+#endif
+    while (1) {
+        XM_Update2(2);
+        VSync(0);
+    }
+#endif
 
     XM_Exit();
     free(file_header_addr);

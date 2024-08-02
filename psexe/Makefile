@@ -34,6 +34,7 @@ CPPFLAGS += -DXM_DIR="$(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR))))" -DXM_FIL
 endif
 ifeq ($(XMPLAY_VARIANT),sbspss)
 CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
+#CPPFLAGS += -DXMPLAY_WORSE_TIMING # HACK regret this
 endif
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
 LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu

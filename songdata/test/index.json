@@ -22,5 +22,11 @@
         "panning_type": 1,
         "module_ext": "it",
         "xmplay_variant": "46"
+    },
+    "viraxor_-_a_cube_made_of_circles": {
+        "xm": "viraxor_-_a_cube_made_of_circles",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
     }
 }
