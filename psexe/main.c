@@ -60,9 +60,13 @@ void main() {
 
     int song_id = XM_Init(
         voice_bank_id, xm_data_id, -1,
+        #ifndef XMPLAY_VARIANT_SBSPSS
+        0,
+        #else
         // HACK: this leaves ch0 empty but gets rid of a terrible bug
         // Specifically, buggy volume automation with the flute in May14 Options theme
         1,
+        #endif
         song_info.loop, -1, song_info.type, song_info.position
     );
     assert(song_id != -1, "song init failed");
