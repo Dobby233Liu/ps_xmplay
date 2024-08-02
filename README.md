@@ -40,8 +40,6 @@ Data:
     // and so on
 }
 ```
-> [!IMPORTANT]
-> Separators don't count in position
 
 ## Usage
 
