@@ -23,6 +23,15 @@
         "module_ext": "it",
         "xmplay_variant": "46"
     },
+    "revx_unused1": {
+        "xm": "revx",
+        "position": 62,
+        "rough_xm_subsong": 1,
+        "panning_type": 1,
+        "module_ext": "it",
+        "xmplay_variant": "46",
+        "loop": false
+    },
     "viraxor_-_a_cube_made_of_circles": {
         "xm": "viraxor_-_a_cube_made_of_circles",
         "position": 0,

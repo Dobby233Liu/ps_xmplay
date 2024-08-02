@@ -33,13 +33,15 @@ Data:
 {
     "song minipsf filename": {
         "xm": "xm name (used in psflib filename)",
-        "position": [int] song start position in the order,
+        "position": [int] position of the order corresponding to the song,
         "rough_xm_subsong": [int optional] subsong in timing xm that roughly corresponds to this song,
         "loop": [boolean optional]
     },
     // and so on
 }
 ```
+> [!IMPORTANT]
+> Separators don't count in position
 
 ## Usage
 
