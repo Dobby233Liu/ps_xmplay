@@ -5,7 +5,7 @@ import libopenmpt
 import lief
 
 
-SONGDATA_DIR = "songdata/may14"
+SONGDATA_DIR = "songdata/retail"
 XMPLAY_VARIANT = "sbspss"
 
 
