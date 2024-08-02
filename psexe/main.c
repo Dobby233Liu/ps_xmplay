@@ -27,7 +27,7 @@ void main() {
 
     SpuInit();
 
-#if 0
+#if 0 // FIXME
     // this clears SPU memory
     // appears to help the DuckStation situation? but is kind of slow
     SpuSetTransferStartAddr(0);
