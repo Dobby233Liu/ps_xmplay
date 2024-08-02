@@ -58,8 +58,10 @@ Output goes in out/ folder
 SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care though - as long as it works in the two
 fb2k PSF players.
 
-The volume leveling in the SBSPSS version of xmplay is pretty broken.
-Try switching to the PSY-Q SDK 4.6 version of it if things sound wrong.
+SBSPSS appears to use a newer version of xmplay.lib that has some bugs fixed.
+I'm sorry for the misinformation that it was more broken that the older version,
+that was a mistake in my code.
+Though try switching to the PSY-Q SDK 4.6 version of xmplay.lib if things sound wrong.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
 If it's caused by an assertion failure a message should show up then.
