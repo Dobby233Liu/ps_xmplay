@@ -27,12 +27,16 @@ def main():
         mod = None
 
         if bank_info.get(info["xm"], None) is None:
+            print("")
+
             mod = None
             path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
 
             if not making_psf:
                 lib_fn = f"{info["xm"]}.psflib"
                 print(lib_fn)
+            else:
+                print(song_name)
 
             # TODO: variant setting should not be here
             lib, lib_psf = modify_driver.make_psflib(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT))
@@ -50,7 +54,8 @@ def main():
         else:
             lib, lib_fn, mod = bank_info[info["xm"]]
 
-        print(song_name)
+        if not making_psf:
+            print(song_name)
 
         sound_type = modify_driver.XMType.Music
 
