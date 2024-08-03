@@ -6,6 +6,8 @@
 #include <xmplay.h>
 #include "song.h"
 #include "debug.h"
+#include "vab.h"
+#include <common/hardware/pcsxhw.h>
 
 #include <common/hardware/pcsxhw.h>
 
@@ -16,10 +18,43 @@ static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
 
 #define BIOS_VERSION_STRING 0xBFC7FF32
 
+
+#ifdef XMPLAY_VARIANT_REDRIVER2
+int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
+    int vab_id = XM_GetFreeVAB();
+    if (vab_id == -1) return -1;
+
+    unsigned char *vag_sizes_ptr = vh_ptr;
+    vag_sizes_ptr += sizeof(struct vab_header);
+    vag_sizes_ptr += 0x10 * 0x80; // program attrs
+    vag_sizes_ptr += 0x200 * ((struct vab_header*)vh_ptr)->num_programs; // tone attrs
+    // first vag is always null
+    vag_sizes_ptr += sizeof(uint16_t);
+    int a = 1;
+
+    unsigned char *cur_vag_data_ptr = vb_ptr;
+    for (int16_t slot = 0; slot < ((struct vab_header*)vh_ptr)->num_samples; ++slot) {
+        uint32_t true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
+
+        unsigned long vag_spu_addr = SpuMalloc(true_size);
+        assert(vag_spu_addr != 0, "vag malloc failed");
+        SpuSetTransferStartAddr(vag_spu_addr);
+        SpuWrite(cur_vag_data_ptr, true_size);
+        SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
+        XM_SetVAGAddress(vab_id, slot, vag_spu_addr);
+
+        cur_vag_data_ptr += true_size;
+    }
+
+    return vab_id;
+}
+#endif
+
+
 void main() {
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "xm invalid");
-    assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "vab invalid");
+    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "vab invalid");
 
     int crit_section_already_entered = enterCriticalSection();
     InitHeap3((unsigned long*)heap, sizeof(heap));
@@ -27,12 +62,11 @@ void main() {
 
     SpuInit();
 
-#if 0 // FIXME
-    // this clears SPU memory
-    // appears to help the DuckStation situation? but is kind of slow
-    SpuSetTransferStartAddr(0);
+#ifdef XMPLAY_VARIANT_REDRIVER2
+    // clear SPU memory
     SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
     SpuSetTransferCallback(NULL);
+    SpuSetTransferStartAddr(0);
     SpuWrite0(512 * 1024);
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
 #endif
@@ -45,7 +79,9 @@ void main() {
 #else // we make a bold assumption here
     XM_OnceOffInit(XM_NTSC);
 #endif
+#ifndef XMPLAY_VARIANT_REDRIVER2
     XM_SetStereo();
+#endif
 
     uint8_t *song_addr = malloc(XM_GetSongSize());
     XM_SetSongAddress(song_addr);
@@ -53,7 +89,11 @@ void main() {
     uint8_t *file_header_addr = malloc(XM_GetFileHeaderSize());
     XM_SetFileHeaderAddress(file_header_addr);
 
+#ifndef XMPLAY_VARIANT_REDRIVER2
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
+#else
+    int voice_bank_id = vab_init(song_info.vh_ptr, song_info.vb_ptr);
+#endif
     assert(voice_bank_id != -1, "voice load failed");
 
     int xm_data_id = InitXMData(song_info.pxm_ptr, 0, song_info.panning_type);
@@ -76,8 +116,8 @@ void main() {
     while (1)
         asm("");
 #else
-#ifndef XMPLAY_VARIANT_SBSPSS
-#error Only the SBSPSS version of xmplay.lib includes XM_Update2, which is necessary for this hack to function
+#ifndef XM_Update2
+#error Only the SBSPSS version of xmplay.lib include XM_Update2, which is necessary for this hack to function
 #endif
     while (1) {
         XM_Update2(2);

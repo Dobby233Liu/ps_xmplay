@@ -1,8 +1,8 @@
 TARGET = xmplayer
 TYPE = ps-exe
 
-XM_BUILTIN ?= false
-XM_DIR ?= songdata
+XM_BUILTIN ?= true
+XM_DIR ?= songdata/retail
 XM_TYPE_MUSIC = 0
 XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
@@ -12,16 +12,19 @@ ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
 
-XMPLAY_VARIANT ?= sbspss # 2000/08
+XMPLAY_VARIANT ?= sbspss
 
 SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
 
 SRCS = \
 nugget/common/crt0/crt0.s \
-nugget/common/syscalls/printf.s \
-debug.c \
+nugget/common/syscalls/printf.s
+ifeq ($(XMPLAY_VARIANT),redriver2)
+SRCS += xmplay/src/xmplay.c
+endif
+SRCS += debug.c \
 main.c \
-song.c 
+song.c
 ifeq ($(XM_BUILTIN),true)
 SRCS += $(SONGDATA_OBJS)
 endif
@@ -32,16 +35,23 @@ CPPFLAGS += -DXM_DIR="$(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR))))" -DXM_FIL
 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif
+
 ifeq ($(XMPLAY_VARIANT),sbspss)
 CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
 #CPPFLAGS += -DXMPLAY_WORSE_TIMING # HACK regret this
 endif
+ifeq ($(XMPLAY_VARIANT),redriver2)
+CPPFLAGS += -DXMPLAY_VARIANT_REDRIVER2
+endif
+
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
 LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu
 ifneq ($(XMPLAY_VARIANT),)
+ifneq ($(XMPLAY_VARIANT),redriver2)
 LDFLAGS += -lxmplay_$(XMPLAY_VARIANT)
+endif
 else
-LDFLAGS += -lxmplay
+LDFLAGS += -lxmplay_46
 endif
 LDFLAGS += -Wl,--end-group
 

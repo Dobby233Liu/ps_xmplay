@@ -1,8 +1,8 @@
 *.o
 
 *.a
-!psyq/**
-!xmplay/**
+!psyq/**.a
+!xmplay/**.a
 
 Overlay.*
 *.elf

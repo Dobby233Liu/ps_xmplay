@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "vab.h"
 #pragma once
 
 struct _song_info {
