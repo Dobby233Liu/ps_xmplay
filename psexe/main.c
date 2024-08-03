@@ -13,8 +13,8 @@
 
 static unsigned char heap[0x40000];
 
-#define MAX_SPU_MALLOC 200 // in sync with SBSPSS
-static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_MALLOC + 1)];
+#define MAX_SPU_BANKS 200 // in sync with SBSPSS
+static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)];
 
 #define BIOS_VERSION_STRING 0xBFC7FF32
 
@@ -71,7 +71,7 @@ void main() {
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
 #endif
 
-    SpuInitMalloc(MAX_SPU_MALLOC, spu_heap);
+    SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
 #ifndef XMPLAY_WORSE_TIMING
