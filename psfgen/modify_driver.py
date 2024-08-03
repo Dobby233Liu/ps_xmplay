@@ -1,7 +1,7 @@
 from ctypes import *
 from enum import IntEnum
 import subprocess
-from typing import Optional
+from typing import Optional, Union
 import lief
 import psexe
 import psf
@@ -33,34 +33,53 @@ def _load_driver() -> lief.ELF.Binary:
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
     return elf
 
-def make_psflib(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> psf.PSF1:
+def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> lief.ELF.Binary:
     subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", f"XMPLAY_VARIANT={xmplay_variant}", f"XM_DIR={xm_dir}", f"XM={xm}", "clean", "all"], check=True)
-    exe = _load_driver()
+    return _load_driver()
+
+def make_psflib_psf(exe: lief.ELF.Binary):
     with psexe.elf_to_psexe(exe) as p:
         psf1 = psf.PSF1()
         psf1.program = p.read()
-    return exe, psf1
+    return psf1
 
+def make_psflib(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> Union[lief.ELF.Binary, psf.PSF1]:
+    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
+    return exe, make_psflib_psf(exe)
+
+
+def make_patched_songinfo(exe: lief.ELF.Binary, type: XMType, loop: bool, position: int, panning_type: XMPanningType) \
+    -> Union[lief.ELF.Symbol, SongInfoStruct]:
+    song_info: lief.ELF.Symbol = exe.get_symbol("song_info")
+    assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
+    assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
+
+    info_struct = SongInfoStruct.from_buffer_copy(exe.get_content_from_virtual_address(song_info.value, sizeof(SongInfoStruct)))
+    info_struct.type = type
+    info_struct.loop = loop
+    info_struct.position = position
+    info_struct.panning_type = panning_type
+
+    return song_info, info_struct
+
+def make_psf(xm: str,
+                 type: XMType, loop: bool, position: int, panning_type: XMPanningType,
+                 xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> psf.PSF1:
+    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
+
+    song_info, info = make_patched_songinfo(exe, type, loop, position, panning_type)
+    exe.patch_address(song_info.value, bytes(info))
+
+    return exe, make_psflib_psf(exe)
 
 def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
                  type: XMType, loop: bool, position: int, panning_type: XMPanningType):
     psf1 = psf.PSF1()
     psf1.libs.append(lib_fn)
 
-    song_info: lief.ELF.Symbol = lib.get_symbol("song_info")
-    assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
-    assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
-    text_addr = song_info.value
-
-    info = SongInfoStruct.from_buffer_copy(lib.get_content_from_virtual_address(text_addr, sizeof(SongInfoStruct)))
-    info.type = type
-    info.loop = loop
-    info.position = position
-    info.panning_type = panning_type
-
+    song_info, info = make_patched_songinfo(lib, type, loop, position, panning_type)
     # That's right we're going to manually assemble a PSX-EXE
-    info_b = bytes(info)
-    psf1.program += psexe.PSXExeHeader(text_addr, len(info_b))
-    psf1.program += info_b
+    psf1.program += psexe.PSXExeHeader(song_info.value, sizeof(SongInfoStruct))
+    psf1.program += bytes(info)
 
     return psf1

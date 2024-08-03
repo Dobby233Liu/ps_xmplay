@@ -1,0 +1,74 @@
+{
+    "halloween_world": {
+        "xm": "halloween_world",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "lost_kingdom": {
+        "xm": "lost_kingdom",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "park_select_0": {
+        "xm": "park_select",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "park_select_1": {
+        "xm": "park_select",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 1
+    },
+    "park_select_2": {
+        "xm": "park_select",
+        "rough_xm_subsong": 2,
+        "loop": true,
+        "position": 2
+    },
+    "park_select_3": {
+        "xm": "park_select",
+        "rough_xm_subsong": 3,
+        "loop": true,
+        "position": 3
+    },
+    "space-patrol": {
+        "xm": "space-patrol",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "space_zone": {
+        "xm": "space_zone",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "title": {
+        "xm": "title",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "unused1": {
+        "xm": "unused1",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "unused2": {
+        "xm": "unused2",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    },
+    "wonderland": {
+        "xm": "wonderland",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "position": 0
+    }
+}

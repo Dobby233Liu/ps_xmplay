@@ -3,7 +3,7 @@ import glob
 from os import path
 import json
 
-SONGDATA_DIR = "songdata/prslr"
+SONGDATA_DIR = "songdata/themepark"
 
 def main():
     index = {}
