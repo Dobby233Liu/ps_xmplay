@@ -21,8 +21,6 @@ def main():
 
     bank_info: list[tuple[lief.ELF.Binary, str, libopenmpt.Module]] = {}
     for song_name, info in index.items():
-        print(song_name)
-
         making_psf = xm_ref_count[info["xm"]] == 1
         lib = None
         lib_fn = None
@@ -44,31 +42,36 @@ def main():
 
             if os.path.exists(path_timing):
                 mod = libopenmpt.Module(open(path_timing, "rb"))
+                mod.ctl["play.at_end"] = "stop"
 
             bank_info[info["xm"]] = (lib, lib_fn, mod)
+
+            if not making_psf:
+                print("")
         else:
             lib, lib_fn, mod = bank_info[info["xm"]]
 
-        song_length = 3.0 * 60
+        print(song_name)
+
+        sound_type = modify_driver.XMType.Music
+
+        song_length = info.get("length", None)
         loop = info.get("loop", True)
-        if (song_length_specified := info.get("length", None)) is not None:
-            song_length = song_length_specified
-        elif (subsong := info.get("rough_xm_subsong", None)) is not None and mod:
-            mod.subsong = subsong
-            if loop:
-                mod.repeat_count = info.get("loop_count", 1)
+        if not song_length:
+            if mod and (subsong := info.get("rough_xm_subsong", None)) is not None:
+                mod.subsong = subsong
+                mod.repeat_count = info.get("loop_count", 1) if loop else 0
+                song_length = mod.estimate_duration() or song_length
             else:
-                mod.repeat_count = 0
-            mod.ctl["play.at_end"] = "stop"
-            song_length = mod.estimate_duration() or song_length
+                song_length = 3.0 * 60
 
         panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
         with open(f"out/{song_name}.{"mini" if not making_psf else ""}psf", "wb") as outf:
             if not making_psf:
-                psf1 = modify_driver.make_minipsf(lib, lib_fn, modify_driver.XMType.Music, loop, info["position"], panning_type)
+                psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:
-                song_info, info_str = modify_driver.make_patched_songinfo(lib, modify_driver.XMType.Music, loop, info["position"], panning_type)
+                song_info, info_str = modify_driver.make_patched_songinfo(lib, sound_type, loop, info.get("position", 0), panning_type)
                 lib.patch_address(song_info.value, list(bytes(info_str)))
                 psf1 = modify_driver.make_psflib_psf(lib)
             psf1.tags["origfilename"] = song_name
