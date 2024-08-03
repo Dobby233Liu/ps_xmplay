@@ -34,10 +34,10 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 
     unsigned char *cur_vag_data_ptr = vb_ptr;
     for (int16_t slot = 0; slot < ((struct vab_header*)vh_ptr)->num_samples; ++slot) {
-        uint32_t true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
-
-        unsigned long vag_spu_addr = SpuMalloc(true_size);
+        long true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
+        long vag_spu_addr = SpuMalloc(true_size);
         assert(vag_spu_addr != 0, "vag malloc failed");
+
         SpuSetTransferStartAddr(vag_spu_addr);
         SpuWrite(cur_vag_data_ptr, true_size);
         SpuIsTransferCompleted(SPU_TRANSFER_WAIT);

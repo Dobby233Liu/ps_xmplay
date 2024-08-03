@@ -12,7 +12,7 @@ ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
 
-XMPLAY_VARIANT ?= sbspss
+XMPLAY_VARIANT ?= redriver2
 
 SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
 
