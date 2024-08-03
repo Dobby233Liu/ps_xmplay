@@ -46,8 +46,7 @@ def main():
 
             bank_info[info["xm"]] = (lib, lib_fn, mod)
 
-            if not making_psf:
-                print("")
+            print("")
         else:
             lib, lib_fn, mod = bank_info[info["xm"]]
 
