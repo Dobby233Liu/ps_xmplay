@@ -1,11 +1,12 @@
 from ctypes import *
 import io
 from typing import Optional
+from struct import unpack
 
 
 class FAT(LittleEndianStructure):
     _fields_ = [
-        ("pos", c_int32),
+        ("pos", c_uint32),
         ("size", c_int32),
     ]
 
@@ -13,12 +14,17 @@ class FAT(LittleEndianStructure):
         stream.seek(self.pos)
         return stream.read(size if size is not None else self.size)
 
-class FATStreamed(FAT):
+class FATStreamed(LittleEndianStructure):
+    _pack_ = 1
     _fields_ = [
         ("unknown", c_uint32),
-        ("pos", c_int32),
+        ("pos", c_uint32),
         ("size", c_int32),
     ]
+
+    def read(self, stream: io.BytesIO, size: Optional[int] = None) -> bytes:
+        stream.seek(self.pos)
+        return stream.read(size if size is not None else self.size)
 
 class BigLump():
     fat: dict[str, FAT]|list[FAT]
@@ -48,14 +54,14 @@ class BigLump():
 
 class GAZ():
     fat_immediate: list[FAT]
-    fat_streamed: list[FAT]
+    fat_streamed: list[FATStreamed]
 
     @classmethod
     def from_stream(cls, stream: io.BytesIO) -> None:
         self = cls()
         self.stream = stream
-        files_type = FAT * int.from_bytes(self.stream.read(4), "little")
-        files_type2 = FATStreamed * int.from_bytes(self.stream.read(4), "little")
+        files_type = FAT * unpack("<I", self.stream.read(4))[0]
+        files_type2 = FATStreamed * unpack("<I", self.stream.read(4))[0]
         self.fat_immediate = files_type.from_buffer_copy(self.stream.read(sizeof(files_type)))
-        self.fat_streamed = files_type2.from_buffer_copy(self.stream.read(sizeof(files_type)))
+        self.fat_streamed = files_type2.from_buffer_copy(self.stream.read(sizeof(files_type2)))
         return self

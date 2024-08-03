@@ -23,5 +23,5 @@ with open("debiglump/BIGLUMP.BIN", "rb") as bls:
             ext = "likely.vb"
         if True and ext == "bin":
             continue
-        with open(f"debiglump/out3/{id}.{ext}", "wb") as f:
+        with open(f"debiglump/out3/{type(fat).__name__}{id}.{ext}", "wb") as f:
             f.write(fat.read(bls))
