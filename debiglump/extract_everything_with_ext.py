@@ -1,4 +1,5 @@
-from lump import BigLump, FAT
+from lump import GAZ
+import itertools
 
 
 XM_MAGIC = b'Extended Module:'
@@ -6,9 +7,9 @@ VAB_MAGIC = b'pBAV'
 
 
 with open("debiglump/BIGLUMP.BIN", "rb") as bls:
-    bl = BigLump.from_stream_guess_fat_size(bls)
+    bl = GAZ.from_stream(bls)
 
-    for id, fat in enumerate(bl.fat):
+    for id, fat in enumerate(itertools.chain(bl.fat_immediate, bl.fat_streamed)):
         if fat.size == 0: continue
         ext = "bin"
         initial_four = fat.read(bls, len(VAB_MAGIC))
@@ -19,7 +20,7 @@ with open("debiglump/BIGLUMP.BIN", "rb") as bls:
             ext = "xm"
         empty_bytes_challenge = fat.read(bls, 0x11)
         if len(empty_bytes_challenge) == 0x11 and empty_bytes_challenge[:0x10] == b'\0' * 0x10 and fat.size != 0x40000 and fat.size != 0x20000:
-            ext = ".likely.vb"
+            ext = "likely.vb"
         if True and ext == "bin":
             continue
         with open(f"debiglump/out3/{id}.{ext}", "wb") as f:

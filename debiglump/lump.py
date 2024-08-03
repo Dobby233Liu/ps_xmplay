@@ -13,6 +13,12 @@ class FAT(LittleEndianStructure):
         stream.seek(self.pos)
         return stream.read(size if size is not None else self.size)
 
+class FATStreamed(FAT):
+    _fields_ = [
+        ("unknown", c_uint32),
+        ("pos", c_int32),
+        ("size", c_int32),
+    ]
 
 class BigLump():
     fat: dict[str, FAT]|list[FAT]
@@ -38,4 +44,18 @@ class BigLump():
         files = files_type.from_buffer_copy(self.stream.read(sizeof(files_type)))
         assert files[0].pos == first_fat.pos and files[0].size == first_fat.size
         self.fat = list(files)
+        return self
+
+class GAZ():
+    fat_immediate: list[FAT]
+    fat_streamed: list[FAT]
+
+    @classmethod
+    def from_stream(cls, stream: io.BytesIO) -> None:
+        self = cls()
+        self.stream = stream
+        files_type = FAT * int.from_bytes(self.stream.read(4), "little")
+        files_type2 = FATStreamed * int.from_bytes(self.stream.read(4), "little")
+        self.fat_immediate = files_type.from_buffer_copy(self.stream.read(sizeof(files_type)))
+        self.fat_streamed = files_type2.from_buffer_copy(self.stream.read(sizeof(files_type)))
         return self
