@@ -62,7 +62,7 @@ define SONG_TO_OBJ
 	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section .data=.rodata,alloc,load,readonly,data,contents -O $(FORMAT) -B mips $(1) $@
 endef
 
-# FIXME: can't rebuild
+# FIXME: can't rebuild with the XM filename changed
 
 song_xm.o: ../$(XM_DIR)/$(XM).xm
 	$(call SONG_TO_OBJ,$<)

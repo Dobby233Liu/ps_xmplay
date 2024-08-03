@@ -1,7 +1,7 @@
 #include <xmplay.h>
 #include "song.h"
 
-struct _song_info song_info =
+struct _song_info song_info __attribute__((__used__)) =
 {
 #ifdef XM_FILENAME
     .pxm_ptr = PXM_FILE,

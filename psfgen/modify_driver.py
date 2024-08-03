@@ -34,7 +34,7 @@ def _load_driver() -> lief.ELF.Binary:
     return elf
 
 def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> lief.ELF.Binary:
-    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", f"XMPLAY_VARIANT={xmplay_variant}", f"XM_DIR={xm_dir}", f"XM={xm}", "clean", "all"], check=True)
+    subprocess.run(["make", "-C", "psexe", "BUILD=LTO", "XM_BUILTIN=true", f"XMPLAY_VARIANT={xmplay_variant}", f"XM_DIR={xm_dir}", f"XM={xm}", "clean", "all"], check=True)
     return _load_driver()
 
 def make_psflib_psf(exe: lief.ELF.Binary):
