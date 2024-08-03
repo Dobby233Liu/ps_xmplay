@@ -19,6 +19,8 @@ with open("debiglump/BIGLUMP.BIN", "rb") as bls:
             ext = "xm"
         empty_bytes_challenge = fat.read(bls, 0x11)
         if len(empty_bytes_challenge) == 0x11 and empty_bytes_challenge[:0x10] == b'\0' * 0x10 and fat.size != 0x40000 and fat.size != 0x20000:
-            ext = "vb_likely"
+            ext = ".likely.vb"
+        if True and ext == "bin":
+            continue
         with open(f"debiglump/out3/{id}.{ext}", "wb") as f:
             f.write(fat.read(bls))
