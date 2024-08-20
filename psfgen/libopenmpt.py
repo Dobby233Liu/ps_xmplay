@@ -56,8 +56,9 @@ class _StreamCallbacks(Structure):
         self._stream = stream
 
         self._read = openmpt_stream_read_func(self._read_impl)
-        self._seek = openmpt_stream_seek_func(self._seek_impl)
-        self._tell = openmpt_stream_tell_proc(self._tell_impl)
+        if self._stream.seekable():
+            self._seek = openmpt_stream_seek_func(self._seek_impl)
+            self._tell = openmpt_stream_tell_proc(self._tell_impl)
 
     def _read_impl(self: Self, ptr: int, dst: c_void_p, size: c_size_t) -> c_size_t:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
@@ -173,6 +174,7 @@ LIB.openmpt_module_read_mono.restype = c_size_t
 class Module():
     class _Ctl():
         def __init__(self, module: "Module", *args: Any, **kwargs: Any) -> None:
+            assert module is not None
             self._module = module
 
         def __getitem__(self, key: str) -> Any:
@@ -241,14 +243,18 @@ class Module():
 
         self._module = None
         stream_cb = _StreamCallbacks(stream)
+        err = c_int()
+        err_msg_c = c_char_p()
         self._module = LIB.openmpt_module_create2(
             stream_cb, stream_cb.hash_ptr,
             self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
-            None, None,
+            pointer(err), pointer(err_msg_c),
             self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
         )
         if self._module is None:
-            self._raise_last_error()
+            err_msg = err_msg_c.value.decode("utf-8")
+            LIB.openmpt_free_string(err_msg_c)
+            raise OpenMPTException(err_msg, err.value)
 
         self.ctl = self._Ctl(self)
 
