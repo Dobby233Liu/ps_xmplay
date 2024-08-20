@@ -350,7 +350,7 @@ class Module():
     # i'm sorry
     def estimate_duration(self) -> float:
         sample_rate = 44100
-        sample_buffer = (c_int16 * (sample_rate // 10))()
+        sample_buffer = (c_int16 * 1024)()
         total_samples = 0
 
         while (rendered_samples := LIB.openmpt_module_read_mono(self._module, sample_rate, len(sample_buffer), sample_buffer)) != 0:
