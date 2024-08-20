@@ -271,8 +271,6 @@ class Module():
     def _log(self, message: int, user: c_void_p):
         message = cast(message, c_void_p)
         print(cast(message, c_char_p).value.decode("utf-8"))
-        # FIXME: why does this cause the interpreter to crash
-        #LIB.openmpt_free_string(message)
 
     def _err(self, code: c_int, user: c_void_p) -> c_int:
         return ErrorFuncResult.Default.value
