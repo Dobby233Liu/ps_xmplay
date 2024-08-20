@@ -105,6 +105,14 @@ LIB.openmpt_module_create2.argtypes = [
     POINTER(_InitialCtl)
 ]
 LIB.openmpt_module_create2.restype = c_openmpt_module
+LIB.openmpt_module_create_from_memory2.argtypes = [
+    c_void_p, c_size_t,
+    LOG_CB, c_void_p,
+    ERR_CB, c_void_p,
+    POINTER(c_int), POINTER(c_char_p),
+    POINTER(_InitialCtl)
+]
+LIB.openmpt_module_create_from_memory2.restype = c_openmpt_module
 
 LIB.openmpt_module_destroy.argtypes = [c_openmpt_module]
 
@@ -239,7 +247,7 @@ class Module():
         return cast(pointer(initial_ctls), POINTER(_InitialCtl))
 
 
-    def __init__(self, stream: io.BytesIO, initial_ctls: dict[str, str|float|int|bool] = None) -> None:
+    def __init__(self, stream: io.BytesIO, initial_ctls: dict[str, str|float|int|bool] = None, read_stream_into_memory: bool = True) -> None:
         self._hash_ptr = pointer(c_int(id(self)))
         self._log_cb = LOG_CB(self._log)
         self._err_cb = ERR_CB(self._err)
@@ -248,12 +256,21 @@ class Module():
         stream_cb = _StreamCallbacks(stream)
         err = c_int()
         err_msg_c = c_char_p()
-        self._module = LIB.openmpt_module_create2(
-            stream_cb, stream_cb.hash_ptr,
-            self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
-            pointer(err), pointer(err_msg_c),
-            self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
-        )
+        if read_stream_into_memory:
+            data = stream.read()
+            self._module = LIB.openmpt_module_create_from_memory2(
+                data, len(data),
+                self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
+                pointer(err), pointer(err_msg_c),
+                self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
+            )
+        else:
+            self._module = LIB.openmpt_module_create2(
+                stream_cb, stream_cb.hash_ptr,
+                self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
+                pointer(err), pointer(err_msg_c),
+                self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
+            )
         if self._module is None:
             err_msg = err_msg_c.value.decode("utf-8")
             LIB.openmpt_free_string(err_msg_c)
