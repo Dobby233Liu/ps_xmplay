@@ -5,6 +5,7 @@ import os
 import io
 import sys
 from typing import Any, Self
+import traceback
 
 """
 Very incomplete libopenmpt interop
@@ -73,6 +74,7 @@ class _StreamCallbacks(Structure):
         try:
             self._stream.seek(pos, whence)
         except OSError:
+            traceback.print_exc()
             return -1
         return 0
 
@@ -83,6 +85,7 @@ class _StreamCallbacks(Structure):
         try:
             return self._stream.tell()
         except OSError:
+            traceback.print_exc()
             return -1
 
 
