@@ -2,6 +2,7 @@ from ctypes import *
 import enum
 import os
 import io
+import sys
 from typing import Any, Self
 import types
 
@@ -22,7 +23,7 @@ if not LIB:
     raise OSError("Please install libopenmpt")
 
 
-LOG_CB = CFUNCTYPE(None, c_void_p, c_void_p)
+LOG_CB = CFUNCTYPE(None, c_char_p, c_void_p)
 
 class ErrorFuncResult(enum.IntEnum):
     DoNothing = 0
@@ -267,12 +268,11 @@ class Module():
         if self._module is not None:
             LIB.openmpt_module_destroy(self._module)
 
-    def _log(self, message: int, user: c_void_p):
-        message = cast(message, c_void_p)
-        print(cast(message, c_char_p).value.decode("utf-8"))
+    def _log(self, message: bytes, user: c_void_p):
+        print(message.decode("utf-8"), file=sys.stderr)
 
     def _err(self, code: c_int, user: c_void_p) -> c_int:
-        return ErrorFuncResult.Default.value
+        return ErrorFuncResult.Store.value
 
     def _raise_last_error(self):
         assert self._module is not None
