@@ -46,10 +46,11 @@ def main():
                     lib_psf.write(libf)
 
             if os.path.exists(path_timing):
-                mod = libopenmpt.Module(open(path_timing, "rb"), {
-                    "load.skip_samples": True,
-                    "play.at_end": "stop"
-                })
+                with open(path_timing, "rb") as mod_f:
+                    mod = libopenmpt.Module(mod_f, {
+                        "load.skip_samples": True,
+                        "play.at_end": "stop"
+                    })
 
             bank_info[info["xm"]] = (lib, lib_fn, mod)
 

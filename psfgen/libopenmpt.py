@@ -92,10 +92,6 @@ class _StreamCallbacks(Structure):
 
         return self
 
-    def __del__(self):
-        if self._stream is not None and not self._stream.closed:
-            self._stream.close()
-
 
 c_openmpt_module = c_void_p # it's some kind of struct alright
 
@@ -248,13 +244,13 @@ class Module():
 
     def __init__(self, stream: io.BytesIO, initial_ctls: dict[str, str|float|int|bool] = None) -> None:
         self._hash_ptr = pointer(c_int(id(self)))
-        self._stream_cb = _StreamCallbacks.from_stream(stream)
         self._log_cb = LOG_CB(self._log)
         self._err_cb = ERR_CB(self._err)
 
         self._module = None
+        stream_cb = _StreamCallbacks.from_stream(stream)
         self._module = LIB.openmpt_module_create2(
-            self._stream_cb, self._stream_cb.hash_ptr,
+            stream_cb, stream_cb.hash_ptr,
             self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
             None, None,
             self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
