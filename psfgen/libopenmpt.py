@@ -59,7 +59,7 @@ class _StreamCallbacks(Structure):
             self._stream.close()
 
 
-openmpt_module = c_void_p # it's some kind of struct alright
+c_openmpt_module = c_void_p # it's some kind of struct alright
 
 LIB.openmpt_module_create2.argtypes = [
     _StreamCallbacks, c_void_p,
@@ -68,12 +68,12 @@ LIB.openmpt_module_create2.argtypes = [
     POINTER(c_int), c_char_p,
     c_void_p
 ]
-LIB.openmpt_module_create2.restype = openmpt_module
+LIB.openmpt_module_create2.restype = c_openmpt_module
 
-LIB.openmpt_module_destroy.argtypes = [openmpt_module]
+LIB.openmpt_module_destroy.argtypes = [c_openmpt_module]
 
 
-LIB.openmpt_module_error_clear.argtypes = [openmpt_module]
+LIB.openmpt_module_error_clear.argtypes = [c_openmpt_module]
 
 class OpenMPTException(Exception):
     def __init__(self, message: str, code: int) -> None:
@@ -81,54 +81,54 @@ class OpenMPTException(Exception):
         self.code = code
 
 
-LIB.openmpt_module_get_current_order.argtypes = [openmpt_module]
+LIB.openmpt_module_get_current_order.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_current_order.restype = c_int32
-LIB.openmpt_module_get_current_row.argtypes = [openmpt_module]
+LIB.openmpt_module_get_current_row.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_current_row.restype = c_int32
-LIB.openmpt_module_set_position_order_row.argtypes = [openmpt_module, c_int32, c_int32]
+LIB.openmpt_module_set_position_order_row.argtypes = [c_openmpt_module, c_int32, c_int32]
 LIB.openmpt_module_set_position_order_row.restype = c_double
 
 
-LIB.openmpt_module_get_duration_seconds.argtypes = [openmpt_module]
+LIB.openmpt_module_get_duration_seconds.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_duration_seconds.restype = c_double
 
 
-LIB.openmpt_module_ctl_get_boolean.argtypes = [openmpt_module, c_char_p]
+LIB.openmpt_module_ctl_get_boolean.argtypes = [c_openmpt_module, c_char_p]
 LIB.openmpt_module_ctl_get_boolean.restype = c_bool
-LIB.openmpt_module_ctl_get_floatingpoint.argtypes = [openmpt_module, c_char_p]
+LIB.openmpt_module_ctl_get_floatingpoint.argtypes = [c_openmpt_module, c_char_p]
 LIB.openmpt_module_ctl_get_floatingpoint.restype = c_double
-LIB.openmpt_module_ctl_get_integer.argtypes = [openmpt_module, c_char_p]
+LIB.openmpt_module_ctl_get_integer.argtypes = [c_openmpt_module, c_char_p]
 LIB.openmpt_module_ctl_get_integer.restype = c_int64
-LIB.openmpt_module_ctl_get_text.argtypes = [openmpt_module, c_char_p]
+LIB.openmpt_module_ctl_get_text.argtypes = [c_openmpt_module, c_char_p]
 LIB.openmpt_module_ctl_get_text.restype = c_char_p
 
 LIB.openmpt_free_string.argtypes = [c_char_p]
 
-LIB.openmpt_module_ctl_set_boolean.argtypes = [openmpt_module, c_char_p, c_bool]
+LIB.openmpt_module_ctl_set_boolean.argtypes = [c_openmpt_module, c_char_p, c_bool]
 LIB.openmpt_module_ctl_get_boolean.restype = c_bool
-LIB.openmpt_module_ctl_set_floatingpoint.argtypes = [openmpt_module, c_char_p, c_double]
+LIB.openmpt_module_ctl_set_floatingpoint.argtypes = [c_openmpt_module, c_char_p, c_double]
 LIB.openmpt_module_ctl_set_floatingpoint.restype = c_bool
-LIB.openmpt_module_ctl_set_integer.argtypes = [openmpt_module, c_char_p, c_int64]
+LIB.openmpt_module_ctl_set_integer.argtypes = [c_openmpt_module, c_char_p, c_int64]
 LIB.openmpt_module_ctl_set_integer.restype = c_bool
-LIB.openmpt_module_ctl_set_text.argtypes = [openmpt_module, c_char_p, c_char_p]
+LIB.openmpt_module_ctl_set_text.argtypes = [c_openmpt_module, c_char_p, c_char_p]
 LIB.openmpt_module_ctl_set_text.restype = c_bool
 
 
-LIB.openmpt_module_get_num_subsongs.argtypes = [openmpt_module]
+LIB.openmpt_module_get_num_subsongs.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_num_subsongs.restype = c_int32
-LIB.openmpt_module_get_selected_subsong.argtypes = [openmpt_module]
+LIB.openmpt_module_get_selected_subsong.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_selected_subsong.restype = c_int32
-LIB.openmpt_module_select_subsong.argtypes = [openmpt_module, c_int32]
+LIB.openmpt_module_select_subsong.argtypes = [c_openmpt_module, c_int32]
 LIB.openmpt_module_select_subsong.restype = c_bool
 
 
-LIB.openmpt_module_get_repeat_count.argtypes = [openmpt_module]
+LIB.openmpt_module_get_repeat_count.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_repeat_count.restype = c_int32
-LIB.openmpt_module_set_repeat_count.argtypes = [openmpt_module, c_int32]
+LIB.openmpt_module_set_repeat_count.argtypes = [c_openmpt_module, c_int32]
 LIB.openmpt_module_set_repeat_count.restype = c_bool
 
 
-LIB.openmpt_module_read_mono.argtypes = [openmpt_module, c_int32, c_size_t, POINTER(c_int16)]
+LIB.openmpt_module_read_mono.argtypes = [c_openmpt_module, c_int32, c_size_t, POINTER(c_int16)]
 LIB.openmpt_module_read_mono.restype = c_size_t
 
 
