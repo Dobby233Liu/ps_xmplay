@@ -198,7 +198,6 @@ class Module():
                 case "boolean": value = LIB.openmpt_module_ctl_get_boolean(self._module._module, key.encode("utf-8"))
                 case "floatingpoint": value = LIB.openmpt_module_ctl_get_floatingpoint(self._module._module, key.encode("utf-8"))
                 case "integer": value = LIB.openmpt_module_ctl_get_integer(self._module._module, key.encode("utf-8"))
-                # FIXME: free these
                 case "text":
                     ptr = cast(LIB.openmpt_module_ctl_get_text(self._module._module, key.encode("utf-8")), c_void_p)
                     value = cast(ptr, c_char_p).value.decode("utf-8")
