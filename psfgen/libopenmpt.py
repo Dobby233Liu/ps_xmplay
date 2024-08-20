@@ -47,13 +47,13 @@ class _StreamCallbacks(Structure):
 
     _stream: io.BytesIO
 
-    def __init__(self) -> None:
+    def __init__(self, stream: io.BytesIO) -> None:
         super().__init__()
 
         self.hash = c_int(id(self))
         self.hash_ptr = pointer(self.hash)
 
-        self._stream = None
+        self._stream = stream
 
         self._read = openmpt_stream_read_func(self._read_impl)
         self._seek = openmpt_stream_seek_func(self._seek_impl)
@@ -83,14 +83,6 @@ class _StreamCallbacks(Structure):
             return self._stream.tell()
         except OSError:
             return -1
-
-    @classmethod
-    def from_stream(cls, stream: io.BytesIO):
-        self = cls()
-
-        self._stream = stream
-
-        return self
 
 
 c_openmpt_module = c_void_p # it's some kind of struct alright
@@ -248,7 +240,7 @@ class Module():
         self._err_cb = ERR_CB(self._err)
 
         self._module = None
-        stream_cb = _StreamCallbacks.from_stream(stream)
+        stream_cb = _StreamCallbacks(stream)
         self._module = LIB.openmpt_module_create2(
             stream_cb, stream_cb.hash_ptr,
             self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
