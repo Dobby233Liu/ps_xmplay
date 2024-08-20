@@ -62,15 +62,18 @@ def make_patched_songinfo(exe: lief.ELF.Binary, type: XMType, loop: bool, positi
 
     return song_info, info_struct
 
+def _make_psf_patch_lib(exe: lief.ELF.Binary,
+                 type: XMType, loop: bool, position: int, panning_type: XMPanningType) -> psf.PSF1:
+    song_info, info = make_patched_songinfo(exe, type, loop, position, panning_type)
+    exe.patch_address(song_info.value, list(bytes(info)))
+
+    return make_psflib_psf(exe)
+
 def make_psf(xm: str,
                  type: XMType, loop: bool, position: int, panning_type: XMPanningType,
-                 xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> psf.PSF1:
+                 xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> Union[lief.ELF.Binary, psf.PSF1]:
     exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
-
-    song_info, info = make_patched_songinfo(exe, type, loop, position, panning_type)
-    exe.patch_address(song_info.value, bytes(info))
-
-    return exe, make_psflib_psf(exe)
+    return exe, _make_psf_patch_lib(exe, type, loop, position, panning_type)
 
 def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
                  type: XMType, loop: bool, position: int, panning_type: XMPanningType):
