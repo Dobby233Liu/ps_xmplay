@@ -1,10 +1,10 @@
 from ctypes import *
+import ctypes
 import enum
 import os
 import io
 import sys
 from typing import Any, Self
-import types
 
 """
 Very incomplete libopenmpt interop
@@ -227,7 +227,7 @@ class Module():
                 self._module._raise_last_error()
 
     @classmethod
-    def _build_initial_ctls(cls, ctls: dict[str, str|float|int|bool]) -> c_void_p:
+    def _build_initial_ctls(cls, ctls: dict[str, str|float|int|bool]) -> ctypes._Pointer:
         initial_ctls = (_InitialCtl * (len(ctls) + 1))()
 
         for i, (ctl, value) in enumerate(ctls.items()):
@@ -243,7 +243,7 @@ class Module():
         initial_ctls[-1].ctl = None
         initial_ctls[-1].value = None
 
-        return pointer(initial_ctls)
+        return cast(pointer(initial_ctls), POINTER(_InitialCtl))
 
 
     def __init__(self, stream: io.BytesIO, initial_ctls: dict[str, str|float|int|bool] = None) -> None:
@@ -257,7 +257,7 @@ class Module():
             self._stream_cb, self._stream_cb.hash_ptr,
             self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
             None, None,
-            cast(self._build_initial_ctls(initial_ctls), POINTER(_InitialCtl)) if initial_ctls is not None else None
+            self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
         )
         if self._module is None:
             self._raise_last_error()
