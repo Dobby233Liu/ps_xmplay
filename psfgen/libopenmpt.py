@@ -2,7 +2,8 @@ from ctypes import *
 import enum
 import os
 import io
-from typing import Any
+from typing import Any, Self
+import types
 
 """
 Very incomplete libopenmpt interop
@@ -32,34 +33,71 @@ class ErrorFuncResult(enum.IntEnum):
 ERR_CB = CFUNCTYPE(c_int, c_int, c_void_p)
 
 
+openmpt_stream_read_func = CFUNCTYPE(c_size_t, c_void_p, c_void_p, c_size_t)
+openmpt_stream_seek_func = CFUNCTYPE(c_int, c_void_p, c_int64, c_int)
+openmpt_stream_tell_proc = CFUNCTYPE(c_int64, c_void_p)
+
 class _StreamCallbacks(Structure):
-    _read_proc = CFUNCTYPE(c_size_t, c_void_p, c_void_p, c_size_t)
-    _seek_proc = CFUNCTYPE(c_int, c_void_p, c_int64, c_int)
-    _tell_proc = CFUNCTYPE(c_int64, c_void_p)
     _fields_ = [
-        ("_read", _read_proc),
-        ("_seek", _seek_proc),
-        ("_tell", _tell_proc)
+        ("_read", openmpt_stream_read_func),
+        ("_seek", openmpt_stream_seek_func),
+        ("_tell", openmpt_stream_tell_proc)
     ]
 
     _stream: io.BytesIO
 
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.hash = c_int(id(self))
+        self.hash_ptr = pointer(self.hash)
+
+        self._stream = None
+
+        self._read = openmpt_stream_read_func(self._read_impl)
+        self._seek = openmpt_stream_seek_func(self._seek_impl)
+        self._tell = openmpt_stream_tell_proc(self._tell_impl)
+
+    def _read_impl(self: Self, ptr: int, dst: c_void_p, size: c_size_t) -> c_size_t:
+        if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
+            raise ValueError("Invalid stream pointer")
+
+        return self._stream.readinto((c_char * size).from_address(dst))
+
+    def _seek_impl(self: Self, ptr: int, pos: c_int64, whence: c_int) -> c_int:
+        if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
+            raise ValueError("Invalid stream pointer")
+
+        try:
+            self._stream.seek(pos, whence)
+        except OSError:
+            return -1
+        return 0
+
+    def _tell_impl(self: Self, ptr: int) -> c_int64:
+        if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
+            raise ValueError("Invalid stream pointer")
+
+        try:
+            return self._stream.tell()
+        except OSError:
+            return -1
+
     @classmethod
     def from_stream(cls, stream: io.BytesIO):
         self = cls()
+
         self._stream = stream
 
-        self._read = cls._read_proc(lambda ptr, dst, size: stream.readinto((c_char * size).from_address(dst)))
-        self._seek = cls._seek_proc(lambda ptr, pos, whence: stream.seek(pos, whence))
-        self._tell = cls._tell_proc(lambda ptr: stream.tell())
         return self
 
     def __del__(self):
-        if not self._stream.closed:
+        if self._stream is not None and not self._stream.closed:
             self._stream.close()
 
 
 c_openmpt_module = c_void_p # it's some kind of struct alright
+
 
 LIB.openmpt_module_create2.argtypes = [
     _StreamCallbacks, c_void_p,
@@ -175,13 +213,14 @@ class Module():
     def __init__(self, stream: io.BytesIO) -> None:
         self._last_error_ptr = pointer(c_int(0))
         self._last_error_msg_ptr = create_string_buffer(512)
-        self._hash_ptr = pointer(c_int(hash(self)))
+        self._hash_ptr = pointer(c_int(id(self)))
         self._stream_cb = _StreamCallbacks.from_stream(stream)
         self._log_cb = LOG_CB(self._log)
         self._err_cb = ERR_CB(self._err)
 
+        self._module = None
         self._module = LIB.openmpt_module_create2(
-            self._stream_cb, self._hash_ptr,
+            self._stream_cb, self._stream_cb.hash_ptr,
             self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
             self._last_error_ptr, self._last_error_msg_ptr,
             None # any ctl would have to be configured later
@@ -192,7 +231,8 @@ class Module():
         self.ctl = self._Ctl(self)
 
     def __del__(self):
-        LIB.openmpt_module_destroy(self._module)
+        if self._module is not None:
+            LIB.openmpt_module_destroy(self._module)
 
     def _log(self, message: c_char_p, user: c_void_p):
         print(message.decode("utf-8"))
