@@ -79,10 +79,11 @@ def main():
                 psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:
                 psf1 = modify_driver._make_psf_patch_lib(lib, sound_type, loop, info.get("position", 0), panning_type)
-            psf1.tags["origfilename"] = song_name
             if song_length:
                 psf1.tags["length"] = song_length
             psf1.tags["fade"] = info.get("fade", 10) if loop else 0
+            psf1.tags["psfby"] = "ps_xmplay psfgen"
+            psf1.tags["origfilename"] = song_name
             psf1.write(outf)
 
 if __name__ == "__main__":
