@@ -1,4 +1,4 @@
-from lump import GAZ
+from lump import BigLump
 import itertools
 
 
@@ -7,9 +7,9 @@ VAB_MAGIC = b'pBAV'
 
 
 with open("debiglump/BIGLUMP.BIN", "rb") as bls:
-    bl = GAZ.from_stream(bls)
+    bl = BigLump.from_stream_guess_fat_size(bls)
 
-    for id, fat in enumerate(itertools.chain(bl.fat_immediate, bl.fat_streamed)):
+    for id, fat in enumerate(bl.fat):
         if fat.size == 0: continue
         ext = "bin"
         initial_four = fat.read(bls, len(VAB_MAGIC))
