@@ -190,15 +190,13 @@ class Module():
                 case "load.skip_samples": item_type = "boolean"
                 case "play.at_end": item_type = "text"
 
-            if item_type is None: # ffs do i have to guess the ctl type
-                raise NotImplementedError()
-
             value = None
             match item_type:
                 case "boolean": value = LIB.openmpt_module_ctl_get_boolean(self._module._module, key.encode("utf-8"))
                 case "floatingpoint": value = LIB.openmpt_module_ctl_get_floatingpoint(self._module._module, key.encode("utf-8"))
                 case "integer": value = LIB.openmpt_module_ctl_get_integer(self._module._module, key.encode("utf-8"))
                 case "text": value = LIB.openmpt_module_ctl_get_text(self._module._module, key.encode("utf-8")).decode("utf-8")
+                case _: value = LIB.openmpt_module_ctl_get(self._module._module, key.encode("utf-8")).decode("utf-8")
             if value is None:
                 self._module._raise_last_error()
             return value
