@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include <common/syscalls/syscalls.h>
 #include <malloc3.h>
 #include <video.h>
@@ -20,6 +21,7 @@ static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)];
 
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
+// FIXME: nonfunctional
 int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int vab_id = XM_GetFreeVAB();
     if (vab_id == -1) return -1;
@@ -111,15 +113,20 @@ void main() {
     );
     assert(song_id != -1, "song init failed");
 
+    // Apparantly it can't be known if an once-off song is finished through
+    // the feedback struct
+    /*XM_Feedback feedback;
+    XM_GetFeedback(song_id, &feedback);*/
+
 #ifndef XMPLAY_WORSE_TIMING
     VSyncCallback(XM_Update);
-    while (1)
+    while (true)
         asm("");
 #else
-#ifndef XM_Update2
+#ifndef XMPLAY_VARIANT_SBSPSS
 #error Only the SBSPSS version of xmplay.lib include XM_Update2, which is necessary for this hack to function
 #endif
-    while (1) {
+    while (true) {
         XM_Update2(2);
         VSync(0);
     }

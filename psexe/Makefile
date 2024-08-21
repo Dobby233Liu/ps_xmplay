@@ -13,6 +13,7 @@ include song.mk
 endif
 
 XMPLAY_VARIANT ?= sbspss
+XMPLAY_WORSE_TIMING ?=
 
 SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
 
@@ -38,7 +39,9 @@ endif
 
 ifeq ($(XMPLAY_VARIANT),sbspss)
 CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
-#CPPFLAGS += -DXMPLAY_WORSE_TIMING # HACK regret this
+ifneq ($(XMPLAY_WORSE_TIMING),)
+CPPFLAGS += -DXMPLAY_WORSE_TIMING # HACK regret this
+endif
 endif
 ifeq ($(XMPLAY_VARIANT),redriver2)
 CPPFLAGS += -DXMPLAY_VARIANT_REDRIVER2

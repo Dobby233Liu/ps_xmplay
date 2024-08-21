@@ -27,18 +27,15 @@ class PSFTags(collections.UserDict):
                 seconds = value
             elif isinstance(value, int):
                 seconds = float(value)
-            if seconds < 60:
-                return f"{seconds:06.3f}"
-            elif seconds < 3600:
-                minutes = seconds // 60
-                seconds -= minutes * 60
-                return f"{floor(minutes):02}:{seconds:06.3f}"
+
+            m, s = divmod(seconds, 60)
+            h, m = divmod(m, 60)
+            if h > 0:
+                return f"{int(h)}:{int(m):02}:{s:06.3f}"
+            elif m > 0:
+                return f"{int(m):02}:{s:06.3f}"
             else:
-                hours = seconds // 3600
-                seconds -= hours * 3600
-                minutes = seconds // 60
-                seconds -= minutes * 60
-                return f"{floor(hours):02}:{floor(minutes):02}:{seconds:06.3f}"
+                return f"{s:06.3f}"
 
         return str(value)
 

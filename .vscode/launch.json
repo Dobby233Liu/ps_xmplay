@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Generate Set",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "psfgen/gen.py",
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Debug Driver",
       "type": "gdb",
       "request": "attach",

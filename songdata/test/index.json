@@ -2,18 +2,21 @@
     "megalovania": {
         "xm": "megalovania",
         "position": 0,
-        "rough_xm_subsong": 0
+        "rough_xm_subsong": 0,
+        "worse_timing": true
     },
     "friendinsideme_youvegota": {
         "xm": "friendinsideme",
         "position": 0,
-        "rough_xm_subsong": 0
+        "rough_xm_subsong": 0,
+        "xmplay_variant": "46"
     },
     "friendinsideme_friendinsideme": {
         "xm": "friendinsideme",
         "position": 10,
         "rough_xm_subsong": 1,
-        "loop": false
+        "loop": false,
+        "xmplay_variant": "46"
     },
     "revx": {
         "xm": "revx",
@@ -36,6 +39,7 @@
         "xm": "viraxor_-_a_cube_made_of_circles",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop": false
+        "loop": false,
+        "xmplay_variant": "46"
     }
 }

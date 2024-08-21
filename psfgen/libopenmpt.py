@@ -142,6 +142,11 @@ LIB.openmpt_module_set_position_order_row.restype = c_double
 LIB.openmpt_module_get_duration_seconds.argtypes = [c_openmpt_module]
 LIB.openmpt_module_get_duration_seconds.restype = c_double
 
+LIB.openmpt_module_get_position_seconds.argtypes = [c_openmpt_module]
+LIB.openmpt_module_get_position_seconds.restype = c_double
+LIB.openmpt_module_set_position_seconds.argtypes = [c_openmpt_module, c_double]
+LIB.openmpt_module_set_position_seconds.restype = c_double
+
 
 LIB.openmpt_module_ctl_get.argtypes = [c_openmpt_module, c_char_p]
 LIB.openmpt_module_ctl_get.restype = c_void_p
@@ -317,6 +322,14 @@ class Module():
     def current_row(self, value: int) -> None:
         LIB.openmpt_module_set_position_order_row(self._module, self.current_order, value)
 
+    @property
+    def position_seconds(self) -> int:
+        return LIB.openmpt_module_get_position_seconds(self._module)
+
+    @current_row.setter
+    def position_seconds(self, value: int) -> None:
+        LIB.openmpt_module_set_position_seconds(self._module, value)
+
 
     @property
     def length(self) -> float:
@@ -349,7 +362,7 @@ class Module():
 
     # i'm sorry
     def estimate_duration(self) -> float:
-        sample_rate = 44100
+        sample_rate = 48000
         sample_buffer = (c_int16 * 1024)()
         total_samples = 0
 

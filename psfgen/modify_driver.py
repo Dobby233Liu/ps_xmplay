@@ -33,8 +33,12 @@ def _load_driver() -> lief.ELF.Binary:
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
     return elf
 
-def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> lief.ELF.Binary:
-    subprocess.run(["make", "-C", "psexe", "BUILD=LTO", "XM_BUILTIN=true", f"XMPLAY_VARIANT={xmplay_variant}", f"XM_DIR={xm_dir}", f"XM={xm}", "clean", "all"], check=True)
+def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss", worse_timing: Optional[bool] = False) -> lief.ELF.Binary:
+    subprocess.run(["make", "-C", "psexe", "BUILD=LTO",
+                    "XM_BUILTIN=true",
+                    f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
+                    f"XM_DIR={xm_dir}", f"XM={xm}",
+                    "clean", "all"], check=True)
     return _load_driver()
 
 def make_psflib_psf(exe: lief.ELF.Binary):
@@ -43,8 +47,8 @@ def make_psflib_psf(exe: lief.ELF.Binary):
         psf1.program = p.read()
     return psf1
 
-def make_psflib(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> Union[lief.ELF.Binary, psf.PSF1]:
-    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
+def make_psflib(xm: str, xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss", worse_timing: Optional[bool] = False) -> Union[lief.ELF.Binary, psf.PSF1]:
+    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant, worse_timing)
     return exe, make_psflib_psf(exe)
 
 
@@ -71,8 +75,9 @@ def _make_psf_patch_lib(exe: lief.ELF.Binary,
 
 def make_psf(xm: str,
                  type: XMType, loop: bool, position: int, panning_type: XMPanningType,
-                 xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss") -> Union[lief.ELF.Binary, psf.PSF1]:
-    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
+                 xm_dir: Optional[str] = "songdata", xmplay_variant: Optional[str] = "sbspss",
+                 worse_timing: Optional[bool] = False) -> Union[lief.ELF.Binary, psf.PSF1]:
+    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant, worse_timing)
     return exe, _make_psf_patch_lib(exe, type, loop, position, panning_type)
 
 def make_minipsf(lib: lief.ELF.Binary, lib_fn: str,
