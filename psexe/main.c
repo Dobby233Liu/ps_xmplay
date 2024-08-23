@@ -15,7 +15,7 @@
 
 static unsigned char heap[0x20000] = {0};
 
-#define MAX_SPU_BANKS 200 // in sync with SBSPSS
+#define MAX_SPU_BANKS 128 // realistic number; SBSPSS uses 200
 static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
@@ -70,13 +70,13 @@ void main() {
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
-#ifdef XMPLAY_VARIANT_REDRIVER2
+/*
     // clear SPU memory
     SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
     SpuSetTransferStartAddr(0);
     SpuWrite0(512 * 1024);
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
-#endif
+*/
 
 #ifndef XMPLAY_WORSE_TIMING
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
@@ -121,9 +121,6 @@ void main() {
     while (true)
         asm("");
 #else
-#ifndef XMPLAY_VARIANT_SBSPSS
-#error Only the SBSPSS version of xmplay.lib include XM_Update2, which is necessary for this hack to function
-#endif
     while (true) {
         XM_Update();
         VSync(0);

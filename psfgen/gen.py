@@ -7,7 +7,7 @@ import lief
 import sys
 
 
-SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "retail"
+SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "may14"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "redriver2"
 
 
