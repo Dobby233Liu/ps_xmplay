@@ -15,6 +15,8 @@ XMPLAY.C
 #include "xmplay.h"
 #include "xmcalls.h"
 
+//#define SOME_KIND_OF_DREAM
+
 /**** PSX SPECIFIC ****/
 
 SpuVoiceAttr xm_g_s_attr; 		/* Structure for individual voice attributes*/
@@ -276,11 +278,7 @@ JPGetPeriod
 *****************************************************************************/
 u_short JPGetPeriod(u_char note, short fine)
 {
-#ifdef SOME_KIND_OF_DREAM
-	return ((120 - note) << 6) - (fine / 2);
-#else
 	return ((120 - note) << 6) - (fine / 2) + 64;
-#endif
 }
 
 
@@ -2579,11 +2577,7 @@ GetFreq2
 #define joc 8
 //int JPPer = 6578;	//6578  D1 has this value and game were shipped with broken soundtrack
 
-#ifdef SOME_KIND_OF_DREAM
-int JPPer = 7286;	//6578
-#else
 int JPPer = 7350;	//6578
-#endif
 
 long GetFreq2(long period)
 {
