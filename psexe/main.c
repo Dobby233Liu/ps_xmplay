@@ -83,9 +83,6 @@ void main() {
 #endif
 
     XM_OnceOffInit(GetVideoMode());
-#ifndef XMPLAY_VARIANT_REDRIVER2
-    XM_SetStereo();
-#endif
 
     uint8_t *song_addr = malloc(XM_GetSongSize());
     XM_SetSongAddress(song_addr);
