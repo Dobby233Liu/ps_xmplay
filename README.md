@@ -56,9 +56,9 @@ Output goes in out/ folder
 ## Flaws
 
 Compatibility is spotty.
-> yes go: mednafen (foo_input_mdfnpsf and standalone), pcsx-redux, highly experimental
+> yes go: mednafen (foo_input_mdfnpsf and standalone), duckstation, pcsx-redux, highly experimental
 >
-> no go: ~~duckstation~~ (got better since 0febdd8), play!
+> no go: play!
 >
 > cant load binaries with nocash and psxfin so dunno
 
