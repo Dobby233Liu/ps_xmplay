@@ -41,7 +41,6 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
             continue;
         long vag_spu_addr = SpuMalloc(true_size);
         assert(vag_spu_addr != 0, "vag malloc failed");
-        ramsyscall_printf("%d %u(%d) -> %u\n", slot, cur_vag_data_ptr, true_size, vag_spu_addr);
 
         SpuSetTransferStartAddr(vag_spu_addr);
         SpuWrite(cur_vag_data_ptr, true_size);
