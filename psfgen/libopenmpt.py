@@ -258,7 +258,6 @@ class Module():
         self._err_cb = ERR_CB(self._err)
 
         self._module = None
-        stream_cb = _StreamCallbacks(stream)
         err = c_int()
         err_msg_c = c_char_p()
         if read_stream_into_memory:
@@ -270,6 +269,7 @@ class Module():
                 self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
             )
         else:
+            stream_cb = _StreamCallbacks(stream)
             self._module = LIB.openmpt_module_create2(
                 stream_cb, stream_cb.hash_ptr,
                 self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
