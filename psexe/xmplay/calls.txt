@@ -46,7 +46,7 @@ void InitXMData(XMData,XM_ID,PanType);
 		Nothing.
 
 ----------------------------------------------------------------------------
-int XM_Init (VabID,XM_ID,FirstChannel,Loop,PlayMask,SongType,SFXPatternNum);
+int XM_Init (VabID,XM_ID,Song_ID,FirstChannel,Loop,PlayMask,SongType,SFXPatternNum);
 
 	Description:
 				Play a Song or SFX
@@ -54,6 +54,7 @@ int XM_Init (VabID,XM_ID,FirstChannel,Loop,PlayMask,SongType,SFXPatternNum);
 	Requres:
 		VabID		ID returned from XM_VABInit
 		XM_ID		So we know what XM file to use.(0-7)
+		Song_ID		The ID you would like the song to be allocated to
 		FirstChannel	1) First channel to playback on (setting
 				   this to 5, with a 4 channel song, would
 				   use SPU channels 5,6,7,8)
