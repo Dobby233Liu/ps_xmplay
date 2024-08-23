@@ -276,7 +276,11 @@ JPGetPeriod
 *****************************************************************************/
 u_short JPGetPeriod(u_char note, short fine)
 {
-	return((10L * 12 * 16 * 4) - ((u_short)note * 16 * 4) - (fine / 2) + 64);
+#ifdef SOME_KIND_OF_DREAM
+	return ((120 - note) << 6) - (fine / 2);
+#else
+	return ((120 - note) << 6) - (fine / 2) + 64;
+#endif
 }
 
 
@@ -868,6 +872,7 @@ u_char dat=0;
 			break;
 
 		case 0xe:
+			// TODO
 			if(vol&0xf)
 				DoXMPanSlide(vol<<4);		/* Pan slide right */
 			break;
@@ -891,22 +896,39 @@ u_char dat=0;
 				break;
 
 			case 'H'-55:                    /* H - global volume slide */
-				// UNIMPLEMENTED
+#ifdef SOME_KIND_OF_DREAM
+				if (dat==0)
+					dat=ms->oldvslide;
+				ms->oldvslide=dat;
+				DoGlobalVolSlide(dat);
+#endif
 				break;
 
 			case 'K'-55:                    /* K - keyoff */
 				// UNIMPLEMENTED: After xx ticks
-				SetNote(96);
+#ifdef SOME_KIND_OF_DREAM
+				if(!ms->vbtick)
+#endif
+					SetNote(96);
 				break;
 
 			case 'L'-55:                    /* L - set envelope position */
-				// UNIMPLEMENTED
+#ifdef SOME_KIND_OF_DREAM
+				if(!ms->vbtick)
+				{
+					XMC->envp = dat; // whatever
+					if (XMC->envflg & EF_SUSTAIN)
+						XMC->panenvp = dat;
+				}
+#endif
 				break;
 
 			case 'P'-55:                    /* P - panning slide */
-				// UNIMPLEMENTED
+#ifdef SOME_KIND_OF_DREAM
+				DoXMPanSlide(dat);
+#else
 				XMC->panning=dat;
-//				DoXMPanSlide(dat);
+#endif
 				break;
 
 			case 'R'-55:                    /* R - multi retrig note */
@@ -918,7 +940,25 @@ u_char dat=0;
 				break;
 
 			case 'X'-55:
-				// UNIMPLEMENTED
+#ifdef SOME_KIND_OF_DREAM
+				u_char hi = dat>>4;
+				if (hi > 2) break;
+				if (ms->vbtick)
+					break;
+				u_char nib = dat&0xf;
+				if (nib == 0)
+					nib = XMC->oldfslidex;
+				XMC->oldfslidex = nib;
+				switch(hi)
+				{
+					case 1: // Extra Fine Portamento Up
+						XMC->tmpperiod -= nib;
+						break;
+					case 2: // Extra Fine Portamento Down
+						XMC->tmpperiod += nib;
+						break;
+				}
+#endif
 				break;
 
 			default:
@@ -1134,7 +1174,11 @@ void DoEEffects(u_char dat)
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
+#ifdef SOME_KIND_OF_DREAM
+			XMC->tmpperiod -= (nib << 2);
+#else
 			XMC->tmpperiod += (nib << 2);
+#endif
 		}
 		break;
 
@@ -1144,7 +1188,11 @@ void DoEEffects(u_char dat)
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
+#ifdef SOME_KIND_OF_DREAM
+			XMC->tmpperiod += (nib << 2);
+#else
 			XMC->tmpperiod -= (nib << 2);
+#endif
 		}
 
 		break;
@@ -1159,7 +1207,9 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINETUNE:			/* 5 Set finetune */
-		// UNIMPLEMENTED
+#ifdef SOME_KIND_OF_DREAM
+		XMC->ovrfine = (nib + 0x80) & 0xff;
+#endif
 		break;
 
 	case XMEF_E_PATLOOP:				/* 6 Set patternloop */
@@ -1276,6 +1326,9 @@ void SetNote(u_char note)
 	if (note == 96)
 	{
 		XMC->keyon = 0;
+#ifdef SOME_KIND_OF_DREAM
+		XMC->ovrfine = 0;
+#endif
 		if (XMC->sample == 254)
 		{
 			XMC->tmpvolume = 64;			/* Force 0 vol if no envelope used */
@@ -1367,6 +1420,9 @@ void SetInstr(u_char inst)
 	ddd += 128;
 	XMC->c2spd = ddd;
 	XMC->c2spd &= 255;
+#ifdef SOME_KIND_OF_DREAM
+	XMC->ovrfine = 0;
+#endif
 
 }
 
@@ -1391,7 +1447,11 @@ void SetPer(void)
 
 	//	a+=jtt;
 
+#ifdef SOME_KIND_OF_DREAM
+	period = GetPeriod(a, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
+#else
 	period = GetPeriod(a, XMC->c2spd);
+#endif
 	//if (XMC->sample==5)
 	//FntPrint("%d,%d,%d=%d\n",XMC->note,XMC->transpose,a,period);
 
@@ -1464,7 +1524,11 @@ void Arpeggio(u_char dat)
 			note += (dat & 0xf);
 			break;
 		}
+#ifdef SOME_KIND_OF_DREAM
+		XMC->period = GetPeriod(note + XMC->transpose, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
+#else
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->c2spd);
+#endif
 		XMC->ownper = 1;
 	}
 }
@@ -1485,6 +1549,23 @@ void DoVolSlide(u_char dat)
 	XMC->tmpvolume -= dat & 0xf;
 	if (XMC->tmpvolume < 64) XMC->tmpvolume = 64;
 }
+
+#ifdef SOME_KIND_OF_DREAM
+/*****************************************************************************
+DoGlobalVolSlide
+	EFFECT - Either +/- 0-0xf to volume
+*****************************************************************************/
+
+void DoGlobalVolSlide(u_char dat)
+{
+	if (!ms->vbtick) return;				 /* do not update when vbtick==0 */
+	// FIXME
+	ms->SongVolume += dat >> 4;           /* volume slide */
+	if (ms->SongVolume > 128) ms->SongVolume = 128;
+	ms->SongVolume -= dat & 0xf;
+	if (ms->SongVolume < 64) ms->SongVolume = 64;
+}
+#endif
 
 
 
@@ -2498,7 +2579,11 @@ GetFreq2
 #define joc 8
 //int JPPer = 6578;	//6578  D1 has this value and game were shipped with broken soundtrack
 
+#ifdef SOME_KIND_OF_DREAM
+int JPPer = 7286;	//6578
+#else
 int JPPer = 7350;	//6578
+#endif
 
 long GetFreq2(long period)
 {
@@ -2690,6 +2775,9 @@ int t;
 	{
 		XMCU=&mu->XM_Chnl[t];
 		XMCU->keyon=0;
+#ifdef SOME_KIND_OF_DREAM
+		XMCU->ovrfine = 0;
+#endif
 		XMCU->tmpvolume=64;
 
 		//if(XMCU->sample!=254)

@@ -1,5 +1,4 @@
-#ifndef XMPLAY_H
-#define XMPLAY_H
+#pragma once
 
 #define XM_NTSC 0				/* Machine type */
 #define XM_PAL 1
@@ -94,6 +93,7 @@ typedef struct _XMCHANNEL {
 	u_char oldvslide;
 	u_char oldfvslide;
 	u_char oldfslide;
+	u_char oldfslidex;
 	short fadevol;		/* fading volume */
 	u_char keyon;		/* if 1=key is pressed. */
 	u_char kick;	   	/* if 1=sample has to be restarted */
@@ -113,6 +113,8 @@ typedef struct _XMCHANNEL {
 	short UserVol;
 	char retrig;		/* retrig value (0 means don't retrig) */
 	u_short c2spd;		/* what finetune to use */
+	u_char ovrfine;	/* current finetune value overrided by E5x */
+	u_char offtick;
 	u_char tmpvolume;	/* tmp volume  JAP */
 	u_short tmpperiod;	/* tmp period */
 	u_short wantedperiod;	/* period to slide to (with effect 3 or 5) */
@@ -156,6 +158,7 @@ typedef struct _XMSONG {
 	int	  SongLoop;         /* loop module ? */
 	u_char  SongVolume;	     /* song volume (0-128) */
 	u_char  MasterVolume;	     /* song volume (0-128) */
+	u_char	oldvslide;
 	int	  XMActiveVoices;	  /* number of voices currently playing */
 	int	  NotAmiga;
 	u_char  XMPlay;
@@ -297,6 +300,8 @@ void Arpeggio(u_char dat); // 0x00086738
 
 void DoVolSlide(u_char dat); // 0x000865B4
 
+void DoGlobalVolSlide(u_char dat);
+
 void DoXMPanSlide(u_char inf); // 0x000866AC
 
 void DoS3MRetrig(u_char inf); // 0x000846D8
@@ -388,6 +393,3 @@ void XM_FreeAllSongIDs(); // 0x000863A4
 int XM_GetFileHeaderSize(); // 0x000863E4
 
 void XM_SetFileHeaderAddress(u_char *Address); // 0x000863B0
-
-
-#endif
