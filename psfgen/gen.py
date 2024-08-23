@@ -5,15 +5,15 @@ import libopenmpt
 import lief
 
 
-SONGDATA_DIR = "songdata/prlsr"
+SONGDATA_DIR = "prlsr"
 XMPLAY_VARIANT = "sbspss"
 
 
 def main():
-    with open(f"{SONGDATA_DIR}/index.json", "r") as f:
+    with open(f"songdata/{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
 
-    os.makedirs("out", exist_ok=True)
+    os.makedirs(f"out/{SONGDATA_DIR}", exist_ok=True)
 
     xm_ref_count: dict[str, int] = {}
     for song_name, info in index.items():
@@ -30,7 +30,7 @@ def main():
             print("")
 
             mod = None
-            path_timing = f"{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
+            path_timing = f"songdata/{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
 
             if not making_psf:
                 lib_fn = f"{info["xm"]}.psflib"
@@ -42,7 +42,7 @@ def main():
             lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT), info.get("worse_timing", False))
             if not making_psf:
                 lib_psf = modify_driver.make_psflib_psf(lib)
-                with open("out/" + lib_fn, "wb") as libf:
+                with open(f"out/{SONGDATA_DIR}/" + lib_fn, "wb") as libf:
                     lib_psf.write(libf)
 
             if os.path.exists(path_timing):
@@ -75,7 +75,7 @@ def main():
 
         panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
-        with open(f"out/{song_name}.{"mini" if not making_psf else ""}psf", "wb") as outf:
+        with open(f"out/{SONGDATA_DIR}/{song_name}.{"mini" if not making_psf else ""}psf", "wb") as outf:
             if not making_psf:
                 psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:

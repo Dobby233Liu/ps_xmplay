@@ -3,11 +3,13 @@ import glob
 from os import path
 import json
 
-SONGDATA_DIR = "songdata/themepark"
+SONGDATA_DIR = "themepark"
 
 def main():
     index = {}
-    for timing_fn in glob.glob(SONGDATA_DIR + "/timing/*.xm"):
+    for timing_fn in glob.glob(f"songdata/{SONGDATA_DIR}/timing/*.*"):
+        if path.splitext(timing_fn)[1] == ".bak":
+            continue
         with open(timing_fn, "rb") as timing_f:
             timing_fnn = path.splitext(path.basename(timing_fn))[0]
             timing = libopenmpt.Module(timing_f)
@@ -15,6 +17,7 @@ def main():
                 minipsf_fn = timing_fnn + ("_" + str(i) if timing.num_subsongs != 1 else "")
                 index[minipsf_fn] = {
                     "xm": timing_fnn,
+                    "module_ext": path.splitext(timing_fn)[1][1:],
                     "rough_xm_subsong": i,
                     "loop": True # till the shelve is ablaze
                 }

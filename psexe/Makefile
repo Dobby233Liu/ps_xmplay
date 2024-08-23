@@ -2,7 +2,7 @@ TARGET = xmplayer
 TYPE = ps-exe
 
 XM_BUILTIN ?= true
-XM_DIR ?= songdata/retail
+XM_DIR ?= retail
 XM_TYPE_MUSIC = 0
 XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
@@ -67,13 +67,13 @@ endef
 
 # FIXME: can't rebuild with the XM filename changed
 
-song_xm.o: ../$(XM_DIR)/$(XM).xm
+song_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
 	$(call SONG_TO_OBJ,$<)
 
-song_vh.o: ../$(XM_DIR)/$(XM).vh
+song_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
 	$(call SONG_TO_OBJ,$<)
 
-song_vb.o: ../$(XM_DIR)/$(XM).vb
+song_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
 	$(call SONG_TO_OBJ,$<)
 
 .PHONY: clean-songdata

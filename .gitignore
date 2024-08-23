@@ -4,5 +4,3 @@ __pycache__
 *.psf
 *.minipsf
 *.psflib
-out/*
-!out/!sbspss *.m3u
