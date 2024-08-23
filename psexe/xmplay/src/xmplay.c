@@ -2774,8 +2774,10 @@ int t;
 #endif
 		XMCU->tmpvolume=64;
 
-		//if(XMCU->sample!=254)
-		//	XMCU->kick=1;			// [A] temporary fix
+#if 0							// [A] temporary fix
+		if(XMCU->sample!=254)
+			XMCU->kick=1;
+#endif
 	}
 
 	mu->posjmp=1;
