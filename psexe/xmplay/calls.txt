@@ -86,7 +86,7 @@ void XM_PlayStart(Song_ID,int Playmask);
 	Description:
 				Set flag to allow processing of tune.
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		PlayMask	BitMask for channels on or off.
 				-1 Play all channels of tune.
 				3 Play channels 0 and 1 etc..etc...
@@ -100,7 +100,7 @@ void XM_PlayStop(Song_ID);
 				Set flag to stop processing of tune.
 				Silence any playing channels for tune.
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 	Returns:
 		Nothing.
 
@@ -111,7 +111,7 @@ void XM_SetSongPos(Song_ID,SongPos);
 				Jumps directley to SongPos in the XM file's
 				playlist.
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		SongPos		Positiong through song to jump to
 	Returns:
 		Nothing
@@ -150,7 +150,7 @@ void XM_Pause(Song_ID);
 				Pause song/SFX
 				Silence any playing channels
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 	Returns:
 		Nothing
 
@@ -162,7 +162,7 @@ void XM_Restart(Song_ID);
 				Continue any playing channels
 				(Continues any previously keyed on notes)
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 	Returns:
 		Nothing
 
@@ -208,7 +208,7 @@ void XM_SetChVolume(Song_ID,Channel,Volume);
 				Allow user input to modify individual channel
 				volumes.
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		Channel		(0-24) Channel to modify/set.
 		Volume		(0-64) This value is subtracted from the
 				channels current volume.
@@ -224,7 +224,7 @@ int XM_GetChVolume(Song_ID,Channel);
 	Description:
 				Get user volume setting for current channel.
 	Requires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		Channel		(0-24) Channel to get info from.
 	Returns:
 		ChannelVolume	(0-64) Current user volume for channel.
@@ -238,7 +238,7 @@ XM_GetFeedback(Song_ID,FB);
 	Description:
 				  Get song info.
 	Requires:
-		Song_ID		  Value passed on XM_Init
+		Song_ID		  As passed to or returned by XM_Init
 		FB		  Pointer to the XM_Feedback structure.
 	Returns:
 		Fdbk.Status	  Current Playing status (stopped,playing,paused..)
@@ -262,7 +262,7 @@ void XM_PlayNext(Song_ID,SongPosition);
 				jump to, when playing reaches the end
 				of a pattern.
 	Reqires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		SongPosition	Position through song list to jump to
 				or -1 to cancel request
 	Returns:
@@ -278,7 +278,7 @@ void XM_CPlayNext(Song_ID,SongPosition);
 				has been put in the pattern data.
 				(set 0xcfe to cancel command)
 	Reqires:
-		Song_ID		Value passed on XM_Init
+		Song_ID		As passed to or returned by XM_Init
 		SongPosition	Position through song list to jump to
 				or -1 to cancel request
 	Returns:
@@ -301,7 +301,7 @@ void XM_SetMasterVol(int Song_ID,u_char Vol);
 	Description:
 				Set Song/SFX master volume.
 	Requires:
-		SongID		Value passed on XM_Init
+		SongID		As passed to or returned by XM_Init
 		Volume		0-128
 				
 	Returns:
@@ -313,7 +313,7 @@ void XM_SetMasterPan(int Song_ID,u_char Pan);
 	Description:
 				Set Song/SFX master volume.
 	Requires:
-		SongID		Value passed on XM_Init
+		SongID		As passed to or returned by XM_Init
 		Pan		-127 > + 127 (0 = middle, -ve left +ve right)
 				
 	Returns:
