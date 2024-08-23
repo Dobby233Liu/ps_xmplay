@@ -57,10 +57,6 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 void main() {
     ResetCallback();
 
-#ifndef XMPLAY_WORSE_TIMING
-    SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
-#endif
-
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "xm invalid");
     assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "vab invalid");
@@ -81,6 +77,10 @@ void main() {
 
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
+
+#ifndef XMPLAY_WORSE_TIMING
+    SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
+#endif
 
 #ifndef XMPLAY_WORSE_TIMING
     XM_OnceOffInit(BIOS_PAL ? XM_PAL : XM_NTSC);
