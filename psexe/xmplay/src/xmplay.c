@@ -3084,4 +3084,7 @@ void XM_SetFileHeaderAddress(u_char *Address)
 
 
 
-
+void XM_FreeFileHeaderID()
+{
+	XM_HA = 0;
+}

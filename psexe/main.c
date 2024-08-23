@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <common/syscalls/syscalls.h>
-#include <malloc3.h>
+#include <malloc.h>
 #include <etc.h>
 #include <video.h>
 #include <libspu.h>
@@ -18,11 +18,9 @@ static unsigned char heap[0x20000] = {0};
 #define MAX_SPU_BANKS 200 // in sync with SBSPSS
 static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
-#define BIOS_VERSION_STRING 0xBFC7FF32
-
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
-// FIXME: nonfunctional
+// FIXME: takes forever and broken on revx
 int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int vab_id = XM_GetFreeVAB();
     if (vab_id == -1) return -1;
@@ -33,13 +31,17 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     vag_sizes_ptr += 0x200 * ((struct vab_header*)vh_ptr)->num_programs; // tone attrs
     // first vag is always null
     vag_sizes_ptr += sizeof(uint16_t);
-    int a = 1;
 
     unsigned char *cur_vag_data_ptr = vb_ptr;
     for (int16_t slot = 0; slot < ((struct vab_header*)vh_ptr)->num_samples; ++slot) {
         long true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
+        // For revx, XM2PSX appear to trim some samples, but then proceed to
+        // write the previous amount of samples for whatever reason
+        if (true_size == 0)
+            continue;
         long vag_spu_addr = SpuMalloc(true_size);
         assert(vag_spu_addr != 0, "vag malloc failed");
+        ramsyscall_printf("%d %u(%d) -> %u\n", slot, cur_vag_data_ptr, true_size, vag_spu_addr);
 
         SpuSetTransferStartAddr(vag_spu_addr);
         SpuWrite(cur_vag_data_ptr, true_size);
@@ -62,10 +64,13 @@ void main() {
     assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "vab invalid");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap3((unsigned long*)heap, sizeof(heap));
+    InitHeap((unsigned long*)heap, sizeof(heap));
     if (!crit_section_already_entered) leaveCriticalSection();
 
     SpuInit();
+
+    SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
+    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
     // clear SPU memory
@@ -75,18 +80,11 @@ void main() {
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
 #endif
 
-    SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
-    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
-
 #ifndef XMPLAY_WORSE_TIMING
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
 #endif
 
-#ifndef XMPLAY_WORSE_TIMING
-    XM_OnceOffInit(BIOS_PAL ? XM_PAL : XM_NTSC);
-#else // we make a bold assumption here
-    XM_OnceOffInit(XM_NTSC);
-#endif
+    XM_OnceOffInit(GetVideoMode());
 #ifndef XMPLAY_VARIANT_REDRIVER2
     XM_SetStereo();
 #endif
@@ -104,10 +102,11 @@ void main() {
 #endif
     assert(voice_bank_id != -1, "voice load failed");
 
-    int xm_data_id = InitXMData(song_info.pxm_ptr, 0, song_info.panning_type);
+    int xm_id = 0;
+    InitXMData(song_info.pxm_ptr, xm_id, song_info.panning_type);
 
     int song_id = XM_Init(
-        voice_bank_id, xm_data_id, -1,
+        voice_bank_id, xm_id, -1,
         #ifndef XMPLAY_VARIANT_SBSPSS
         0,
         #else
@@ -128,7 +127,7 @@ void main() {
 #error Only the SBSPSS version of xmplay.lib include XM_Update2, which is necessary for this hack to function
 #endif
     while (true) {
-        XM_Update2(2);
+        XM_Update();
         VSync(0);
     }
 #endif

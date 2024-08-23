@@ -3,20 +3,20 @@
         "xm": "megalovania",
         "position": 0,
         "rough_xm_subsong": 0,
-        "xmplay_variant": "46"
+        "xmplay_variant": "redriver2"
     },
     "friendinsideme_youvegota": {
         "xm": "friendinsideme",
         "position": 0,
         "rough_xm_subsong": 0,
-        "xmplay_variant": "46"
+        "xmplay_variant": "redriver2"
     },
     "friendinsideme_friendinsideme": {
         "xm": "friendinsideme",
         "position": 10,
         "rough_xm_subsong": 1,
         "loop": false,
-        "xmplay_variant": "46"
+        "xmplay_variant": "redriver2"
     },
     "revx": {
         "xm": "revx",
@@ -24,7 +24,7 @@
         "rough_xm_subsong": 0,
         "panning_type": 1,
         "module_ext": "it",
-        "xmplay_variant": "46"
+        "xmplay_variant": "redriver2"
     },
     "revx_unused1": {
         "xm": "revx",
@@ -32,7 +32,7 @@
         "rough_xm_subsong": 1,
         "panning_type": 1,
         "module_ext": "it",
-        "xmplay_variant": "46",
+        "xmplay_variant": "redriver2",
         "loop": false
     },
     "viraxor_-_a_cube_made_of_circles": {
@@ -40,6 +40,6 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": false,
-        "xmplay_variant": "46"
+        "xmplay_variant": "redriver2"
     }
 }
