@@ -55,8 +55,12 @@ Output goes in out/ folder
 
 ## Flaws
 
-SBSPSS PSFs are half-broken in DuckStation as of July 2024. I don't really care though - as long as it works in the two
-fb2k PSF players.
+Compatibility is spotty.
+> yes go: mednafen (foo_input_mdfnpsf and standalone), pcsx-redux, highly experimental
+>
+> no go: ~~duckstation~~ (got better since 0febdd8), play!
+>
+> cant load binaries with nocash and psxfin so dunno
 
 SBSPSS appears to use a newer version of xmplay.lib that has some bugs fixed.
 I'm sorry for the misinformation that it was more broken that the older version,
