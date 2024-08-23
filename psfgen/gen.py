@@ -1,6 +1,7 @@
 import json
 import modify_driver
 import os
+from os import path
 import libopenmpt
 import lief
 import sys
@@ -8,6 +9,11 @@ import sys
 
 SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "prlsr"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "sbspss"
+
+
+# cd to script directory / .. because otherwise everything will explode
+# (i don't want to fix it)
+os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
 
 
 def main():
@@ -46,7 +52,7 @@ def main():
                 with open(f"out/{SONGDATA_DIR}/" + lib_fn, "wb") as libf:
                     lib_psf.write(libf)
 
-            if os.path.exists(path_timing):
+            if path.exists(path_timing):
                 with open(path_timing, "rb") as mod_f:
                     mod = libopenmpt.Module(mod_f, {
                         "load.skip_samples": True,
