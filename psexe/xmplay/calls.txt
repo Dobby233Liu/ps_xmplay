@@ -30,7 +30,7 @@ int XM_VABInit(VHData,VBData);
 				-1 if transfer not complete
 				(no free ID's or out of SPU RAM)
 ----------------------------------------------------------------------------
-void InitXMData(XMData,XM_ID,PanType);
+int InitXMData(XMData,XM_ID,PanType);
 
 	Description:
 		    		Initialise the XM data
@@ -43,7 +43,8 @@ void InitXMData(XMData,XM_ID,PanType);
 				(Allows S3M files (converted to .XM) to play
 				correctly)
 	Returns:
-		Nothing.
+		The number of channels used by the XM (???)
+		Or the XM ID?
 
 ----------------------------------------------------------------------------
 int XM_Init (VabID,XM_ID,Song_ID,FirstChannel,Loop,PlayMask,SongType,SFXPatternNum);
