@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <common/syscalls/syscalls.h>
 #include <malloc3.h>
+#include <etc.h>
 #include <video.h>
 #include <libspu.h>
 #include <xmplay.h>
@@ -12,7 +13,7 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned char heap[0x40000];
+static unsigned char heap[0x20000];
 
 #define MAX_SPU_BANKS 200 // in sync with SBSPSS
 static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)];
@@ -54,6 +55,12 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 
 
 void main() {
+    ResetCallback();
+
+#ifndef XMPLAY_WORSE_TIMING
+    SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
+#endif
+
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "xm invalid");
     assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "vab invalid");
@@ -67,7 +74,6 @@ void main() {
 #ifdef XMPLAY_VARIANT_REDRIVER2
     // clear SPU memory
     SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
-    SpuSetTransferCallback(NULL);
     SpuSetTransferStartAddr(0);
     SpuWrite0(512 * 1024);
     SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
@@ -77,7 +83,7 @@ void main() {
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
 #ifndef XMPLAY_WORSE_TIMING
-    XM_OnceOffInit(((char *)BIOS_VERSION_STRING)[32] == 'E' ? XM_PAL : XM_NTSC);
+    XM_OnceOffInit(BIOS_PAL ? XM_PAL : XM_NTSC);
 #else // we make a bold assumption here
     XM_OnceOffInit(XM_NTSC);
 #endif
@@ -113,11 +119,6 @@ void main() {
     );
     assert(song_id != -1, "song init failed");
 
-    // Apparantly it can't be known if an once-off song is finished through
-    // the feedback struct
-    /*XM_Feedback feedback;
-    XM_GetFeedback(song_id, &feedback);*/
-
 #ifndef XMPLAY_WORSE_TIMING
     VSyncCallback(XM_Update);
     while (true)
@@ -132,6 +133,8 @@ void main() {
     }
 #endif
 
+    // TODO: let there be some way to reach this
+    // test/revx_unused1 ends in an absolutely ugly way otherwise
     XM_Exit();
     free(file_header_addr);
     free(song_addr);
