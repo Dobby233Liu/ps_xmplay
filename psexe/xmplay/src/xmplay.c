@@ -834,28 +834,28 @@ u_char dat=0;
 	{
 		case 0x6:
 			if(vol&0xf)
-				SPE(0xa,vol&0xf);				/* Volume slide down */
+				SPE(XMEF_VOLSLD,vol&0xf);				/* Volume slide down */
 			break;
 	
 		case 0x7:
 			if(vol&0xf)
-				SPE(0xa,vol<<4);				/* Volume slide up */
+				SPE(XMEF_VOLSLD,vol<<4);				/* Volume slide up */
 			break;
 	
 		case 0x8:
-			SPE (0xe,0xb0 | (vol&0xf));	/* Fine volume slide down */
+			SPE (XMEF_E,0xb0 | (vol&0xf));	/* Fine volume slide down */
 			break;
 
 		case 0x9:                     
-			SPE (0xe,0xa0 | (vol&0xf));	/* Fine volume slide up */
+			SPE (XMEF_E,0xa0 | (vol&0xf));	/* Fine volume slide up */
 			break;
 
 		case 0xa:
-			SPE (0x4,vol<<4);					/* Set Vibrato speed */
+			SPE (XMEF_VIBRATO,vol<<4);					/* Set Vibrato speed */
 			break;
 
 		case 0xb:
-			SPE (0x4,vol&0xf);				/* Vibrato */
+			SPE (XMEF_VIBRATO,vol&0xf);				/* Vibrato */
 			break;
 
 		case 0xc:
@@ -873,13 +873,13 @@ u_char dat=0;
 			break;
 
 		case 0xf:
-			SPE (0x3,vol<<4);					/* Portamento */
+			SPE (XMEF_TONEPORT,vol<<4);					/* Portamento */
 			break;
 
 		default:
 			if(vol>=0x10 && vol<=0x50)
 			{
-				SPE (0xc,vol-0x10);			/* Set volume */
+				SPE (XMEF_VOLUME,vol-0x10);			/* Set volume */
 			}
 	}
 //	if (eff!=0)
@@ -891,16 +891,20 @@ u_char dat=0;
 				break;
 
 			case 'H'-55:                    /* H - global volume slide */
+				// UNIMPLEMENTED
 				break;
 
 			case 'K'-55:                    /* K - keyoff */
-					SetNote(96);
+				// UNIMPLEMENTED: After xx ticks
+				SetNote(96);
 				break;
 
 			case 'L'-55:                    /* L - set envelope position */
+				// UNIMPLEMENTED
 				break;
 
 			case 'P'-55:                    /* P - panning slide */
+				// UNIMPLEMENTED
 				XMC->panning=dat;
 //				DoXMPanSlide(dat);
 				break;
@@ -910,10 +914,11 @@ u_char dat=0;
 				break;
 
 			case 'T'-55:
-				SPE (0x6,dat);
+				SPE (XMEF_VIB_VOLSLD,dat);
 				break;
 
 			case 'X'-55:
+				// UNIMPLEMENTED
 				break;
 
 			default:
@@ -1154,6 +1159,7 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINETUNE:			/* 5 Set finetune */
+		// UNIMPLEMENTED
 		break;
 
 	case XMEF_E_PATLOOP:				/* 6 Set patternloop */
