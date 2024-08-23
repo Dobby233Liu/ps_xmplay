@@ -12,10 +12,10 @@ XMPLAY.C
 #include <abs.h>
 #include <libspu.h>
 
+//#define SOME_KIND_OF_DREAM
+
 #include "xmplay.h"
 #include "xmcalls.h"
-
-//#define SOME_KIND_OF_DREAM
 
 /**** PSX SPECIFIC ****/
 

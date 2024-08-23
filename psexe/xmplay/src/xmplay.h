@@ -93,7 +93,9 @@ typedef struct _XMCHANNEL {
 	u_char oldvslide;
 	u_char oldfvslide;
 	u_char oldfslide;
+#ifdef SOME_KIND_OF_DREAM
 	u_char oldfslidex;
+#endif
 	short fadevol;		/* fading volume */
 	u_char keyon;		/* if 1=key is pressed. */
 	u_char kick;	   	/* if 1=sample has to be restarted */
@@ -113,8 +115,9 @@ typedef struct _XMCHANNEL {
 	short UserVol;
 	char retrig;		/* retrig value (0 means don't retrig) */
 	u_short c2spd;		/* what finetune to use */
+#ifdef SOME_KIND_OF_DREAM
 	u_char ovrfine;	/* current finetune value overrided by E5x */
-	u_char offtick;
+#endif
 	u_char tmpvolume;	/* tmp volume  JAP */
 	u_short tmpperiod;	/* tmp period */
 	u_short wantedperiod;	/* period to slide to (with effect 3 or 5) */
@@ -158,7 +161,9 @@ typedef struct _XMSONG {
 	int	  SongLoop;         /* loop module ? */
 	u_char  SongVolume;	     /* song volume (0-128) */
 	u_char  MasterVolume;	     /* song volume (0-128) */
+#ifdef SOME_KIND_OF_DREAM
 	u_char	oldvslide;
+#endif
 	int	  XMActiveVoices;	  /* number of voices currently playing */
 	int	  NotAmiga;
 	u_char  XMPlay;
@@ -300,7 +305,9 @@ void Arpeggio(u_char dat); // 0x00086738
 
 void DoVolSlide(u_char dat); // 0x000865B4
 
+#ifdef SOME_KIND_OF_DREAM
 void DoGlobalVolSlide(u_char dat);
+#endif
 
 void DoXMPanSlide(u_char inf); // 0x000866AC
 
