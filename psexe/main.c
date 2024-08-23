@@ -13,10 +13,10 @@
 
 #include <common/hardware/pcsxhw.h>
 
-static unsigned char heap[0x20000];
+static unsigned char heap[0x20000] = {0};
 
 #define MAX_SPU_BANKS 200 // in sync with SBSPSS
-static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)];
+static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 #define BIOS_VERSION_STRING 0xBFC7FF32
 
