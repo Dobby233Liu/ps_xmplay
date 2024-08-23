@@ -20,7 +20,6 @@ static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
-// FIXME: takes forever and broken on revx
 int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int vab_id = XM_GetFreeVAB();
     if (vab_id == -1) return -1;
