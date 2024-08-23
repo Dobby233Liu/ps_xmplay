@@ -62,10 +62,9 @@ Compatibility is spotty.
 >
 > cant load binaries with nocash and psxfin so dunno
 
-SBSPSS appears to use a newer version of xmplay.lib that has some bugs fixed.
-I'm sorry for the misinformation that it was more broken that the older version,
-that was a mistake in my code.
-Though try switching to the PSY-Q SDK 4.6 version of xmplay.lib if things sound wrong.
+I provide three versions of the library to use. SBSPSS's xmplay.lib appears to be newer
+than the SDK 4.6 one, but has some glaring bugs you can hear. REDriver2's appears to
+be adapted from a version for PS2, and at least doesn't have the bug plauging SBSPSS's.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
 If it's caused by an assertion failure a message should show up then.
