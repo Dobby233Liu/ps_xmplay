@@ -9,6 +9,11 @@ import sys
 
 SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "themepark"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "redriver2"
+LICENSES = [
+    ("ps_xmplay", "LICENSE"),
+    ("nugget", "psexe/nugget/LICENSE"),
+    ("REDriver2", "psexe/xmplay/src/LICENSE.REDriver2") if XMPLAY_VARIANT == "redriver2" else (None, None)
+]
 
 
 # cd to script directory / .. because otherwise everything will explode
@@ -20,7 +25,8 @@ def main():
     with open(f"songdata/{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
 
-    os.makedirs(f"out/{SONGDATA_DIR}", exist_ok=True)
+    outdir = f"out/{SONGDATA_DIR}"
+    os.makedirs(outdir, exist_ok=True)
 
     xm_ref_count: dict[str, int] = {}
     for song_name, info in index.items():
@@ -49,7 +55,7 @@ def main():
             lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT), info.get("worse_timing", False))
             if not making_psf:
                 lib_psf = modify_driver.make_psflib_psf(lib)
-                with open(f"out/{SONGDATA_DIR}/" + lib_fn, "wb") as libf:
+                with open(f"{outdir}/{lib_fn}", "wb") as libf:
                     lib_psf.write(libf)
 
             if path.exists(path_timing):
@@ -82,7 +88,7 @@ def main():
 
         panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
-        with open(f"out/{SONGDATA_DIR}/{song_name}.{"mini" if not making_psf else ""}psf", "wb") as outf:
+        with open(f"{outdir}/{song_name}.{"mini" if not making_psf else ""}psf", "wb") as outf:
             if not making_psf:
                 psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:
@@ -93,6 +99,15 @@ def main():
             psf1.tags["psfby"] = "ps_xmplay psfgen"
             psf1.tags["origfilename"] = song_name
             psf1.write(outf)
+
+    with open(f"{outdir}/!3RD_LICENSES.txt", "w") as f:
+        for (sw_name, license_fp) in LICENSES:
+            if license_fp is None: continue
+            print(sw_name, file=f)
+            print("-"*80, file=f)
+            with open(license_fp, "r") as f2:
+                print(f2.read().strip(), file=f)
+            print(file=f)
 
 if __name__ == "__main__":
     main()
