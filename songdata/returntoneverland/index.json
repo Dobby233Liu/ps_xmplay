@@ -1,5 +1,5 @@
 {
-    "LEVEL1": {
+    "ADVENTUR~LEVEL1": {
         "xm": "LEVEL1",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -7,7 +7,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL10": {
+    "ADVENTUR~LEVEL10": {
         "xm": "LEVEL10",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -15,7 +15,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL11": {
+    "ADVENTUR~LEVEL11": {
         "xm": "LEVEL11",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -23,7 +23,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL12": {
+    "SPECIAL~LEVEL12": {
         "xm": "LEVEL12",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -31,7 +31,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL13": {
+    "ADVENTUR~LEVEL13": {
         "xm": "LEVEL13",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -39,7 +39,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL14": {
+    "ADVENTUR~LEVEL14": {
         "xm": "LEVEL14",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -47,7 +47,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL15": {
+    "ADVENTUR~LEVEL15": {
         "xm": "LEVEL15",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -55,7 +55,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL16": {
+    "ADVENTUR~LEVEL16": {
         "xm": "LEVEL16",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -63,7 +63,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL17": {
+    "ADVENTUR~LEVEL17": {
         "xm": "LEVEL17",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -71,7 +71,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL18": {
+    "ADVENTUR~LEVEL18": {
         "xm": "LEVEL18",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -79,7 +79,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL19": {
+    "ADVENTUR~LEVEL19": {
         "xm": "LEVEL19",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -87,7 +87,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL2": {
+    "ADVENTUR~LEVEL2": {
         "xm": "LEVEL2",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -95,7 +95,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL20": {
+    "SPECIAL~LEVEL20": {
         "xm": "LEVEL20",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -103,7 +103,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL21": {
+    "SPECIAL~LEVEL21": {
         "xm": "LEVEL21",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -111,7 +111,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL3": {
+    "ADVENTUR~LEVEL3": {
         "xm": "LEVEL3",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -119,7 +119,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL4": {
+    "SPECIAL~LEVEL4": {
         "xm": "LEVEL4",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -127,7 +127,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL40": {
+    "MENUS~LEVEL40": {
         "xm": "LEVEL40",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -135,7 +135,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL41": {
+    "MENUS~LEVEL41": {
         "xm": "LEVEL41",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -143,7 +143,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL42": {
+    "MENUS~LEVEL42": {
         "xm": "LEVEL42",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -151,7 +151,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL5": {
+    "ADVENTUR~LEVEL5": {
         "xm": "LEVEL5",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -159,7 +159,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL51": {
+    "TINKER~LEVEL51": {
         "xm": "LEVEL51",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -167,7 +167,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL52": {
+    "TINKER~LEVEL52": {
         "xm": "LEVEL52",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -175,7 +175,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL53": {
+    "TINKER~LEVEL53": {
         "xm": "LEVEL53",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -183,7 +183,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL54": {
+    "TINKER~LEVEL54": {
         "xm": "LEVEL54",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -191,7 +191,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL6": {
+    "ADVENTUR~LEVEL6": {
         "xm": "LEVEL6",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -199,7 +199,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL61": {
+    "BOSSES~LEVEL61": {
         "xm": "LEVEL61",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -207,7 +207,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL62": {
+    "BOSSES~LEVEL62": {
         "xm": "LEVEL62",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -215,7 +215,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL63": {
+    "BOSSES~LEVEL63": {
         "xm": "LEVEL63",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -223,7 +223,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL64": {
+    "BOSSES~LEVEL64": {
         "xm": "LEVEL64",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -231,7 +231,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL7": {
+    "ADVENTUR~LEVEL7": {
         "xm": "LEVEL7",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -239,7 +239,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL8": {
+    "SPECIAL~LEVEL8": {
         "xm": "LEVEL8",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
@@ -247,7 +247,7 @@
         "use_orig_as_timing": true,
         "position": 0
     },
-    "LEVEL9": {
+    "ADVENTUR~LEVEL9": {
         "xm": "LEVEL9",
         "module_ext": "XM",
         "rough_xm_subsong": 0,
