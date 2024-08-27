@@ -1,22 +1,4 @@
 {
-    "complete": {
-        "xm": "complete",
-        "rough_xm_subsong": 0,
-        "loop": false,
-        "position": 0
-    },
-    "credits": {
-        "xm": "complete",
-        "rough_xm_subsong": 1,
-        "loop": true,
-        "position": 14
-    },
-    "gameover": {
-        "xm": "gameover",
-        "rough_xm_subsong": 0,
-        "loop": false,
-        "position": 0
-    },
     "level1_stage": {
         "xm": "level1",
         "rough_xm_subsong": 0,
@@ -149,11 +131,29 @@
         "loop": false,
         "position": 0
     },
+    "gameover": {
+        "xm": "gameover",
+        "rough_xm_subsong": 0,
+        "loop": false,
+        "position": 0
+    },
     "megazord": {
         "xm": "megazord",
         "rough_xm_subsong": 0,
         "loop": true,
         "position": 0
+    },
+    "complete": {
+        "xm": "complete",
+        "rough_xm_subsong": 0,
+        "loop": false,
+        "position": 0
+    },
+    "credits": {
+        "xm": "complete",
+        "rough_xm_subsong": 1,
+        "loop": true,
+        "position": 14
     },
     "unused": {
         "xm": "unused",
