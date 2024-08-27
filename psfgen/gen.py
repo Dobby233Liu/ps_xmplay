@@ -7,7 +7,7 @@ import lief
 import sys
 
 
-SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "test"
+SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "returntoneverland"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "redriver2"
 LICENSES = [
     ("ps_xmplay", "LICENSE"),
@@ -44,6 +44,8 @@ def main():
 
             mod = None
             path_timing = f"songdata/{SONGDATA_DIR}/timing/{info["xm"]}.{info.get("module_ext", "xm")}"
+            if info.get("use_orig_as_timing", False):
+                path_timing = f"songdata/{SONGDATA_DIR}/{info["xm"]}.xm"
 
             if not making_psf:
                 lib_fn = f"{info["xm"]}.psflib"

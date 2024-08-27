@@ -3,11 +3,12 @@ import glob
 from os import path
 import json
 
-SONGDATA_DIR = "themepark"
+SONGDATA_DIR = "returntoneverland"
 
 def main():
     index = {}
-    for timing_fn in glob.glob(f"songdata/{SONGDATA_DIR}/timing/*.*"):
+    use_orig_as_timing = SONGDATA_DIR == "returntoneverland"
+    for timing_fn in glob.glob(f"songdata/{SONGDATA_DIR}/{"timing/" if not use_orig_as_timing else ""}*.{"*" if not use_orig_as_timing else "xm"}"):
         if path.splitext(timing_fn)[1] == ".bak":
             continue
         with open(timing_fn, "rb") as timing_f:
@@ -19,11 +20,12 @@ def main():
                     "xm": timing_fnn,
                     "module_ext": path.splitext(timing_fn)[1][1:],
                     "rough_xm_subsong": i,
-                    "loop": True # till the shelve is ablaze
+                    "loop": True, # till the shelve is ablaze
+                    "use_orig_as_timing": use_orig_as_timing
                 }
                 timing.subsong = i
                 index[minipsf_fn]["position"] = timing.current_order
-    with open(SONGDATA_DIR + "/index.json", "w", encoding="utf-8") as index_f:
+    with open("songdata/" + SONGDATA_DIR + "/index.json", "w", encoding="utf-8") as index_f:
         json.dump(index, index_f, indent=4, ensure_ascii=False)
 
 if __name__ == "__main__":
