@@ -20,7 +20,7 @@ static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
-int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
+static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int vab_id = XM_GetFreeVAB();
     if (vab_id == -1) return -1;
 
@@ -36,8 +36,10 @@ int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
         long true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
         // For revx, XM2PSX appears to trim some samples, but then proceed to
         // write the previous amount of samples for whatever reason
-        if (true_size == 0)
-            continue;
+        // FIXME: This technically hides a out-of-bounds read, but I dunno
+        // how to handle it
+        if (true_size <= 0)
+            break;
         long vag_spu_addr = SpuMalloc(true_size);
         assert(vag_spu_addr != 0, "vag malloc failed");
 
@@ -90,15 +92,15 @@ void main() {
     uint8_t *file_header_addr = malloc(XM_GetFileHeaderSize());
     XM_SetFileHeaderAddress(file_header_addr);
 
+    int xm_id = 0;
+    InitXMData(song_info.pxm_ptr, xm_id, song_info.panning_type);
+
 #ifndef XMPLAY_VARIANT_REDRIVER2
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
 #else
     int voice_bank_id = vab_init(song_info.vh_ptr, song_info.vb_ptr);
 #endif
     assert(voice_bank_id != -1, "voice load failed");
-
-    int xm_id = 0;
-    InitXMData(song_info.pxm_ptr, xm_id, song_info.panning_type);
 
     int song_id = XM_Init(
         voice_bank_id, xm_id, -1,

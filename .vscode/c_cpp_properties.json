@@ -17,7 +17,7 @@
         "MAX_PXM_SIZE",
         "MAX_VH_SIZE",
         "MAX_VB_SIZE",
-        "XMPLAY_VARIANT_SBSPSS"
+        "XMPLAY_VARIANT_REDRIVER2"
       ],
       "includePath": [
         "${env:AppData}/mips/mips/include",
@@ -45,7 +45,7 @@
         "MAX_PXM_SIZE",
         "MAX_VH_SIZE",
         "MAX_VB_SIZE",
-        "XMPLAY_VARIANT_SBSPSS"
+        "XMPLAY_VARIANT_REDRIVER2"
       ],
       "includePath": [
         "/usr/mipsel-linux-gnu/include",

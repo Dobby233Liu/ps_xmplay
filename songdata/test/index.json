@@ -41,5 +41,11 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": true
+    },
+    "icefront": {
+        "xm": "icefront",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": true
     }
 }
