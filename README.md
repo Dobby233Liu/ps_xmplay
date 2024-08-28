@@ -77,6 +77,8 @@ Other known issues include:
   SOME_KIND_OF_DREAM in xmplay.c to fix it, which also enables support for the
   finer portamento adjusting commands.
 - Not all commands are implemented. SOME_KIND_OF_DREAM mode implements some more.
+- If a non-looping track doesn't stop properly, the driver will not try to stop it
+  by itself.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
 If it's caused by an assertion failure a message should show up in TTY then.
