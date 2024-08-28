@@ -1,4 +1,25 @@
 {
+    "revx": {
+        "xm": "revx",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "panning_type": 1,
+        "module_ext": "it"
+    },
+    "revx_unused1": {
+        "xm": "revx",
+        "position": 62,
+        "rough_xm_subsong": 1,
+        "panning_type": 1,
+        "module_ext": "it",
+        "loop": false
+    },
+    "icefront": {
+        "xm": "icefront",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": true
+    },
     "megalovania": {
         "xm": "megalovania",
         "position": 0,
@@ -15,35 +36,8 @@
         "rough_xm_subsong": 1,
         "loop": false
     },
-    "revx": {
-        "xm": "revx",
-        "position": 0,
-        "rough_xm_subsong": 0,
-        "panning_type": 1,
-        "module_ext": "it"
-    },
-    "revx_unused1": {
-        "xm": "revx",
-        "position": 62,
-        "rough_xm_subsong": 1,
-        "panning_type": 1,
-        "module_ext": "it",
-        "loop": false
-    },
-    "viraxor_-_a_cube_made_of_circles": {
-        "xm": "viraxor_-_a_cube_made_of_circles",
-        "position": 0,
-        "rough_xm_subsong": 0,
-        "loop": false
-    },
     "gadget_room": {
         "xm": "gadget_room",
-        "position": 0,
-        "rough_xm_subsong": 0,
-        "loop": true
-    },
-    "icefront": {
-        "xm": "icefront",
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": true
@@ -52,6 +46,13 @@
         "xm": "intro",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop": true
+        "loop": true,
+        "xmplay_variant": "46"
+    },
+    "viraxor_-_a_cube_made_of_circles": {
+        "xm": "viraxor_-_a_cube_made_of_circles",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
     }
 }
