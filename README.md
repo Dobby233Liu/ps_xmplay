@@ -55,16 +55,28 @@ Output goes in out/ folder
 
 ## Flaws
 
-Compatibility is spotty.
-> yes go: mednafen (foo_input_mdfnpsf and standalone), duckstation, pcsx-redux, highly experimental
->
-> no go: play!
->
-> cant load binaries with nocash and psxfin so dunno
+Compatibility with emulators is spotty.
+* **OK:** Mednafen (foo_input_mdfnpsf and standalone), DuckStation, PCSX-Redux, Highly Experimental
+* **No:** Play! (PsfPlayer)
+* **Unknown:** nocash, psxfin
 
-I provide three versions of the library to use. SBSPSS's xmplay.lib appears to be newer
-than the SDK 4.6 one, but has some glaring bugs you can hear. REDriver2's appears to
-be adapted from a version for PS2, and at least doesn't have the bug plauging SBSPSS's.
+I provide three versions of the library to use. Each has their own flaws.
+SBSPSS's xmplay.lib appears to be newer than the SDK 4.6 one,
+but has some glaring bugs you can hear. REDriver2's appears to be adapted from
+[a version for PS2][1], and at least doesn't have the bug plauging SBSPSS's.
+
+[1]: https://www.psxdev.net/forum/viewtopic.php?f=64&t=358&p=11754#p11754
+
+Other known issues include:
+- Timing code is off, so the speed of the playback might not be what you except.
+  You might need to tinker with tempo settings.
+- As Jason Page said in the readme of the PS2 version, using very short looping
+  samples will cause them to be detuned. He said this is related to the ADPCM format,
+  so encoding the VAB differently might help?
+- E1/E2 works incorrectly. If you use the REDriver2 lib, you can manually enable
+  SOME_KIND_OF_DREAM in xmplay.c to fix it, which also enables support for the
+  finer portamento adjusting commands.
+- Not all commands are implemented. SOME_KIND_OF_DREAM mode implements some more.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
 If it's caused by an assertion failure a message should show up then.
