@@ -79,13 +79,13 @@ Other known issues include:
 - Not all commands are implemented. SOME_KIND_OF_DREAM mode implements some more.
 
 If a PSF crashes before it even tries to play the song, try running it in PCSX-Redux.
-If it's caused by an assertion failure a message should show up then.
-The debugger may or may not be able to help, personally I couldn't figure it out.
+If it's caused by an assertion failure a message should show up in TTY then.
+The debugger may or may not be able to help.
 
 You will need to tag the PSFs yourself.
 
-This was never supposed for anybody else to use, if you hit any issues, feel free to open an issue or ask on the HCS64
-Discord server, and I'll try to help you out.
+This was never supposed for anybody else to use, if you hit any issues, feel free to
+open an issue or ask on the HCS64 Discord server, and I'll try to help you out.
 PRs are also welcome.
 
 ## License
