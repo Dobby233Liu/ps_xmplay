@@ -46,8 +46,7 @@
         "xm": "intro",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop": true,
-        "xmplay_variant": "46"
+        "loop": true
     },
     "viraxor_-_a_cube_made_of_circles": {
         "xm": "viraxor_-_a_cube_made_of_circles",

@@ -24,22 +24,23 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int vab_id = XM_GetFreeVAB();
     if (vab_id == -1) return -1;
 
+    struct vab_header *vh = (struct vab_header*)vh_ptr;
     unsigned char *vag_sizes_ptr = vh_ptr;
     vag_sizes_ptr += sizeof(struct vab_header);
     vag_sizes_ptr += 0x10 * 0x80; // program attrs
-    vag_sizes_ptr += 0x200 * ((struct vab_header*)vh_ptr)->num_programs; // tone attrs
+    vag_sizes_ptr += 0x200 * vh->num_programs; // tone attrs
     // skip null
     vag_sizes_ptr += sizeof(uint16_t);
 
     unsigned char *cur_vag_data_ptr = vb_ptr;
-    for (int16_t slot = 0; slot < ((struct vab_header*)vh_ptr)->num_samples; ++slot) {
+    for (int16_t slot = 0; slot < vh->num_samples; ++slot) {
         long true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
         // For revx, XM2PSX appears to trim some samples, but then proceed to
         // write the previous amount of samples for whatever reason
-        // FIXME: This technically hides a out-of-bounds read, but I dunno
-        // how to handle it
+        // Thus, carry on if we hit a empty sample or everything can explode
+        // FIXME: Am I reading the wrong value from vh?
         if (true_size <= 0)
-            break;
+            continue;
         long vag_spu_addr = SpuMalloc(true_size);
         assert(vag_spu_addr != 0, "vag malloc failed");
 
