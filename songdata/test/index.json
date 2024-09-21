@@ -18,7 +18,7 @@
         "xm": "icefront",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop": true
+        "loop": false
     },
     "megalovania": {
         "xm": "megalovania",
