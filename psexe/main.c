@@ -62,7 +62,7 @@ void main() {
 
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice is null");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "invalid xm");
-    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "invalid vav");
+    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "invalid vab");
 
     int crit_section_already_entered = enterCriticalSection();
     InitHeap(heap, sizeof(heap) * sizeof(unsigned long));
