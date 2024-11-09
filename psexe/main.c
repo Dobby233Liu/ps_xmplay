@@ -11,11 +11,10 @@
 #include "vab.h"
 #include <common/hardware/pcsxhw.h>
 
-#include <common/hardware/pcsxhw.h>
 
-static unsigned char heap[0x20000] = {0};
+static unsigned long heap[0x800] = {0};
 
-#define MAX_SPU_BANKS 128 // realistic number; SBSPSS uses 200
+#define MAX_SPU_BANKS 0x80 // realistic number; SBSPSS uses 200
 static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
@@ -29,7 +28,7 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     vag_sizes_ptr += sizeof(struct vab_header);
     vag_sizes_ptr += 0x10 * 0x80; // program attrs
     vag_sizes_ptr += 0x200 * vh->num_programs; // tone attrs
-    // skip null
+    // first sample is always null
     vag_sizes_ptr += sizeof(uint16_t);
 
     unsigned char *cur_vag_data_ptr = vb_ptr;
@@ -41,8 +40,9 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
         // FIXME: Am I reading the wrong value from vh?
         if (true_size <= 0)
             continue;
+
         long vag_spu_addr = SpuMalloc(true_size);
-        assert(vag_spu_addr != 0, "vag malloc failed");
+        assert(vag_spu_addr != 0, "cant alloc vag");
 
         SpuSetTransferStartAddr(vag_spu_addr);
         SpuWrite(cur_vag_data_ptr, true_size);
@@ -60,30 +60,28 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 void main() {
     ResetCallback();
 
-    assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice pointer unset");
-    assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "xm invalid");
-    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "vab invalid");
+    assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice is null");
+    assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "invalid xm");
+    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "invalid vav");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap((unsigned long*)heap, sizeof(heap));
+    InitHeap(heap, sizeof(heap) * sizeof(unsigned long));
     if (!crit_section_already_entered) leaveCriticalSection();
-
-    SpuInit();
-
-    SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
-    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
-
-/*
-    // clear SPU memory
-    SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
-    SpuSetTransferStartAddr(0);
-    SpuWrite0(512 * 1024);
-    SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
-*/
 
 #ifndef XMPLAY_WORSE_TIMING
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
 #endif
+
+    SpuInit();
+
+    // clear SPU memory
+    SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
+    SpuSetTransferStartAddr(0);
+    SpuWrite0(0x80000);
+    SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
+
+    SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
+    SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
     XM_OnceOffInit(GetVideoMode());
 
@@ -101,7 +99,7 @@ void main() {
 #else
     int voice_bank_id = vab_init(song_info.vh_ptr, song_info.vb_ptr);
 #endif
-    assert(voice_bank_id != -1, "voice load failed");
+    assert(voice_bank_id != -1, "cant load voice");
 
     int song_id = XM_Init(
         voice_bank_id, xm_id, -1,
@@ -114,7 +112,7 @@ void main() {
         #endif
         song_info.loop, -1, song_info.type, song_info.position
     );
-    assert(song_id != -1, "song init failed");
+    assert(song_id != -1, "cant init song");
 
 #ifndef XMPLAY_WORSE_TIMING
     VSyncCallback(XM_Update);
