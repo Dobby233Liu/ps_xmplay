@@ -9,7 +9,6 @@
 #include "song.h"
 #include "debug.h"
 #include "vab.h"
-#include <common/hardware/pcsxhw.h>
 
 
 static unsigned long heap[0x800] = {0};
