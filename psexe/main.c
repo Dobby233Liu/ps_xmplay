@@ -76,6 +76,8 @@ void main() {
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
+    SpuSetTransferCallback(NULL);
+
     XM_OnceOffInit(GetVideoMode());
 
     uint8_t *song_addr = malloc(XM_GetSongSize());
