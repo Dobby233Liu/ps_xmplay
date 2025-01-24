@@ -47,6 +47,8 @@ ifeq ($(XMPLAY_VARIANT),redriver2)
 CPPFLAGS += -DXMPLAY_VARIANT_REDRIVER2
 endif
 
+#CPPFLAGS += -Wall -Wno-unused-function
+
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
 LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu
 ifneq ($(XMPLAY_VARIANT),)

@@ -13,7 +13,7 @@
 
 static unsigned long heap[0x800] = {0};
 
-#define MAX_SPU_BANKS 0x80 // realistic number; SBSPSS uses 200
+#define MAX_SPU_BANKS 0x80 // max for 1 file. SBSPSS uses 200 likely to accomodate the use of SFXs
 static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
@@ -72,12 +72,6 @@ void main() {
 #endif
 
     SpuInit();
-
-    // clear SPU memory
-    SpuSetTransferMode(SPU_TRANSFER_BY_DMA);
-    SpuSetTransferStartAddr(0);
-    SpuWrite0(0x80000);
-    SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
 
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
