@@ -50,7 +50,7 @@ endif
 #CPPFLAGS += -Wall -Wno-unused-function
 
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
-LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu
+LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu -lsnd
 ifneq ($(XMPLAY_VARIANT),)
 ifneq ($(XMPLAY_VARIANT),redriver2)
 LDFLAGS += -lxmplay_$(XMPLAY_VARIANT)

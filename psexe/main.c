@@ -5,10 +5,10 @@
 #include <etc.h>
 #include <video.h>
 #include <libspu.h>
+#include <libsnd.h>
 #include <xmplay.h>
 #include "song.h"
 #include "debug.h"
-#include "vab.h"
 
 
 static unsigned long heap[0x800] = {0};
@@ -19,39 +19,29 @@ static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
 static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
-    int vab_id = XM_GetFreeVAB();
-    if (vab_id == -1) return -1;
+    int ret = -1;
 
-    struct vab_header *vh = (struct vab_header*)vh_ptr;
-    unsigned char *vag_sizes_ptr = vh_ptr;
-    vag_sizes_ptr += sizeof(struct vab_header);
-    vag_sizes_ptr += 0x10 * 0x80; // program attrs
-    vag_sizes_ptr += 0x200 * vh->num_programs; // tone attrs
-    // first sample is always null
-    vag_sizes_ptr += sizeof(uint16_t);
+    SsInit();
 
-    unsigned char *cur_vag_data_ptr = vb_ptr;
-    for (int16_t slot = 0; slot < vh->num_samples; ++slot) {
-        long true_size = *((uint16_t*)vag_sizes_ptr + slot) * 8;
-        // For revx, XM2PSX appears to trim some samples, but then proceed to
-        // write the previous amount of samples for whatever reason
-        // Thus, carry on if we hit a empty sample or everything can explode
-        // FIXME: Am I reading the wrong value from vh?
-        if (true_size <= 0)
-            continue;
+    int vab_id_xmplay = XM_GetFreeVAB();
+    if (vab_id_xmplay == -1) goto done;
 
-        long vag_spu_addr = SpuMalloc(true_size);
-        assert(vag_spu_addr != 0, "cant alloc vag");
+    int vab_id_libsnd = SsVabTransfer(vh_ptr, vb_ptr, 0, SS_WAIT_COMPLETED);
+    if (vab_id_libsnd < 0) goto done;
 
-        SpuSetTransferStartAddr(vag_spu_addr);
-        SpuWrite(cur_vag_data_ptr, true_size);
-        SpuIsTransferCompleted(SPU_TRANSFER_WAIT);
-        XM_SetVAGAddress(vab_id, slot, vag_spu_addr);
+    VabHdr vh;
+    if (SsUtGetVabHdr(vab_id_libsnd, &vh) != 0) goto done;
 
-        cur_vag_data_ptr += true_size;
-    }
+    for (int i = 0; i < vh.vs; i++)
+        XM_SetVAGAddress(vab_id_xmplay, i, SsUtGetVagAddr(vab_id_libsnd, i + 1));
 
-    return vab_id;
+    ret = vab_id_xmplay;
+
+done:
+    if (vab_id_libsnd >= 0) SsVabClose(vab_id_libsnd);
+    if (vab_id_xmplay != -1 && ret == -1) XM_CloseVAB2(vab_id_xmplay);
+    SsQuit();
+    return ret;
 }
 #endif
 
@@ -61,7 +51,7 @@ void main() {
 
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice is null");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "invalid xm");
-    assert(syscall_strncmp(((struct vab_header*)song_info.vh_ptr)->magic, "pBAV", 4) == 0, "invalid vab");
+    assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "invalid vab");
 
     int crit_section_already_entered = enterCriticalSection();
     InitHeap(heap, sizeof(heap) * sizeof(unsigned long));
@@ -76,8 +66,6 @@ void main() {
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
 
-    SpuSetTransferCallback(NULL);
-
     XM_OnceOffInit(GetVideoMode());
 
     uint8_t *song_addr = malloc(XM_GetSongSize());
@@ -89,6 +77,7 @@ void main() {
     int xm_id = 0;
     InitXMData(song_info.pxm_ptr, xm_id, song_info.panning_type);
 
+    SpuSetTransferCallback(NULL);
 #ifndef XMPLAY_VARIANT_REDRIVER2
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
 #else
