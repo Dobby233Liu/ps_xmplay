@@ -12,7 +12,7 @@ XMPLAY.C
 #include <abs.h>
 #include <libspu.h>
 
-//#define SOME_KIND_OF_DREAM
+#define SOME_KIND_OF_DREAM
 
 #include "xmplay.h"
 #include "xmcalls.h"
@@ -1870,6 +1870,9 @@ void UpdateXMData(void)
 }
 
 
+#ifdef SOME_KIND_OF_DREAM
+static void PerformUpdate(int SC, int catching_up);
+#endif
 
 int tt=0;
 int aa=0;
@@ -1900,13 +1903,26 @@ void UpdateWithTimer(int SC)
 		}
 		return;
 	}
+#ifdef SOME_KIND_OF_DREAM
+	/* YES! Update song/hardware */
+	while (ms->JBPM>=BPMLimit)
+	{
+		PerformUpdate(SC, (ms->JBPM - BPMLimit)>=BPMLimit);
+		ms->JBPM-=BPMLimit;
+	}
+#else
 	ms->JBPM-=BPMLimit;		/* YES! Update song/hardware */
 	XM_DoFullUpdate(SC);
+#endif
 }
 
 
 
+#ifdef SOME_KIND_OF_DREAM
+static void PerformUpdate(int SC, int catching_up)
+#else
 void XM_DoFullUpdate(int SC)
+#endif
 {
 	ms = (XMSONG*)(XM_SngAddress[SC]);
 	//	ms=&XM_Song[SC];
@@ -1921,9 +1937,15 @@ void XM_DoFullUpdate(int SC)
 			UpdateEffs();			/* Do this if not done before in spare frame*/
 			ApplyEffs();
 		}
-		ms->JUp = 0;					/* Clear update flag */
+/*#ifdef SOME_KIND_OF_DREAM
+		if (catching_up)
+#endif*/
+			ms->JUp = 0;					/* Clear update flag */
 
-		UpdateHardware();			/* Update SPU */
+/*#ifdef SOME_KIND_OF_DREAM
+		if (!catching_up)
+#endif*/
+			UpdateHardware();			/* Update SPU */
 		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
 			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
 
@@ -1939,6 +1961,12 @@ void XM_DoFullUpdate(int SC)
 	//		UpdateHardware();			/* Update SPU */
 }
 
+#ifdef SOME_KIND_OF_DREAM
+void XM_DoFullUpdate(int SC)
+{
+	PerformUpdate(SC, 0);
+}
+#endif
 
 
 void UpdatePatternData(int SC)

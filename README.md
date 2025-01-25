@@ -69,7 +69,7 @@ but has some glaring bugs you can hear. REDriver2's appears to be adapted from
 
 Other known issues include:
 - Timing code is off, so the speed of the playback might not be what you except.
-  You might need to tinker with tempo settings.
+  If you enable SOME_KIND_OF_DREAM, there will be a mitigation.
 - As Jason Page said in the readme of the PS2 version, using very short looping
   samples will cause them to be detuned. He said this is related to the ADPCM format,
   so encoding the VAB differently might help?
