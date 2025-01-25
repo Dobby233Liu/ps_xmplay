@@ -5,7 +5,7 @@ import io
 from math import floor
 import struct
 from typing import Self, Any, Optional
-import zlib
+import deflate
 import datetime
 
 
@@ -97,9 +97,9 @@ class PSF():
 
         of.write(struct.pack("<L", len(self.reserved)))
 
-        compressed_program = zlib.compress(self.program, 9)
+        compressed_program = deflate.zlib_compress(self.program, 12)
         of.write(struct.pack("<L", len(compressed_program)))
-        of.write(struct.pack("<L", zlib.crc32(compressed_program)))
+        of.write(struct.pack("<L", deflate.crc32(compressed_program)))
 
         of.write(self.reserved)
         of.write(compressed_program)
