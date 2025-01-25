@@ -14,7 +14,7 @@ LICENSES = [
     ("nugget", "psexe/nugget/LICENSE"),
     ("REDriver2", "psexe/xmplay/src/LICENSE.REDriver2") if XMPLAY_VARIANT == "redriver2" else (None, None)
 ]
-USE_ZOPFLI = sys.argv[3] == "1" if len(sys.argv) > 3 else True
+USE_ZOPFLI = sys.argv[3] == "1" if len(sys.argv) > 3 else False
 
 
 # cd to script directory / .. because otherwise everything will explode
