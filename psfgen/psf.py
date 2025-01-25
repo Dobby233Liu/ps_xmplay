@@ -104,7 +104,7 @@ class PSF():
         if use_zopfli:
             if not zopfli:
                 raise RuntimeError("zopfli is not installed")
-            # Note that uncompressed data tend to be 100-200kb big so numiterations
+            # Note that uncompressed data tend to be 50-200kb big so numiterations
             # doesn't need to be too high
             compressed_program = zopfli.compress(self.program, numiterations=15, blocksplittinglast=1)
         else:
