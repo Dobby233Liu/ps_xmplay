@@ -31,6 +31,8 @@ def _load_driver() -> lief.ELF.Binary:
     lets_go_gambling_aw_dangit = lief.ELF.ParserConfig()
     lets_go_gambling_aw_dangit.parse_notes = False
     elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
+    if elf is None:
+        raise Exception("failed to load xmplayer.elf")
     return elf
 
 
@@ -45,7 +47,7 @@ def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: 
                     "XM_BUILTIN=true",
                     f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
                     f"XM_DIR={xm_dir}", f"XM={xm}",
-                    "clean-songdata", "all"], check=True)
+                    "all"], check=True)
     return _load_driver()
 
 def make_psflib_psf(exe: lief.ELF.Binary):

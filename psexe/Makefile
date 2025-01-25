@@ -8,6 +8,8 @@ XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
 XM_PANNING_S3M = 1
 
+XM_FILENAME_SYM = $(subst /,_,$(subst .,_,$(subst -,_,../songdata/$(XM_DIR)/$(XM))))
+
 ifeq ($(XM_BUILTIN),true)
 include song.mk
 endif
@@ -24,8 +26,9 @@ endif
 SRCS += debug.c \
 main.c \
 song.c
+
 ifeq ($(XM_BUILTIN),true)
-SRCS += song_$(XM)_xm.o song_$(XM)_vh.o song_$(XM)_vb.o
+LIBRARIES += song_$(XM_FILENAME_SYM)_xm.o song_$(XM_FILENAME_SYM)_vh.o song_$(XM_FILENAME_SYM)_vb.o
 endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
@@ -59,8 +62,6 @@ LDFLAGS += -lxmplay_46
 endif
 LDFLAGS += -Wl,--end-group
 
-include nugget/common.mk
-
 ifeq ($(XM_BUILTIN),true)
 define SONG_TO_OBJ
 	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section \
@@ -69,16 +70,25 @@ define SONG_TO_OBJ
 		-O $(FORMAT) -B mips $(1) $@
 endef
 
-song_$(XM)_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
+song_$(XM_FILENAME_SYM)_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
 	$(call SONG_TO_OBJ,$<,xm)
 
-song_$(XM)_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
+song_$(XM_FILENAME_SYM)_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
 	$(call SONG_TO_OBJ,$<,vh)
 
-song_$(XM)_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
+song_$(XM_FILENAME_SYM)_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
 	$(call SONG_TO_OBJ,$<,vb)
 
-.PHONY: clean-songdata
+# HACK to make sure the elf always rebuilds
+.PHONY: clean-songdata clean-fast $(BINDIR)$(TARGET).elf
+
 clean-songdata:
 	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
+
+clean-fast: clean-songdata
+	rm -f $(BINDIR)$(TARGET).elf
+
+clean: clean-songdata
 endif
+
+include nugget/common.mk
