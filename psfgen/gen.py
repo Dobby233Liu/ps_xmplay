@@ -10,7 +10,6 @@ import sys
 SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "test"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "redriver2"
 LICENSES = [
-    ("ps_xmplay", "LICENSE"),
     ("nugget", "psexe/nugget/LICENSE"),
     ("REDriver2", "psexe/xmplay/src/LICENSE.REDriver2") if XMPLAY_VARIANT == "redriver2" else (None, None)
 ]
