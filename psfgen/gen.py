@@ -56,7 +56,7 @@ def main():
                 print(song_name)
 
             # TODO: variant setting should not be here
-            lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT), info.get("worse_timing", False))
+            lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT))
             if not making_psf:
                 lib_psf = modify_driver.make_psflib_psf(lib)
                 with open(f"{outdir}/{lib_fn}", "wb") as libf:
