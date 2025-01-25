@@ -12,7 +12,7 @@ XMPLAY.C
 #include <abs.h>
 #include <libspu.h>
 
-//#define SOME_KIND_OF_DREAM
+#define SOME_KIND_OF_DREAM
 
 #include "xmplay.h"
 #include "xmcalls.h"
@@ -3200,9 +3200,33 @@ void XM_SetFileHeaderAddress(u_char *Address)
 }
 
 
-
+// The following doesn't exist in the original distribution
 
 void XM_FreeFileHeaderID()
 {
 	XM_HA = 0;
+}
+
+int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
+{
+	if (Feedback == 0 || (SongID < 0 || SongID >= XM_NSA))
+		return 0;
+    if (XMSongIDs[SongID] == -1)
+        return 0;
+
+	XMSONG *ms = (XMSONG*)(XM_SngAddress[SongID]);
+	XMHEADER *mhu = (XMHEADER*)(XM_HeaderAddress[SongID]);
+	Feedback->Status = ms->XMPlay;
+	Feedback->SongPos = ms->SongPos;
+	Feedback->PatternPos = ms->PatternPos;
+	Feedback->SongBPM = ms->SongBPM;
+	Feedback->SongSpeed = ms->SongSpeed;
+	Feedback->SongLength = mhu->songlength;
+	Feedback->SongLoop = ms->SongLoop;
+	Feedback->Volume = ms->MasterVolume;
+	Feedback->Panning = ms->UserPan;
+	Feedback->ActiveVoices = ms->XMActiveVoices;
+	Feedback->PlayNext = ms->PlayNext;
+	Feedback->CurrentStart = ms->CurrentStart;
+	return 1;
 }

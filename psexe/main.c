@@ -100,14 +100,30 @@ void main() {
     assert(song_id != -1, "cant init song");
 
     VSyncCallback(XM_Update);
-    while (true)
-        asm("");
+    if (song_info.loop) {
+        // The song will never end, so let's idle to not confuse HE
+        while (true)
+            asm("");
+    } else {
+        XM_Feedback status;
+        while (true) {
+            assert(XM_GetFeedback(song_id, &status), "cant get feedback");
+            if (status.Status == XM_STOPPED)
+                break;
+        }
+    }
 
-    // TODO: let there be some way to reach this
-    // test/revx_unused1 ends in an absolutely ugly way otherwise
+    // Quit XMPlay
     XM_Exit();
+    VSyncCallback(NULL);
+
     free(file_header_addr);
     free(song_addr);
     XM_FreeAllSongIDs();
     XM_FreeFileHeaderID();
+
+    // Quit SPU processing
+    // For some reason XM_PlayStop doesn't kill all channels correctly
+    SpuSetKey(SPU_OFF, SPU_ALLCH);
+    SpuQuit();
 }
