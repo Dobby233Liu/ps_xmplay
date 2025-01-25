@@ -7,6 +7,10 @@ import struct
 from typing import Self, Any, Optional
 import deflate
 import datetime
+try:
+    import zopfli.zopfli as zopfli
+except ImportError:
+    pass
 
 
 class PSFType(enum.IntEnum):
@@ -92,12 +96,19 @@ class PSF():
             for key, value in tags.items()
         )
 
-    def write(self: Self, of: io.BytesIO) -> None:
+    def write(self: Self, of: io.BytesIO, use_zopfli: bool = False) -> None:
         of.write(self._magic + struct.pack("<B", self._type))
 
         of.write(struct.pack("<L", len(self.reserved)))
 
-        compressed_program = deflate.zlib_compress(self.program, 12)
+        if use_zopfli:
+            if not zopfli:
+                raise RuntimeError("zopfli is not installed")
+            # Note that uncompressed data tend to be 100-200kb big so numiterations
+            # doesn't need to be too high
+            compressed_program = zopfli.compress(self.program, numiterations=15, blocksplittinglast=1)
+        else:
+            compressed_program = deflate.zlib_compress(self.program, 12)
         of.write(struct.pack("<L", len(compressed_program)))
         of.write(struct.pack("<L", deflate.crc32(compressed_program)))
 

@@ -14,6 +14,7 @@ LICENSES = [
     ("nugget", "psexe/nugget/LICENSE"),
     ("REDriver2", "psexe/xmplay/src/LICENSE.REDriver2") if XMPLAY_VARIANT == "redriver2" else (None, None)
 ]
+USE_ZOPFLI = sys.argv[3] == "1" if len(sys.argv) > 3 else True
 
 
 # cd to script directory / .. because otherwise everything will explode
@@ -58,7 +59,7 @@ def main():
             if not making_psf:
                 lib_psf = modify_driver.make_psflib_psf(lib)
                 with open(f"{outdir}/{lib_fn}", "wb") as libf:
-                    lib_psf.write(libf)
+                    lib_psf.write(libf, use_zopfli=USE_ZOPFLI)
 
             if path.exists(path_timing):
                 with open(path_timing, "rb") as mod_f:
@@ -100,7 +101,7 @@ def main():
             psf1.tags["fade"] = info.get("fade", 10) if loop else 0
             psf1.tags["psfby"] = "ps_xmplay psfgen"
             psf1.tags["origfilename"] = song_name
-            psf1.write(outf)
+            psf1.write(outf, use_zopfli=USE_ZOPFLI)
 
     with open(f"{outdir}/!3RD_LICENSES.txt", "w") as f:
         for (sw_name, license_fp) in LICENSES:
