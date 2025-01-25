@@ -42,7 +42,7 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 
 done:
     if (vab_id_libsnd >= 0) SsVabClose(vab_id_libsnd);
-    if (vab_id_xmplay != -1 && ret == -1) XM_CloseVAB2(vab_id_xmplay);
+    if (vab_id_xmplay != -1 && ret == -1) XM_CloseVAB(vab_id_xmplay);
     SsQuit();
     return ret;
 }
