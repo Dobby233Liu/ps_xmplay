@@ -1938,7 +1938,7 @@ void XM_DoFullUpdate(int SC)
 			ApplyEffs();
 		}
 /*#ifdef SOME_KIND_OF_DREAM
-		if (catching_up)
+		if (!catching_up)
 #endif*/
 			ms->JUp = 0;					/* Clear update flag */
 
