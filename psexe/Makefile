@@ -1,5 +1,6 @@
 TARGET = xmplayer
 TYPE = ps-exe
+BUILD ?= LTO
 
 XM_BUILTIN ?= true
 XM_DIR ?= retail
@@ -18,6 +19,8 @@ XM_PANNING_TYPE ?= $(XM_PANNING_XM)
 
 SONG_DIR = ../songdata/$(XM_DIR)/
 XM_FILENAME_SYM = $(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR)/$(XM))))
+# HACK to make sure the change is reflected
+TARGET = xmplayer_$(XM_FILENAME_SYM)
 endif
 
 XMPLAY_VARIANT ?= sbspss
@@ -87,16 +90,12 @@ song_$(XM_FILENAME_SYM)_vh.o: $(SONG_DIR)$(XM).vh
 song_$(XM_FILENAME_SYM)_vb.o: $(SONG_DIR)$(XM).vb
 	$(call SONG_TO_OBJ,$<,vb)
 
-ifeq ($(FROM_PSFGEN),true)
-# HACK so that the driver is always rebuilt
-.PHONY: .FORCE
-.FORCE:
-$(BINDIR)$(TARGET).elf: .FORCE
-endif
-
 .PHONY: clean-songdata
 clean-songdata:
 	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
 
-clean: clean-songdata
+clean-all-exe:
+	rm -f xmplayer_*.elf xmplayer_*.ps-exe
+
+clean: clean-songdata clean-all-exe
 endif

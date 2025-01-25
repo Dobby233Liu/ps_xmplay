@@ -33,27 +33,26 @@ class SongInfoStruct(LittleEndianStructure):
         self.version = SONGINFO_VERSION
 
 
-def _load_driver() -> lief.ELF.Binary:
+def _load_driver(xm_dir: str, xm: str) -> lief.ELF.Binary:
     lets_go_gambling_aw_dangit = lief.ELF.ParserConfig()
     lets_go_gambling_aw_dangit.parse_notes = False
-    elf: lief.ELF.Binary = lief.ELF.parse("psexe/xmplayer.elf", lets_go_gambling_aw_dangit)
+    diff_mark = f"{xm_dir}_{xm}".replace('/', '_').replace('.', '_').replace('-', '_')
+    elf: lief.ELF.Binary = lief.ELF.parse(f"psexe/xmplayer_{diff_mark}.elf", lets_go_gambling_aw_dangit)
     if elf is None:
-        raise Exception("failed to load xmplayer.elf")
+        raise Exception("failed to load driver ELF")
     return elf
 
 
 def _clean_src() -> lief.ELF.Binary:
-    subprocess.run(["make", "-C", "psexe", "BUILD=LTO",
-                    "XM_BUILTIN=true",
+    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true",
                     "clean"], check=True)
 
 
 def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss", worse_timing: Optional[bool] = False) -> lief.ELF.Binary:
-    subprocess.run(["make", "-C", "psexe", "BUILD=LTO",
-                    "XM_BUILTIN=true",
+    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true",
                     f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
-                    f"XM_DIR={xm_dir}", f"XM={xm}", "FROM_PSFGEN=true"], check=True)
-    return _load_driver()
+                    f"XM_DIR={xm_dir}", f"XM={xm}"], check=True)
+    return _load_driver(xm_dir, xm)
 
 def make_psflib_psf(exe: lief.ELF.Binary):
     with psexe.elf_to_psexe(exe) as p:
