@@ -117,9 +117,8 @@ class PSF():
 
         tags = self._build_tags()
         if tags:
-            tags = tags.encode("utf-8")
             of.write(b"[TAG]")
-            of.write(tags)
+            of.write(tags.encode("utf-8"))
 
 
 class PSF1RefreshRates(enum.IntEnum):
