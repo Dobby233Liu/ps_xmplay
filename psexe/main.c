@@ -11,10 +11,12 @@
 #include "debug.h"
 
 
-static unsigned long heap[0x800] = {0};
+static char heap[0x2000] = {0};
 
-#define MAX_SPU_BANKS 0x80 // max for 1 file. SBSPSS uses 200 likely to accomodate the use of SFXs
-static unsigned char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
+// max in one VAB allowed by xmplay
+// SBSPSS uses 200 likely to accomodate the use of SFXs
+#define MAX_SPU_BANKS 0x80
+static char spu_heap[SPU_MALLOC_RECSIZ * (MAX_SPU_BANKS + 1)] = {0};
 
 
 #ifdef XMPLAY_VARIANT_REDRIVER2
@@ -32,6 +34,7 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     VabHdr vh;
     if (SsUtGetVabHdr(vab_id_libsnd, &vh) != 0) goto done;
 
+    assert(vh.vs <= 0x80, "too many voices");
     for (int i = 0; i < vh.vs; i++)
         XM_SetVAGAddress(vab_id_xmplay, i, SsUtGetVagAddr(vab_id_libsnd, i + 1));
 
@@ -54,7 +57,7 @@ void main() {
     assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "invalid vab");
 
     int crit_section_already_entered = enterCriticalSection();
-    InitHeap(heap, sizeof(heap) * sizeof(unsigned long));
+    InitHeap((unsigned long*)heap, sizeof(heap));
     if (!crit_section_already_entered) leaveCriticalSection();
 
 #ifndef XMPLAY_WORSE_TIMING

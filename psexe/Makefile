@@ -62,13 +62,18 @@ LDFLAGS += -lxmplay_46
 endif
 LDFLAGS += -Wl,--end-group
 
+include nugget/common.mk
+
 ifeq ($(XM_BUILTIN),true)
 define SONG_TO_OBJ
-	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section \
-		.data=.rodata,alloc,load,readonly,data,contents \
+	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 \
+		--rename-section .data=.rodata,alloc,load,readonly,data,contents \
 		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(subst -,_,$(1))))_start=_song_$(2)_start \
 		-O $(FORMAT) -B mips $(1) $@
 endef
+
+# HACK so that the driver is always rebuilt
+.PHONY: song_$(XM_FILENAME_SYM)_xm.o
 
 song_$(XM_FILENAME_SYM)_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
 	$(call SONG_TO_OBJ,$<,xm)
@@ -79,8 +84,7 @@ song_$(XM_FILENAME_SYM)_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
 song_$(XM_FILENAME_SYM)_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
 	$(call SONG_TO_OBJ,$<,vb)
 
-# HACK to make sure the elf always rebuilds
-.PHONY: clean-songdata clean-fast $(BINDIR)$(TARGET).elf
+.PHONY: clean-songdata clean-fast
 
 clean-songdata:
 	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
@@ -90,5 +94,3 @@ clean-fast: clean-songdata
 
 clean: clean-songdata
 endif
-
-include nugget/common.mk

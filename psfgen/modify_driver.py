@@ -15,8 +15,10 @@ class XMPanningType(IntEnum):
     XM = 0
     S3M = 1
 
+SONGINFO_VERSION = 1
 class SongInfoStruct(LittleEndianStructure):
     _fields_ = [
+        ("version", c_int32),
         ("pxm_ptr", c_uint32),
         ("vh_ptr", c_uint32),
         ("vb_ptr", c_uint32),
@@ -25,6 +27,10 @@ class SongInfoStruct(LittleEndianStructure):
         ("position", c_int32),
         ("panning_type", c_int32),
     ]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.version = SONGINFO_VERSION
 
 
 def _load_driver() -> lief.ELF.Binary:
@@ -46,8 +52,7 @@ def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: 
     subprocess.run(["make", "-C", "psexe", "BUILD=LTO",
                     "XM_BUILTIN=true",
                     f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
-                    f"XM_DIR={xm_dir}", f"XM={xm}",
-                    "all"], check=True)
+                    f"XM_DIR={xm_dir}", f"XM={xm}"], check=True)
     return _load_driver()
 
 def make_psflib_psf(exe: lief.ELF.Binary):
@@ -68,6 +73,7 @@ def make_patched_songinfo(exe: lief.ELF.Binary, type: XMType, loop: bool, positi
     assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
 
     info_struct = SongInfoStruct.from_buffer_copy(exe.get_content_from_virtual_address(song_info.value, sizeof(SongInfoStruct)))
+    assert info_struct.version == SONGINFO_VERSION, "song_info is not version %d" % SONGINFO_VERSION
     info_struct.type = type
     info_struct.loop = loop
     info_struct.position = position

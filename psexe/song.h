@@ -2,7 +2,9 @@
 #include <stddef.h>
 #pragma once
 
-struct _song_info {
+struct _song_info_t {
+    int version;
+
     unsigned char *pxm_ptr;
     unsigned char *vh_ptr;
     unsigned char *vb_ptr;
@@ -12,7 +14,8 @@ struct _song_info {
     int position;
     int panning_type;
 };
-extern struct _song_info song_info;
+typedef struct _song_info_t song_info_t;
+extern song_info_t song_info __attribute__((__used__));
 
 #ifdef XM_BUILTIN
 extern unsigned char _song_xm_start[];

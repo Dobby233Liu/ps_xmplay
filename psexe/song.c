@@ -1,8 +1,10 @@
 #include <xmplay.h>
 #include "song.h"
 
-struct _song_info song_info __attribute__((__used__)) =
+song_info_t song_info __attribute__((__used__)) =
 {
+    .version = 1,
+
 #ifdef XM_BUILTIN
     .pxm_ptr = _song_xm_start,
     .vh_ptr = _song_vh_start,
