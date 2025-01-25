@@ -52,7 +52,7 @@ def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: 
     subprocess.run(["make", "-C", "psexe", "BUILD=LTO",
                     "XM_BUILTIN=true",
                     f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
-                    f"XM_DIR={xm_dir}", f"XM={xm}"], check=True)
+                    f"XM_DIR={xm_dir}", f"XM={xm}", "FROM_PSFGEN=true"], check=True)
     return _load_driver()
 
 def make_psflib_psf(exe: lief.ELF.Binary):

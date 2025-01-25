@@ -8,10 +8,16 @@ XM_TYPE_SFX = 1
 XM_PANNING_XM = 0
 XM_PANNING_S3M = 1
 
-XM_FILENAME_SYM = $(subst /,_,$(subst .,_,$(subst -,_,../songdata/$(XM_DIR)/$(XM))))
-
 ifeq ($(XM_BUILTIN),true)
-include song.mk
+XM ?= chapter1
+
+XM_TYPE ?= $(XM_TYPE_MUSIC)
+XM_LOOP ?= 1
+XM_POSITION ?= 0
+XM_PANNING_TYPE ?= $(XM_PANNING_XM)
+
+SONG_DIR = ../songdata/$(XM_DIR)/
+XM_FILENAME_SYM = $(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR)/$(XM))))
 endif
 
 XMPLAY_VARIANT ?= sbspss
@@ -28,7 +34,7 @@ main.c \
 song.c
 
 ifeq ($(XM_BUILTIN),true)
-LIBRARIES += song_$(XM_FILENAME_SYM)_xm.o song_$(XM_FILENAME_SYM)_vh.o song_$(XM_FILENAME_SYM)_vb.o
+OBJS += song_$(XM_FILENAME_SYM)_xm.o song_$(XM_FILENAME_SYM)_vh.o song_$(XM_FILENAME_SYM)_vb.o
 endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
@@ -72,25 +78,25 @@ define SONG_TO_OBJ
 		-O $(FORMAT) -B mips $(1) $@
 endef
 
-# HACK so that the driver is always rebuilt
-.PHONY: song_$(XM_FILENAME_SYM)_xm.o
-
-song_$(XM_FILENAME_SYM)_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
+song_$(XM_FILENAME_SYM)_xm.o: $(SONG_DIR)$(XM).xm
 	$(call SONG_TO_OBJ,$<,xm)
 
-song_$(XM_FILENAME_SYM)_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
+song_$(XM_FILENAME_SYM)_vh.o: $(SONG_DIR)$(XM).vh
 	$(call SONG_TO_OBJ,$<,vh)
 
-song_$(XM_FILENAME_SYM)_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
+song_$(XM_FILENAME_SYM)_vb.o: $(SONG_DIR)$(XM).vb
 	$(call SONG_TO_OBJ,$<,vb)
 
-.PHONY: clean-songdata clean-fast
+ifeq ($(FROM_PSFGEN),true)
+# HACK so that the driver is always rebuilt
+.PHONY: .FORCE
+.FORCE:
+$(BINDIR)$(TARGET).elf: .FORCE
+endif
 
+.PHONY: clean-songdata
 clean-songdata:
 	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
-
-clean-fast: clean-songdata
-	rm -f $(BINDIR)$(TARGET).elf
 
 clean: clean-songdata
 endif
