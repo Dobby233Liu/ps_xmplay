@@ -102,7 +102,7 @@ def main():
                 psf1.tags["length"] = song_length
             psf1.tags["fade"] = info.get("fade", 10) if loop else 0
             psf1.tags["psfby"] = "ps_xmplay psfgen"
-            psf1.tags["origfilename"] = song_name
+            #psf1.tags["origfilename"] = song_name
             psf1.write(outf, use_zopfli=USE_ZOPFLI)
 
     with open(f"{outdir}/!3RD_LICENSES.txt", "w") as f:
