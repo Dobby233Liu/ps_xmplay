@@ -24,7 +24,6 @@ TARGET = xmplayer_$(XM_FILENAME_SYM)
 endif
 
 XMPLAY_VARIANT ?= sbspss
-XMPLAY_WORSE_TIMING ?=
 
 SRCS = \
 nugget/common/crt0/crt0.s \
@@ -48,9 +47,6 @@ endif
 
 ifeq ($(XMPLAY_VARIANT),sbspss)
 CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
-ifneq ($(XMPLAY_WORSE_TIMING),)
-CPPFLAGS += -DXMPLAY_WORSE_TIMING # HACK regret this
-endif
 endif
 ifeq ($(XMPLAY_VARIANT),redriver2)
 CPPFLAGS += -DXMPLAY_VARIANT_REDRIVER2

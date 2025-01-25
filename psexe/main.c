@@ -60,9 +60,7 @@ void main() {
     InitHeap((unsigned long*)heap, sizeof(heap));
     if (!crit_section_already_entered) leaveCriticalSection();
 
-#ifndef XMPLAY_WORSE_TIMING
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
-#endif
 
     SpuInit();
 
@@ -101,16 +99,9 @@ void main() {
     );
     assert(song_id != -1, "cant init song");
 
-#ifndef XMPLAY_WORSE_TIMING
     VSyncCallback(XM_Update);
     while (true)
         asm("");
-#else
-    while (true) {
-        XM_Update();
-        VSync(0);
-    }
-#endif
 
     // TODO: let there be some way to reach this
     // test/revx_unused1 ends in an absolutely ugly way otherwise

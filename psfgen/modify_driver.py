@@ -48,9 +48,9 @@ def _clean_src() -> lief.ELF.Binary:
                     "clean"], check=True)
 
 
-def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss", worse_timing: Optional[bool] = False) -> lief.ELF.Binary:
+def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss") -> lief.ELF.Binary:
     subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true",
-                    f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_WORSE_TIMING=true" if worse_timing else "",
+                    f"XMPLAY_VARIANT={xmplay_variant}",
                     f"XM_DIR={xm_dir}", f"XM={xm}"], check=True)
     return _load_driver(xm_dir, xm)
 
@@ -60,8 +60,8 @@ def make_psflib_psf(exe: lief.ELF.Binary):
         psf1.program = p.read()
     return psf1
 
-def make_psflib(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss", worse_timing: Optional[bool] = False) -> Union[lief.ELF.Binary, psf.PSF1]:
-    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant, worse_timing)
+def make_psflib(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss") -> Union[lief.ELF.Binary, psf.PSF1]:
+    exe = _make_psflib_elf(xm, xm_dir, xmplay_variant)
     return exe, make_psflib_psf(exe)
 
 
