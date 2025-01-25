@@ -15,8 +15,6 @@ endif
 XMPLAY_VARIANT ?= sbspss
 XMPLAY_WORSE_TIMING ?=
 
-SONGDATA_OBJS = song_xm.o song_vh.o song_vb.o
-
 SRCS = \
 nugget/common/crt0/crt0.s \
 nugget/common/syscalls/printf.s
@@ -27,13 +25,12 @@ SRCS += debug.c \
 main.c \
 song.c
 ifeq ($(XM_BUILTIN),true)
-SRCS += $(SONGDATA_OBJS)
+SRCS += song_$(XM)_xm.o song_$(XM)_vh.o song_$(XM)_vb.o
 endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
 ifeq ($(XM_BUILTIN),true)
-CPPFLAGS += -DXM_DIR="$(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR))))" -DXM_FILENAME="$(subst .,_,$(subst -,_,$(XM)))" \
--DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
+CPPFLAGS += -DXM_BUILTIN=1 -DXM_TYPE="$(XM_TYPE)" -DXM_LOOP="$(XM_LOOP)" \
 -DXM_POSITION="$(XM_POSITION)" -DXM_PANNING_TYPE="$(XM_PANNING_TYPE)"
 endif
 
@@ -66,21 +63,22 @@ include nugget/common.mk
 
 ifeq ($(XM_BUILTIN),true)
 define SONG_TO_OBJ
-	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section .data=.rodata,alloc,load,readonly,data,contents -O $(FORMAT) -B mips $(1) $@
+	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 --rename-section \
+		.data=.rodata,alloc,load,readonly,data,contents \
+		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(subst -,_,$(1))))_start=_song_$(2)_start \
+		-O $(FORMAT) -B mips $(1) $@
 endef
 
-# FIXME: can't rebuild with the XM filename changed
+song_$(XM)_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
+	$(call SONG_TO_OBJ,$<,xm)
 
-song_xm.o: ../songdata/$(XM_DIR)/$(XM).xm
-	$(call SONG_TO_OBJ,$<)
+song_$(XM)_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
+	$(call SONG_TO_OBJ,$<,vh)
 
-song_vh.o: ../songdata/$(XM_DIR)/$(XM).vh
-	$(call SONG_TO_OBJ,$<)
-
-song_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
-	$(call SONG_TO_OBJ,$<)
+song_$(XM)_vb.o: ../songdata/$(XM_DIR)/$(XM).vb
+	$(call SONG_TO_OBJ,$<,vb)
 
 .PHONY: clean-songdata
 clean-songdata:
-	rm -f $(SONGDATA_OBJS)
+	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
 endif

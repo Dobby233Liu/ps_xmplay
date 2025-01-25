@@ -8,15 +8,10 @@
       "defines": [
         "__STDC_HOSTED__ = 0",
         "XM_BUILTIN",
-        "XM_DIR",
-        "XM_FILENAME",
         "XM_TYPE",
         "XM_LOOP",
         "XM_POSITION",
         "XM_PANNING_TYPE",
-        "MAX_PXM_SIZE",
-        "MAX_VH_SIZE",
-        "MAX_VB_SIZE",
         "XMPLAY_VARIANT_REDRIVER2"
       ],
       "includePath": [
@@ -36,15 +31,10 @@
       "defines": [
         "__STDC_HOSTED__ = 0",
         "XM_BUILTIN",
-        "XM_DIR",
-        "XM_FILENAME",
         "XM_TYPE",
         "XM_LOOP",
         "XM_POSITION",
         "XM_PANNING_TYPE",
-        "MAX_PXM_SIZE",
-        "MAX_VH_SIZE",
-        "MAX_VB_SIZE",
         "XMPLAY_VARIANT_REDRIVER2"
       ],
       "includePath": [

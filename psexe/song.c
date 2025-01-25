@@ -3,10 +3,10 @@
 
 struct _song_info song_info __attribute__((__used__)) =
 {
-#ifdef XM_FILENAME
-    .pxm_ptr = PXM_FILE,
-    .vh_ptr = VH_FILE,
-    .vb_ptr = VB_FILE,
+#ifdef XM_BUILTIN
+    .pxm_ptr = _song_xm_start,
+    .vh_ptr = _song_vh_start,
+    .vb_ptr = _song_vb_start,
 
     .type = XM_TYPE,
     .loop = XM_LOOP,

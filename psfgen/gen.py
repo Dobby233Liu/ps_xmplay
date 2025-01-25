@@ -23,6 +23,8 @@ os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
 
 
 def main():
+    modify_driver._clean_src()
+
     with open(f"songdata/{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
 
