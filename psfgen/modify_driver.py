@@ -55,7 +55,7 @@ def make_psflib(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optio
 def make_patched_songinfo(exe: lief.ELF.Binary, type: XMType, loop: bool, position: int, panning_type: XMPanningType) \
     -> Union[lief.ELF.Symbol, SongInfoStruct]:
     song_info: lief.ELF.Symbol = exe.get_symbol("song_info")
-    assert song_info and song_info.type == lief.ELF.SYMBOL_TYPES.OBJECT, "cannot find song_info"
+    assert song_info and song_info.type == lief.ELF.Symbol.TYPE.OBJECT, "cannot find song_info"
     assert song_info.size == sizeof(SongInfoStruct), "song_info is not the right size"
 
     info_struct = SongInfoStruct.from_buffer_copy(exe.get_content_from_virtual_address(song_info.value, sizeof(SongInfoStruct)))
