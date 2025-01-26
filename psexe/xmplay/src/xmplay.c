@@ -1434,17 +1434,11 @@ SetInstr
 	Set instrument if new one to be processed
 	Copy values from XM data (transpose, fine,volume...)
 *****************************************************************************/
-
 void SetInstr(u_char inst)
 {
 	u_long *j;
 	u_char j2;
 	short ddd;
-
-	//	if (ms->SongPos==4)
-	//	{
-	//		inst+=0;
-	//	}
 
 	if (CurrentCh > 23)
 		return;
@@ -1461,22 +1455,25 @@ void SetInstr(u_char inst)
 
 	XMC->sample = inst;
 
-	/*
-		j=mh->JAP_InstrumentOffset[inst];
-		j2=*((u_char*)j+(XMC->note+33));
-		j3=*((u_char*)j);
+/*#ifdef XMPLAY_ENABLE_FIXES
+// unfortuaturely XM2PSX doesn't preserve the variant samples
+	u_char *inst_info = (u_char*)mh->JAP_InstrumentOffset[inst];
+	u_char sample_cand = *(inst_info + 33 + XMC->note);
 
-		if (j2!=0)
-		{
-			ddd=243*j2;			// Not using instrument 0
-		}
-	//	if (j2>=j3)
-	//		return;
-	*/
+	if (sample_cand != 0)
+	{
+		XMC->sample = sample_cand - 1;
+	}
+#endif*/
 
 	j = mh->JAP_SampHdrAddr[inst];
 	if (j == (u_long*)0x01234567)
 		return;
+/*#ifdef XMPLAY_ENABLE_FIXES
+	// !!BROKEN!!
+	if (XMC->sample > inst)
+		j += *(inst_info + 29) * (XMC->sample - inst);
+#endif*/
 
 	j2 = *((u_char*)j + 12);
 	XMC->tmpvolume = j2 + 64;
@@ -2911,8 +2908,6 @@ PlaySFX
 ****************************************************************************/
 void PlaySFX(int VBID,int Channel,int Inst,int Pitch,int LV,int RV)
 {
-	int a;
-
 	/* Mask which specific voice attributes are to be set */
 	xm_g_s_attr.mask = (SPU_VOICE_VOLL |
 						SPU_VOICE_VOLR | 
@@ -2924,8 +2919,6 @@ void PlaySFX(int VBID,int Channel,int Inst,int Pitch,int LV,int RV)
 	xm_g_s_attr.volume.left  = LV; 
 	xm_g_s_attr.volume.right = RV; 
 	xm_g_s_attr.pitch        = Pitch; 
-	a=xm_l_vag_spu_addr[VBID][Inst]; 
-	a=xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset; 
 
 	xm_g_s_attr.addr         = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset; 
 	xm_g_s_attr.loop_addr    = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset; 
