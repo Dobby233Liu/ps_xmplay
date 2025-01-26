@@ -24,6 +24,7 @@ TARGET = xmplayer_$(XM_FILENAME_SYM)
 endif
 
 XMPLAY_VARIANT ?= sbspss
+XMPLAY_ENABLE_FIXES ?=
 
 SRCS = \
 nugget/common/crt0/crt0.s \
@@ -50,6 +51,9 @@ CPPFLAGS += -DXMPLAY_VARIANT_SBSPSS
 endif
 ifeq ($(XMPLAY_VARIANT),redriver2)
 CPPFLAGS += -DXMPLAY_VARIANT_REDRIVER2
+ifneq ($(XMPLAY_ENABLE_FIXES),)
+CPPFLAGS += -DSOME_KIND_OF_DREAM
+endif
 endif
 
 #CPPFLAGS += -Wall -Wno-unused-function

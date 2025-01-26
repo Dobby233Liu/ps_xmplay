@@ -48,9 +48,9 @@ def _clean_src() -> lief.ELF.Binary:
                     "clean"], check=True)
 
 
-def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss") -> lief.ELF.Binary:
+def _make_psflib_elf(xm: str, xm_dir: Optional[str] = "retail", xmplay_variant: Optional[str] = "sbspss", xmplay_enable_fixes: bool = False) -> lief.ELF.Binary:
     subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true",
-                    f"XMPLAY_VARIANT={xmplay_variant}",
+                    f"XMPLAY_VARIANT={xmplay_variant}", f"XMPLAY_ENABLE_FIXES=true" if xmplay_enable_fixes else "",
                     f"XM_DIR={xm_dir}", f"XM={xm}"], check=True)
     return _load_driver(xm_dir, xm)
 
