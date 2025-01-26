@@ -140,5 +140,6 @@ void main() {
     SpuSetKey(SPU_OFF, SPU_ALLCH);
     SpuQuit();
 
-    pcsx_exit(-1);
+    pcsx_exit(0);
+    syscall__exit(0);
 }

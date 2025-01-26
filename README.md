@@ -56,7 +56,8 @@ Output goes in out/ folder
 ## Flaws
 
 Compatibility with emulators is spotty.
-* **OK:** Mednafen (foo_input_mdfnpsf and standalone), DuckStation, PCSX-Redux, Highly Experimental
+* **OK:** Mednafen (standalone), DuckStation, PCSX-Redux, Highly Experimental
+** foo_input_mdfnpsf is broken in main somehow
 * **No:** Play! (PsfPlayer)
 * **Unknown:** nocash, psxfin
 
