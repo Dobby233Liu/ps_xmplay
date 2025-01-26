@@ -70,14 +70,14 @@ but has some glaring bugs you can hear. REDriver2's appears to be adapted from
 
 Other known issues include:
 - Timing code is off, so the speed of the playback might not be what you except.
-  If you enable SOME_KIND_OF_DREAM, there will be a mitigation.
+  If you enable XMPLAY_ENABLE_FIXES, there will be a mitigation.
 - As Jason Page said in the readme of the PS2 version, using very short looping
   samples will cause them to be detuned. He said this is related to the ADPCM format,
   so encoding the VAB differently might help?
 - E1/E2 works incorrectly. If you use the REDriver2 lib, you can manually enable
-  SOME_KIND_OF_DREAM in xmplay.c to fix it, which also enables support for the
+  XMPLAY_ENABLE_FIXES in xmplay.c to fix it, which also enables support for the
   finer portamento adjusting commands.
-- Not all commands are implemented. SOME_KIND_OF_DREAM mode implements some more.
+- Not all commands are implemented. XMPLAY_ENABLE_FIXES mode implements some more.
 - If a non-looping track doesn't stop properly, the driver will not try to stop it
   by itself.
 

@@ -136,7 +136,7 @@ void main() {
     XM_FreeAllFileHeaderIDs();
 
     // Quit SPU processing
-#ifndef SOME_KIND_OF_DREAM
+#ifndef XMPLAY_ENABLE_FIXES
     // Calling XM_Exit is not enough to make sure all channels are keyed off
     SpuSetKey(SPU_OFF, SPU_ALLCH);
 #endif

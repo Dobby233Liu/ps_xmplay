@@ -2,7 +2,6 @@ from abc import abstractmethod
 import collections
 import enum
 import io
-from math import floor
 import struct
 from typing import Self, Any, Optional
 import deflate
@@ -138,3 +137,9 @@ class PSF1(PSF):
         ret = super()._build_tags_internal()
         ret.update({ "_refresh": self.refresh_rate })
         return ret
+
+    def write(self: Self, *args, **kwargs) -> None:
+        if len(self.program) > 0x1F0800:
+            raise Exception("Program is too big")
+
+        super().write(*args, **kwargs)

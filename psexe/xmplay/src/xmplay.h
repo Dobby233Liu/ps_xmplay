@@ -93,7 +93,7 @@ typedef struct _XMCHANNEL {
 	u_char oldvslide;
 	u_char oldfvslide;
 	u_char oldfslide;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	u_char oldfslidex;
 #endif
 	short fadevol;		/* fading volume */
@@ -115,7 +115,7 @@ typedef struct _XMCHANNEL {
 	short UserVol;
 	char retrig;		/* retrig value (0 means don't retrig) */
 	u_short c2spd;		/* what finetune to use */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	u_char ovrfine;	/* current finetune value overrided by E5x */
 #endif
 	u_char tmpvolume;	/* tmp volume  JAP */
@@ -161,7 +161,7 @@ typedef struct _XMSONG {
 	int	  SongLoop;         /* loop module ? */
 	u_char  SongVolume;	     /* song volume (0-128) */
 	u_char  MasterVolume;	     /* song volume (0-128) */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	u_char	oldvslide;
 #endif
 	int	  XMActiveVoices;	  /* number of voices currently playing */
@@ -305,7 +305,7 @@ void Arpeggio(u_char dat); // 0x00086738
 
 void DoVolSlide(u_char dat); // 0x000865B4
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 void DoGlobalVolSlide(u_char dat);
 #endif
 

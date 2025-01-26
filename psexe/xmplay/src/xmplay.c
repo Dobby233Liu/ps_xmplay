@@ -512,7 +512,7 @@ void XM_OnceOffInit(int PAL)
 {
 	XM_NSA = 0;
 	JP_Do_Nothing = 0;				/* Allow XM_Update to process */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	for (int i = 0; i < 24; i++)
 	{
 		// Since the addresses are externally allocated this doesn't make sense
@@ -887,7 +887,7 @@ u_char dat=0;
 				break;
 
 			case 'H'-55:                    /* H - global volume slide */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 				if (dat==0)
 					dat=ms->oldvslide;
 				ms->oldvslide=dat;
@@ -897,14 +897,14 @@ u_char dat=0;
 
 			case 'K'-55:                    /* K - keyoff */
 				// UNIMPLEMENTED: After xx ticks
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 				if(!ms->vbtick)
 #endif
 					SetNote(96);
 				break;
 
 			case 'L'-55:                    /* L - set envelope position */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 				if(!ms->vbtick)
 				{
 					XMC->envp = dat; // whatever
@@ -915,7 +915,7 @@ u_char dat=0;
 				break;
 
 			case 'P'-55:                    /* P - panning slide */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 				DoXMPanSlide(dat);
 #else
 				XMC->panning=dat;
@@ -931,7 +931,7 @@ u_char dat=0;
 				break;
 
 			case 'X'-55:
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 				u_char hi = dat>>4;
 				if (hi > 2) break;
 				u_char nib = dat&0xf;
@@ -1160,18 +1160,18 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINESLD_UP:			/* 1 Fineslide up */
-#ifndef SOME_KIND_OF_DREAM
+#ifndef XMPLAY_ENABLE_FIXES
 		if (!ms->vbtick)
 		{
 #endif
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		if (!ms->vbtick)
 		{
 #endif
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 			XMC->tmpperiod -= (nib << 2);
 #else
 			XMC->tmpperiod += (nib << 2);
@@ -1180,18 +1180,18 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINESLD_DOWN:		/* 2 Fineslide down */
-#ifndef SOME_KIND_OF_DREAM
+#ifndef XMPLAY_ENABLE_FIXES
 		if (!ms->vbtick)
 		{
 #endif
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		if (!ms->vbtick)
 		{
 #endif
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 			XMC->tmpperiod += (nib << 2);
 #else
 			XMC->tmpperiod -= (nib << 2);
@@ -1210,7 +1210,7 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINETUNE:			/* 5 Set finetune */
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		XMC->ovrfine = (nib + 0x80) & 0xff;
 #endif
 		break;
@@ -1329,7 +1329,7 @@ void SetNote(u_char note)
 	if (note == 96)
 	{
 		XMC->keyon = 0;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		XMC->ovrfine = 0;
 #endif
 		if (XMC->sample == 254)
@@ -1423,7 +1423,7 @@ void SetInstr(u_char inst)
 	ddd += 128;
 	XMC->c2spd = ddd;
 	XMC->c2spd &= 255;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	XMC->ovrfine = 0;
 #endif
 
@@ -1450,7 +1450,7 @@ void SetPer(void)
 
 	//	a+=jtt;
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	period = GetPeriod(a, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
 #else
 	period = GetPeriod(a, XMC->c2spd);
@@ -1525,7 +1525,7 @@ void Arpeggio(u_char dat)
 			note += (dat & 0xf);
 			break;
 		}
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
 #else
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->c2spd);
@@ -1551,7 +1551,7 @@ void DoVolSlide(u_char dat)
 	if (XMC->tmpvolume < 64) XMC->tmpvolume = 64;
 }
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 /*****************************************************************************
 DoGlobalVolSlide
 	EFFECT - Either +/- 0-0xf to volume
@@ -1872,7 +1872,7 @@ void UpdateXMData(void)
 }
 
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 static void PerformUpdate(int SC, int catching_up);
 #endif
 
@@ -1905,7 +1905,7 @@ void UpdateWithTimer(int SC)
 		}
 		return;
 	}
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	/* YES! Update song/hardware */
 	while (ms->JBPM>=BPMLimit)
 	{
@@ -1920,7 +1920,7 @@ void UpdateWithTimer(int SC)
 
 
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 static void PerformUpdate(int SC, int catching_up)
 #else
 void XM_DoFullUpdate(int SC)
@@ -1937,17 +1937,18 @@ void XM_DoFullUpdate(int SC)
 			UpdateEffs();			/* Do this if not done before in spare frame*/
 			ApplyEffs();
 		}
-/*#ifdef SOME_KIND_OF_DREAM
-		if (!catching_up)
-#endif*/
-			ms->JUp = 0;					/* Clear update flag */
+		ms->JUp = 0;					/* Clear update flag */
 
-/*#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		if (!catching_up)
-#endif*/
+		{
+#endif
 			UpdateHardware();			/* Update SPU */
 		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
 			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
+#ifdef XMPLAY_ENABLE_FIXES
+		}
+#endif
 
 /****
 	Update song at the end - so it doesn't have to process so much in
@@ -1961,7 +1962,7 @@ void XM_DoFullUpdate(int SC)
 	//		UpdateHardware();			/* Update SPU */
 }
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 void XM_DoFullUpdate(int SC)
 {
 	PerformUpdate(SC, 0);
@@ -2068,7 +2069,7 @@ void UpdatePatternData(int SC)
 			{
 				if (!ms->SongLoop)
 				{
-#ifndef SOME_KIND_OF_DREAM
+#ifndef XMPLAY_ENABLE_FIXES
 					ms->XMPlay = XM_STOPPED;			/* Once off tune */
 #else
 					// This causes all channels to be silenced too
@@ -2795,7 +2796,7 @@ int t;
 	{
 		XMCU=&mu->XM_Chnl[t];
 		XMCU->keyon=0;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 		XMCU->ovrfine = 0;
 #endif
 		XMCU->tmpvolume=64;
@@ -2976,7 +2977,7 @@ void SilenceXM(int Song_ID)
 
 	SpuSetKey(0, i);
 
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	// Prevent repeated calls to this function causing
 	// bogus keyoff calls
 	// If PlayStart is called this would be set correctly
@@ -3167,7 +3168,7 @@ int XM_GetSongSize(void)
 
 void XM_SetSongAddress(u_char *Address)
 {
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	if (XM_NSA < 24)
 	{
 #endif
@@ -3176,14 +3177,14 @@ void XM_SetSongAddress(u_char *Address)
 	mu->Status = 0;				/* Turn off song */
 	mu->XMPlay = XM_STOPPED;
 	XM_NSA++;
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	}
 #endif
 }
 
 void XM_FreeAllSongIDs(void)
 {
-#ifdef SOME_KIND_OF_DREAM
+#ifdef XMPLAY_ENABLE_FIXES
 	for (int i = 0; i < 24; i++)
 	{
 	    XM_SngAddress[i] = 0;
