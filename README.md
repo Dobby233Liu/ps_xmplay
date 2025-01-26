@@ -71,8 +71,8 @@ but has some glaring bugs you can hear. REDriver2's appears to be adapted from
 Other known issues include:
 - Timing code is off, so the speed of the playback might not be what you except.
   If you enable XMPLAY_ENABLE_FIXES, there will be a mitigation.
-- As Jason Page said in the readme of the PS2 version, using very short looping
-  samples will cause them to be detuned. He said this is related to the ADPCM format,
+- As Jason Page said in the readme of the PS2 version, samples with a very short
+  looping period will be detuned. He said this is related to the ADPCM format,
   so encoding the VAB differently might help?
 - E1/E2 works incorrectly. If you use the REDriver2 lib, you can manually enable
   XMPLAY_ENABLE_FIXES in xmplay.c to fix it, which also enables support for the

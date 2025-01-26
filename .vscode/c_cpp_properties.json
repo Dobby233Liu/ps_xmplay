@@ -12,7 +12,8 @@
         "XM_LOOP",
         "XM_POSITION",
         "XM_PANNING_TYPE",
-        "XMPLAY_VARIANT_REDRIVER2"
+        "XMPLAY_VARIANT_REDRIVER2",
+        "XMPLAY_ENABLE_FIXES"
       ],
       "includePath": [
         "${env:AppData}/mips/mips/include",

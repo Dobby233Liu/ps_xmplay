@@ -75,7 +75,7 @@ typedef struct _XMCHANNEL {
 	u_short panenva;		/* envelope index a */
 	u_short panenvb;		/* envelope index b */
 	u_short keyoffspd;
-	u_char envflg;       /* envelope flag */
+	u_char envflg;       	/* envelope flag */
 	u_char envpts;			/* number of envelope points */
 	u_char envsus;			/* envelope sustain index */
 	u_char envbeg;			/* envelope loop begin */
@@ -115,9 +115,6 @@ typedef struct _XMCHANNEL {
 	short UserVol;
 	char retrig;		/* retrig value (0 means don't retrig) */
 	u_short c2spd;		/* what finetune to use */
-#ifdef XMPLAY_ENABLE_FIXES
-	u_char ovrfine;	/* current finetune value overrided by E5x */
-#endif
 	u_char tmpvolume;	/* tmp volume  JAP */
 	u_short tmpperiod;	/* tmp period */
 	u_short wantedperiod;	/* period to slide to (with effect 3 or 5) */
@@ -163,6 +160,7 @@ typedef struct _XMSONG {
 	u_char  MasterVolume;	     /* song volume (0-128) */
 #ifdef XMPLAY_ENABLE_FIXES
 	u_char	oldvslide;
+	u_char	oldgvslide;
 #endif
 	int	  XMActiveVoices;	  /* number of voices currently playing */
 	int	  NotAmiga;

@@ -49,8 +49,21 @@ int			XM_HA = 0;				// NEXT HEADER Address;
 XMSONG		*XM_SngAddress[24];		/* MAX 24 XM's playing at once */
 XMHEADER	*XM_HeaderAddress[8];	/* MAX 8 XM's files in memory at once */
 
+#ifdef XMPLAY_ENABLE_FIXES
+// Reading big endian shorts on little endian platform
+static inline u_short getWord(u_char mpp[2])
+{
+	return (mpp[1] << 8) | mpp[0];
+}
+
+static inline short getSWord(u_char mpp[2])
+{
+	return (mpp[1] << 8) | mpp[0];
+}
+#else
 #define getWord(mpp) ((u_short)((*(u_char *)(mpp)) + ((*((u_char *)(mpp) + 1)) << 8)))
 #define getSWord(mpp) ((short)((*(u_char *)(mpp)) + ((*((u_char *)(mpp) + 1)) << 8)))
+#endif
 
 int CurrentCh;
 
@@ -216,6 +229,12 @@ Interpolate
 				v2 Destination value
 *****************************************************************************/
 
+/// @param p CurrentPos
+/// @param p1 Start Pos
+/// @param p2 End Pos
+/// @param v1 Original Value
+/// @param v2 Destination value
+/// @return Interpolated Value
 short Interpolate(short p, short p1, short p2, short v1, short v2)
 {
 	short dp, dv, di;
@@ -270,7 +289,11 @@ JPGetPeriod
 *****************************************************************************/
 u_short JPGetPeriod(u_char note, short fine)
 {
+#ifdef XMPLAY_ENABLE_FIXES
 	return ((120 - note) << 6) - (fine / 2) + 64;
+#else
+	return((10L * 12 * 16 * 4) - ((u_short)note * 16 * 4) - (fine / 2) + 64);
+#endif
 }
 
 
@@ -806,6 +829,7 @@ int JPlayNote(u_char *j, int pmsk)
 JPlayEffects
 	Checks if any effects to be played.
 	Calls relevent routines if thay are.
+See: OpenMPT CSoundFile::ProcessEffects
 *****************************************************************************/
 
 void JPlayEffects(void)
@@ -825,7 +849,7 @@ u_char dat=0;
 	XMC->ownper=0;
 	XMC->ownvol=0;
 
-	switch(vol>>4)
+	switch(vol>>4) /* Volume commands */
 	{
 		case 0x6:
 			if(vol&0xf)
@@ -846,11 +870,12 @@ u_char dat=0;
 			break;
 
 		case 0xa:
+			// OpenMPT: "FT2 does not automatically enable vibrato with the "set vibrato speed" command"
 			SPE (XMEF_VIBRATO,vol<<4);					/* Set Vibrato speed */
 			break;
 
 		case 0xb:
-			SPE (XMEF_VIBRATO,vol&0xf);				/* Vibrato */
+			SPE (XMEF_VIBRATO,vol&0xf);				/* Vibrato depth */
 			break;
 
 		case 0xc:
@@ -863,7 +888,6 @@ u_char dat=0;
 			break;
 
 		case 0xe:
-			// TODO
 			if(vol&0xf)
 				DoXMPanSlide(vol<<4);		/* Pan slide right */
 			break;
@@ -880,36 +904,45 @@ u_char dat=0;
 	}
 //	if (eff!=0)
 //	{
-		switch(eff)
+		switch(eff) /* Effects */
 			{
 			case 'G'-55:                    /* G - set global volume */
+#ifdef XMPLAY_ENABLE_FIXES
+				ms->SongVolume=dat <= 64 ? dat*2 : 128;
+#else
 				ms->SongVolume=dat*2;
+#endif
 				break;
 
 			case 'H'-55:                    /* H - global volume slide */
 #ifdef XMPLAY_ENABLE_FIXES
-				if (dat==0)
-					dat=ms->oldvslide;
-				ms->oldvslide=dat;
 				DoGlobalVolSlide(dat);
 #endif
 				break;
 
 			case 'K'-55:                    /* K - keyoff */
-				// UNIMPLEMENTED: After xx ticks
 #ifdef XMPLAY_ENABLE_FIXES
-				if(!ms->vbtick)
+				if (ms->vbtick >= dat)
 #endif
 					SetNote(96);
 				break;
 
 			case 'L'-55:                    /* L - set envelope position */
 #ifdef XMPLAY_ENABLE_FIXES
-				if(!ms->vbtick)
+				// FIXME
+				if (ms->vbtick) break;
+				if (dat < XMC->envpts)
 				{
-					XMC->envp = dat; // whatever
-					if (XMC->envflg & EF_SUSTAIN)
-						XMC->panenvp = dat;
+					XMC->envp = dat;
+					XMC->enva = XMC->envp == 0 ? 0 : XMC->envp - 1;
+					XMC->envb = XMC->envp == 0 ? 1 : XMC->envp;
+				}
+				// OpenMPT: "FT2 only sets the position of the panning envelope if the volume envelope's sustain flag is set"
+				if (XMC->envflg & EF_SUSTAIN && dat < XMC->panenvpts)
+				{
+					XMC->panenvp = dat;
+					XMC->panenvp = XMC->panenvp == 0 ? 0 : XMC->panenvp - 1;
+					XMC->panenvp = XMC->panenvp == 0 ? 1 : XMC->panenvp;
 				}
 #endif
 				break;
@@ -926,8 +959,20 @@ u_char dat=0;
 				DoS3MRetrig(dat);
 				break;
 
-			case 'T'-55:
+			case 'T'-55:					/* T - Tremor */
+#ifdef XMPLAY_ENABLE_FIXES
+				// FIXME: Legit what is happening here
+				if (ms->vbtick)
+					break;
+				DoVibrato();
+				if (dat==0)
+					dat=XMC->oldvslide;
+				XMC->oldvslide=dat;
+				DoVolSlide(dat);
+				XMC->ownper=1;
+#else
 				SPE (XMEF_VIB_VOLSLD,dat);
+#endif
 				break;
 
 			case 'X'-55:
@@ -942,11 +987,15 @@ u_char dat=0;
 					break;
 				switch(hi)
 				{
-					case 1: // Extra Fine Portamento Up
+					case 1: // X1 - Extra Fine Portamento Up
 						XMC->tmpperiod -= nib;
 						break;
-					case 2: // Extra Fine Portamento Down
-						XMC->tmpperiod += nib;
+					case 2: // X2 - Extra Fine Portamento Down
+						u_int anti_overflow_hack = XMC->tmpperiod + nib;
+						if (anti_overflow_hack > 0xFFFF)
+							XMC->tmpperiod = 0xFFFF;
+						else
+							XMC->tmpperiod += nib;
 						break;
 				}
 #endif
@@ -1146,6 +1195,8 @@ int lo;
 /*****************************************************************************
 DoEEffects
 	Process effects if 0xe command used.
+
+See: OpenMPT CSoundFile::ExtendedMODCommands
 *****************************************************************************/
 
 void DoEEffects(u_char dat)
@@ -1161,42 +1212,44 @@ void DoEEffects(u_char dat)
 
 	case XMEF_E_FINESLD_UP:			/* 1 Fineslide up */
 #ifndef XMPLAY_ENABLE_FIXES
-		if (!ms->vbtick)
-		{
+		if (ms->vbtick)
+			break;
 #endif
-			if (nib == 0)
-				nib = XMC->oldfslide;
-			XMC->oldfslide = nib;
+		if (nib == 0)
+			nib = XMC->oldfslide;
+		XMC->oldfslide = nib;
 #ifdef XMPLAY_ENABLE_FIXES
-		if (!ms->vbtick)
-		{
+		if (ms->vbtick)
+			break;
 #endif
 #ifdef XMPLAY_ENABLE_FIXES
-			XMC->tmpperiod -= (nib << 2);
+		XMC->tmpperiod -= (nib << 2);
 #else
-			XMC->tmpperiod += (nib << 2);
+		XMC->tmpperiod += (nib << 2);
 #endif
-		}
 		break;
 
 	case XMEF_E_FINESLD_DOWN:		/* 2 Fineslide down */
 #ifndef XMPLAY_ENABLE_FIXES
-		if (!ms->vbtick)
-		{
+		if (ms->vbtick)
+			break;
 #endif
-			if (nib == 0)
-				nib = XMC->oldfslide;
-			XMC->oldfslide = nib;
+		if (nib == 0)
+			nib = XMC->oldfslide;
+		XMC->oldfslide = nib;
 #ifdef XMPLAY_ENABLE_FIXES
-		if (!ms->vbtick)
-		{
+		if (ms->vbtick)
+			break;
 #endif
 #ifdef XMPLAY_ENABLE_FIXES
+		u_int anti_overflow_hack = XMC->tmpperiod + (nib << 2);
+		if (anti_overflow_hack > 0xFFFF)
+			XMC->tmpperiod = 0xFFFF;
+		else
 			XMC->tmpperiod += (nib << 2);
 #else
-			XMC->tmpperiod -= (nib << 2);
+		XMC->tmpperiod -= (nib << 2);
 #endif
-		}
 
 		break;
 
@@ -1211,7 +1264,12 @@ void DoEEffects(u_char dat)
 
 	case XMEF_E_FINETUNE:			/* 5 Set finetune */
 #ifdef XMPLAY_ENABLE_FIXES
-		XMC->ovrfine = (nib + 0x80) & 0xff;
+		// OpenMPT code isn't exactly helping here
+		if (ms->vbtick)
+			break;
+		XMC->transpose = (nib - 8) << 4;
+		XMC->period = GetPeriod(XMC->note + XMC->transpose, XMC->c2spd);
+		XMC->ownper = 1;
 #endif
 		break;
 
@@ -1240,7 +1298,7 @@ void DoEEffects(u_char dat)
 		XMC->wavecontrol |= nib << 4;
 		break;
 
-	case XMEF_E_NOTUSED:				/* 8 Not used */
+	case XMEF_E_NOTUSED:				/* 8 Set 4-bit panning */
 		XMC->panning = nib << 4;
 		break;
 
@@ -1261,23 +1319,37 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINEVOL_UP:			/* A - Fine volume slide up */
+#ifndef XMPLAY_ENABLE_FIXES
 		if (ms->vbtick)
 			break;
+#endif
 
 		if (nib == 0)
 			nib = XMC->oldfvslide;
 		XMC->oldfvslide = nib;
+#ifdef XMPLAY_ENABLE_FIXES
+
+		if (ms->vbtick)
+			break;
+#endif
 		XMC->tmpvolume += nib;
 		if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
 		break;
 
 	case XMEF_E_FINEVOL_DOWN:		/* B - Fine volume slide down */
+#ifndef XMPLAY_ENABLE_FIXES
 		if (ms->vbtick)
 			break;
+#endif
 
 		if (nib == 0)
 			nib = XMC->oldfvslide;
 		XMC->oldfvslide = nib;
+#ifdef XMPLAY_ENABLE_FIXES
+
+		if (ms->vbtick)
+			break;
+#endif
 		XMC->tmpvolume -= nib;
 		if (XMC->tmpvolume < 64) XMC->tmpvolume = 64;
 		break;
@@ -1329,9 +1401,6 @@ void SetNote(u_char note)
 	if (note == 96)
 	{
 		XMC->keyon = 0;
-#ifdef XMPLAY_ENABLE_FIXES
-		XMC->ovrfine = 0;
-#endif
 		if (XMC->sample == 254)
 		{
 			XMC->tmpvolume = 64;			/* Force 0 vol if no envelope used */
@@ -1423,9 +1492,6 @@ void SetInstr(u_char inst)
 	ddd += 128;
 	XMC->c2spd = ddd;
 	XMC->c2spd &= 255;
-#ifdef XMPLAY_ENABLE_FIXES
-	XMC->ovrfine = 0;
-#endif
 
 }
 
@@ -1450,11 +1516,7 @@ void SetPer(void)
 
 	//	a+=jtt;
 
-#ifdef XMPLAY_ENABLE_FIXES
-	period = GetPeriod(a, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
-#else
 	period = GetPeriod(a, XMC->c2spd);
-#endif
 
 	XMC->wantedperiod = period;
 	XMC->tmpperiod = period;
@@ -1525,11 +1587,7 @@ void Arpeggio(u_char dat)
 			note += (dat & 0xf);
 			break;
 		}
-#ifdef XMPLAY_ENABLE_FIXES
-		XMC->period = GetPeriod(note + XMC->transpose, XMC->ovrfine!=0 ? XMC->ovrfine : XMC->c2spd);
-#else
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->c2spd);
-#endif
 		XMC->ownper = 1;
 	}
 }
@@ -1559,12 +1617,26 @@ DoGlobalVolSlide
 
 void DoGlobalVolSlide(u_char dat)
 {
+	if (dat==0)
+		dat=ms->oldgvslide;
+	ms->oldgvslide=dat;
+
 	if (!ms->vbtick) return;				 /* do not update when vbtick==0 */
-	// FIXME
-	ms->SongVolume += dat >> 4;           /* volume slide */
-	if (ms->SongVolume > 128) ms->SongVolume = 128;
-	ms->SongVolume -= dat & 0xf;
-	if (ms->SongVolume < 64) ms->SongVolume = 64;
+
+	u_char lo = dat & 0xf;
+	u_char hi = dat >> 4;
+	/* slide right has absolute priority: */
+	if (hi)
+		lo = 0;
+
+	short vol = ms->SongVolume;
+
+	vol -= lo;
+	vol += hi;
+	if (vol < 0) vol = 0;
+	if (vol > 128) vol = 128;
+
+	ms->SongVolume = vol;
 }
 #endif
 
@@ -2807,9 +2879,6 @@ int t;
 	{
 		XMCU=&mu->XM_Chnl[t];
 		XMCU->keyon=0;
-#ifdef XMPLAY_ENABLE_FIXES
-		XMCU->ovrfine = 0;
-#endif
 		XMCU->tmpvolume=64;
 
 #if 0							// [A] temporary fix
