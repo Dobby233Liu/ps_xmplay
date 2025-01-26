@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <common/syscalls/syscalls.h>
+#include <common/hardware/pcsxhw.h>
 #include <malloc.h>
 #include <etc.h>
 #include <video.h>
@@ -49,16 +50,31 @@ done:
 #endif
 
 
+static int song_id = -1;
+static volatile bool stop = false;
+
+static void on_vsync() {
+    if (song_id < 0 || stop) return;
+
+    XM_Update();
+
+    XM_Feedback feedback;
+    assert(XM_GetFeedback(song_id, &feedback), "cant get feedback");
+    if (!stop)
+        stop = feedback.Status == XM_STOPPED;
+}
+
 void main() {
+    int locked;
     ResetCallback();
 
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice is null");
     assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "invalid xm");
     assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "invalid vab");
 
-    int crit_section_already_entered = enterCriticalSection();
+    locked = enterCriticalSection();
     InitHeap((unsigned long*)heap, sizeof(heap));
-    if (!crit_section_already_entered) leaveCriticalSection();
+    if (!locked) leaveCriticalSection();
 
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
 
@@ -86,7 +102,7 @@ void main() {
 #endif
     assert(voice_bank_id != -1, "cant load voice");
 
-    int song_id = XM_Init(
+    song_id = XM_Init(
         voice_bank_id, xm_id, -1,
         #ifndef XMPLAY_VARIANT_SBSPSS
         0,
@@ -99,23 +115,19 @@ void main() {
     );
     assert(song_id != -1, "cant init song");
 
-    VSyncCallback(XM_Update);
     if (song_info.loop) {
         // The song will never end, so let's idle to not confuse HE
-        while (true)
-            asm("");
+        VSyncCallback(XM_Update);
+        while (true);
     } else {
-        XM_Feedback status;
-        while (true) {
-            assert(XM_GetFeedback(song_id, &status), "cant get feedback");
-            if (status.Status == XM_STOPPED)
-                break;
-        }
+        VSyncCallback(on_vsync);
+        while (!stop);
     }
 
     // Quit XMPlay
     XM_Exit();
     VSyncCallback(NULL);
+    song_id = -1;
 
     free(file_header_addr);
     free(song_addr);
@@ -126,4 +138,6 @@ void main() {
     // For some reason XM_PlayStop doesn't kill all channels correctly
     SpuSetKey(SPU_OFF, SPU_ALLCH);
     SpuQuit();
+
+    pcsx_exit(-1);
 }

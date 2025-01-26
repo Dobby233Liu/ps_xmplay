@@ -3,7 +3,6 @@
 
 __attribute__((noreturn)) void abort(const char* msg) {
     enterCriticalSection();
-    pcsx_debugbreak();
 
     ramsyscall_printf("Aborted");
     if (msg) {
@@ -12,6 +11,9 @@ __attribute__((noreturn)) void abort(const char* msg) {
     }
     ramsyscall_printf("\n");
 
-    while (1)
-        asm("");
+    pcsx_debugbreak();
+    pcsx_exit(-1);
+
+    while (1);
+    __builtin_unreachable();
 }
