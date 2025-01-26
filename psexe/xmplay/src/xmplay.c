@@ -12,7 +12,7 @@ XMPLAY.C
 #include <abs.h>
 #include <libspu.h>
 
-//#define SOME_KIND_OF_DREAM
+#define SOME_KIND_OF_DREAM
 
 #include "xmplay.h"
 #include "xmcalls.h"
@@ -941,12 +941,12 @@ u_char dat=0;
 #ifdef SOME_KIND_OF_DREAM
 				u_char hi = dat>>4;
 				if (hi > 2) break;
-				if (ms->vbtick)
-					break;
 				u_char nib = dat&0xf;
 				if (nib == 0)
 					nib = XMC->oldfslidex;
 				XMC->oldfslidex = nib;
+				if (ms->vbtick)
+					break;
 				switch(hi)
 				{
 					case 1: // Extra Fine Portamento Up
@@ -1167,11 +1167,17 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINESLD_UP:			/* 1 Fineslide up */
+#ifndef SOME_KIND_OF_DREAM
 		if (!ms->vbtick)
 		{
+#endif
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
+#ifdef SOME_KIND_OF_DREAM
+		if (!ms->vbtick)
+		{
+#endif
 #ifdef SOME_KIND_OF_DREAM
 			XMC->tmpperiod -= (nib << 2);
 #else
@@ -1181,11 +1187,17 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_FINESLD_DOWN:		/* 2 Fineslide down */
+#ifndef SOME_KIND_OF_DREAM
 		if (!ms->vbtick)
 		{
+#endif
 			if (nib == 0)
 				nib = XMC->oldfslide;
 			XMC->oldfslide = nib;
+#ifdef SOME_KIND_OF_DREAM
+		if (!ms->vbtick)
+		{
+#endif
 #ifdef SOME_KIND_OF_DREAM
 			XMC->tmpperiod += (nib << 2);
 #else
