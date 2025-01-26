@@ -56,12 +56,13 @@ static volatile bool stop = false;
 static void on_vsync() {
     if (song_id < 0 || stop) return;
 
-    XM_Update();
-
     XM_Feedback feedback;
     assert(XM_GetFeedback(song_id, &feedback), "cant get feedback");
     if (!stop)
         stop = feedback.Status == XM_STOPPED;
+    if (stop) return;
+
+    XM_Update();
 }
 
 void main() {
