@@ -1907,6 +1907,8 @@ void UpdateWithTimer(int SC)
 	}
 #ifdef XMPLAY_ENABLE_FIXES
 	/* YES! Update song/hardware */
+	/* in case destinated BPM exceeds frame limit, let's process as much as we should
+		(causes small glitches) */
 	while (ms->JBPM>=BPMLimit)
 	{
 		PerformUpdate(SC, (ms->JBPM - BPMLimit)>=BPMLimit);
