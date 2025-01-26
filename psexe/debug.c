@@ -6,7 +6,8 @@ __attribute__((noreturn)) void abort(const char* msg) {
 
     ramsyscall_printf("Aborted");
     if (msg) {
-        ramsyscall_printf(": %s\n", msg);
+        ramsyscall_printf(": ");
+        ramsyscall_printf(msg);
         pcsx_message(msg);
     }
     ramsyscall_printf("\n");

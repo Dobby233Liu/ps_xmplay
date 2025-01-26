@@ -30,7 +30,10 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     if (vab_id_xmplay == -1) goto done;
 
     int vab_id_libsnd = SsVabTransfer(vh_ptr, vb_ptr, 0, SS_WAIT_COMPLETED);
-    if (vab_id_libsnd < 0) goto done;
+    if (vab_id_libsnd < 0) {
+        ret = vab_id_libsnd - 1;
+        goto done;
+    }
 
     VabHdr vh;
     if (SsUtGetVabHdr(vab_id_libsnd, &vh) != 0) goto done;
@@ -100,8 +103,9 @@ void main() {
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
 #else
     int voice_bank_id = vab_init(song_info.vh_ptr, song_info.vb_ptr);
+    assert(voice_bank_id != -2, "oom/invalid vab");
 #endif
-    assert(voice_bank_id != -1, "cant load voice");
+    assert(voice_bank_id >= 0, "cant load voice");
 
     song_id = XM_Init(
         voice_bank_id, xm_id, -1,

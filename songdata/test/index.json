@@ -54,5 +54,12 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": false
+    },
+    "breaking_the_wind": {
+        "xm": "breaking_the_wind",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop_count": 0,
+        "xmplay_enable_fixes": true
     }
 }
