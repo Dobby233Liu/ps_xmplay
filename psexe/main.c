@@ -130,6 +130,10 @@ void main() {
     }
 
     // Quit XMPlay
+#if defined(XMPLAY_VARIANT_REDRIVER2) && defined(XMPLAY_ENABLE_FIXES)
+    // Calling XM_Exit is not enough to make sure all channels are keyed off
+    SilenceXM(song_id);
+#endif
     XM_Exit();
     VSyncCallback(NULL);
     song_id = -1;
@@ -140,7 +144,7 @@ void main() {
     XM_FreeAllFileHeaderIDs();
 
     // Quit SPU processing
-#ifndef XMPLAY_ENABLE_FIXES
+#if !defined(XMPLAY_VARIANT_REDRIVER2) || !defined(XMPLAY_ENABLE_FIXES)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
     SpuSetKey(SPU_OFF, SPU_ALLCH);
 #endif

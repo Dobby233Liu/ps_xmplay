@@ -2149,14 +2149,7 @@ void UpdatePatternData(int SC)
 			{
 				if (!ms->SongLoop)
 				{
-#ifndef XMPLAY_ENABLE_FIXES
 					ms->XMPlay = XM_STOPPED;			/* Once off tune */
-#else
-					// This causes all channels to be silenced too
-					// which may be indesirable, but I think it's
-					// correct
-					XM_PlayStop(SC);
-#endif
 					return;
 				}
 				ms->SongPos = ms->reppos;				/* Loop to loop point */

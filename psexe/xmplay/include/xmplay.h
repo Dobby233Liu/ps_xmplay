@@ -119,3 +119,7 @@ int XM_GetFileHeaderSize(void);
 void XM_Update2(int speed);
 void SetTranspose(int a);
 #endif
+
+#if defined(XMPLAY_VARIANT_REDRIVER2) && defined(XMPLAY_ENABLE_FIXES)
+void SilenceXM(int Song_ID);
+#endif
