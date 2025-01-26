@@ -133,11 +133,13 @@ void main() {
     free(file_header_addr);
     free(song_addr);
     XM_FreeAllSongIDs();
-    XM_FreeFileHeaderID();
+    XM_FreeAllFileHeaderIDs();
 
     // Quit SPU processing
-    // For some reason XM_PlayStop doesn't kill all channels correctly
+#ifndef SOME_KIND_OF_DREAM
+    // Calling XM_Exit is not enough to make sure all channels are keyed off
     SpuSetKey(SPU_OFF, SPU_ALLCH);
+#endif
     SpuQuit();
 
     pcsx_exit(0);

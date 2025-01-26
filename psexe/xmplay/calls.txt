@@ -646,7 +646,7 @@ void XM_FreeFileHeaderID(void)
 		Nothing.
 
 ----------------------------------------------------------------------------
-void XM_FreeAllHeaderIDs(void)
+void XM_FreeAllFileHeaderIDs(void)
 
 	Description:
 				Free's ALL header ID's. Call this after freeing

@@ -38,22 +38,16 @@ char MonoMode = XM_STEREO;
 
 XMCHANNEL *XMCU;
 XMCHANNEL *XMC;
-//XMHEADER	XM_Header[8];		/* MAX 8 XM's files in memory at once */
 XMHEADER *mh;					/* Pointer used by internal routines */
 XMHEADER *mhu;					/* Pointer used by User routines */
-//XMSONG	XM_Song[24];		/* MAX 24 XM's playing at once */
 XMSONG	*ms;					/* Pointer used by internal routines */
 XMSONG	*mu;					/* Pointer used by User routines */
 
 
-int		XM_NSA = 0;			// NEXT SONG ADDRESS
-int		XM_HA = 0;				// NEXT HEADER Address;
-u_char	*XM_SngAddress[32];
-u_char	*XM_HeaderAddress[8];
-//XMSONG	*XM_SngAddress[24];
-
-//#define getSWord(mpp)	((short)((u_char)(*(mpp))+(u_char)((*((mpp)+1))<<8)))
-//#define getWord(mpp)		((u_short)((u_char)(*(mpp))+(u_char)((*((mpp)+1))<<8)))
+int			XM_NSA = 0;				// NEXT SONG ADDRESS
+int			XM_HA = 0;				// NEXT HEADER Address;
+XMSONG		*XM_SngAddress[24];		/* MAX 24 XM's playing at once */
+XMHEADER	*XM_HeaderAddress[8];	/* MAX 8 XM's files in memory at once */
 
 #define getWord(mpp) ((u_short)((*(u_char *)(mpp)) + ((*((u_char *)(mpp) + 1)) << 8)))
 #define getSWord(mpp) ((short)((*(u_char *)(mpp)) + ((*((u_char *)(mpp) + 1)) << 8)))
@@ -379,8 +373,7 @@ void XM_PlayStart(int Song_ID, int PlayMask)
 		return;
 	if (PlayMask != 0)
 	{
-		mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-		//		mu=&XM_Song[Song_ID]; 
+		mu = XM_SngAddress[Song_ID];
 		mu->PlayMask = PlayMask;
 		mu->XMPlay = XM_PLAYING;
 	}
@@ -399,8 +392,7 @@ void XM_PlayStop(int Song_ID)
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
-	mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-	//	mu=&XM_Song[Song_ID];
+	mu = XM_SngAddress[Song_ID];
 	if (!mu->XMPlay)
 		return;
 	mu->XMPlay = XM_STOPPED;
@@ -427,8 +419,7 @@ int InitXMData(u_char *mpp, int XM_ID, int S3MPan)
 	u_short b2;
 
 
-	//	mhu=&XM_Header[XM_ID];
-	mhu = (XMHEADER*)(XM_HeaderAddress[XM_ID]);
+	mhu = XM_HeaderAddress[XM_ID];
 
 	mhu->S3MPanning = S3MPan;
 
@@ -521,19 +512,25 @@ void XM_OnceOffInit(int PAL)
 {
 	XM_NSA = 0;
 	JP_Do_Nothing = 0;				/* Allow XM_Update to process */
-//	for (i=0;i<24;i++)
-//	{
-//		mu=&XM_Song[i];
-//		mu->Status=0;				/* Turn off every song */
-//	}
+#ifdef SOME_KIND_OF_DREAM
+	for (int i = 0; i < 24; i++)
+	{
+		// Since the addresses are externally allocated this doesn't make sense
+		/*if (XM_SngAddress[i])
+			XM_SngAddress[i]->XMPlay = XM_STOPPED;	/* Turn off every song */
+		XM_SngAddress[i] = 0;
+		XMSongIDs[i] = -1;
+	}
+#endif
 	BPMLimit = NTSCBPMLIMIT;		/* Set Max limit for BPM */
 	if (PAL == XM_NTSC)
 		PALType = 0;
 	else if (PAL == XM_PAL)
 	{
 		PALType = 1;					/* Set if PAL or NTSC */
-//		PALType=0;					/* Set if PAL or NTSC */
-//		BPMLimit=125;
+		// [A] use NTSC handling instead of bodge timer
+		/* PALType=0;
+		BPMLimit=125; */
 	}
 }
 
@@ -578,12 +575,10 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 	}
 
 	JP_Do_Nothing=1;
-	mu=(XMSONG*)(XM_SngAddress[SngID]);
+	mu=XM_SngAddress[SngID];
 
-//	mhu=&XM_Header[XM_ID];
-	mhu=(XMHEADER*)(XM_HeaderAddress[XM_ID]);
+	mhu=XM_HeaderAddress[XM_ID];
 
-//	mu=&XM_Song[SngID];
 	mu->XMPlay=XM_STOPPED;
 
 	mu->JUp=0;
@@ -1388,7 +1383,7 @@ void SetInstr(u_char inst)
 	if (!XMC->kick)
 		return;							// Instrument but no note...
 
-	if (inst == 255)
+	if (inst == 255) // INVESTIGATE: Why not 254?
 	{
 		inst = XMC->sample;				// If instrument=0, use last instrument.
 	}
@@ -1460,8 +1455,6 @@ void SetPer(void)
 #else
 	period = GetPeriod(a, XMC->c2spd);
 #endif
-	//if (XMC->sample==5)
-	//FntPrint("%d,%d,%d=%d\n",XMC->note,XMC->transpose,a,period);
 
 	XMC->wantedperiod = period;
 	XMC->tmpperiod = period;
@@ -1476,7 +1469,7 @@ void SetPer(void)
 		j = mh->JAP_InstrumentOffset[XMC->sample];
 
 		XMC->keyoffspd = *((u_char*)j + 239);
-		XMC->keyoffspd;	//*=1;	//4;
+		// XMC->keyoffspd;	//*=1;	//4;
 		XMC->envflg = *((u_char*)j + 233);
 		if (XMC->envflg & EF_ON)
 		{
@@ -1868,8 +1861,7 @@ void UpdateXMData(void)
 
 	for (SC=0;SC<XM_NSA;SC++)
 	{
-		ms=(XMSONG*)(XM_SngAddress[SC]);
-//		ms=&XM_Song[SC];
+		ms=XM_SngAddress[SC];
 		UpdateWithTimer(SC);
 		if (ms->PCounter==5)
 		{
@@ -1890,14 +1882,14 @@ void UpdateWithTimer(int SC)
 {
 	aa++;
 
-	ms=(XMSONG*)(XM_SngAddress[SC]);
+	ms=XM_SngAddress[SC];
 	if (ms->XMPlay!=XM_PLAYING)
 		return;
 
  	if (PALType==1)
  		ms->PCounter++;		/* PAL Mode stuff...bodge timer */
 
-	mh=(XMHEADER*)(XM_HeaderAddress[ms->HeaderNum]);
+	mh=XM_HeaderAddress[ms->HeaderNum];
 
 	ms->JBPM+=ms->SongBPM;
 
@@ -1934,12 +1926,10 @@ static void PerformUpdate(int SC, int catching_up)
 void XM_DoFullUpdate(int SC)
 #endif
 {
-	ms = (XMSONG*)(XM_SngAddress[SC]);
-	//	ms=&XM_Song[SC];
+	ms = XM_SngAddress[SC];
 	if (ms->XMPlay == XM_PLAYING)
 	{
-		//		mh=&XM_Header[ms->HeaderNum];
-		mh = (XMHEADER*)(XM_HeaderAddress[ms->HeaderNum]);
+		mh = XM_HeaderAddress[ms->HeaderNum];
 
 		if (ms->JUp == 0)
 		{
@@ -2078,7 +2068,14 @@ void UpdatePatternData(int SC)
 			{
 				if (!ms->SongLoop)
 				{
+#ifndef SOME_KIND_OF_DREAM
 					ms->XMPlay = XM_STOPPED;			/* Once off tune */
+#else
+					// This causes all channels to be silenced too
+					// which may be indesirable, but I think it's
+					// correct
+					XM_PlayStop(SC);
+#endif
 					return;
 				}
 				ms->SongPos = ms->reppos;				/* Loop to loop point */
@@ -2090,7 +2087,6 @@ void UpdatePatternData(int SC)
 			else
 				SP = ms->SFXNum;							/* Pattern from user SFX */
 
-//		SP+=0;
 			ms->CurrentPattern = SP;
 			ms->PatAdr = mh->JAP_PAT_ADDR[SP];		/* Addr of pat header */
 			ms->PatAdr2 = mh->JAP_PAT_ADDR2[SP];	/* Addr of pat data */
@@ -2613,7 +2609,7 @@ GetFreq2
 *****************************************************************************/
 
 #define joc 8
-//int JPPer = 6578;	//6578  D1 has this value and game were shipped with broken soundtrack
+//int JPPer = 6578;	//6578  Driver 1 has this value, breaking the game's soundtrack
 
 int JPPer = 7350;	//6578
 
@@ -2622,15 +2618,9 @@ long GetFreq2(long period)
 	int okt;
 	long frequency;
 
-	//FntPrint("period %d\n",period);
 	period = JPPer - period;
 	okt = period / 768;
-	//FntPrint("octave %d\n",okt);
 	frequency = lintab[period % 768];
-	//FntPrint("freq %d\n",frequency);
-
-	//if (XMC->sample==5)
-	//printf("aa %d aa\n",frequency>>(joc-okt));
 
 	return(frequency >> (joc - okt));		/* Final SPU pitch */
 }
@@ -2793,10 +2783,8 @@ int t;
 	if (XMSongIDs[Song_ID]==-1)
 		return;
 
-	mu=(XMSONG*)(XM_SngAddress[Song_ID]);
-//	mu=&XM_Song[Song_ID];
-//	mhu=&XM_Header[mu->HeaderNum];
-	mhu=(XMHEADER*)(XM_HeaderAddress[mu->HeaderNum]);
+	mu=XM_SngAddress[Song_ID];
+	mhu=XM_HeaderAddress[mu->HeaderNum];
 
 	if (pos>=mhu->songlength)
 		return;
@@ -2969,10 +2957,8 @@ void SilenceXM(int Song_ID)
 	int pmsk;
 
 
-	mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-	//	mu=&XM_Song[Song_ID]; 
-	//	mhu=&XM_Header[mu->HeaderNum]; 
-	mhu = (XMHEADER*)(XM_HeaderAddress[mu->HeaderNum]);
+	mu = XM_SngAddress[Song_ID];
+	mhu = XM_HeaderAddress[mu->HeaderNum];
 	i = 0;
 	for (t = 0; t < mhu->XMPSXChannels; t++)
 	{
@@ -2989,6 +2975,13 @@ void SilenceXM(int Song_ID)
 	}
 
 	SpuSetKey(0, i);
+
+#ifdef SOME_KIND_OF_DREAM
+	// Prevent repeated calls to this function causing
+	// bogus keyoff calls
+	// If PlayStart is called this would be set correctly
+	mu->PlayMask = 0;
+#endif
 }
 
 
@@ -3004,10 +2997,8 @@ void XM_Pause(int Song_ID)
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
-	mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-	//	mu=&XM_Song[Song_ID]; 
-	//	mhu=&XM_Header[mu->HeaderNum]; 
-	mhu = (XMHEADER*)(XM_HeaderAddress[mu->HeaderNum]);
+	mu = XM_SngAddress[Song_ID];
+	mhu = XM_HeaderAddress[mu->HeaderNum];
 	if (mu->XMPlay == XM_PLAYING)
 	{
 		mu->XMPlay = XM_PAUSED;
@@ -3035,10 +3026,8 @@ void XM_Restart(int Song_ID)
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
-	mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-	//	mu=&XM_Song[Song_ID];
-	//	mhu=&XM_Header[mu->HeaderNum];
-	mhu = (XMHEADER*)(XM_HeaderAddress[mu->HeaderNum]);
+	mu = XM_SngAddress[Song_ID];
+	mhu = XM_HeaderAddress[mu->HeaderNum];
 	if (mu->XMPlay == XM_PAUSED)
 	{
 		mu->XMPlay = XM_PLAYING;
@@ -3068,9 +3057,8 @@ void XM_SetMasterVol(int Song_ID, u_char Vol)
 		return;
 	if (Vol <= 128)
 	{
-		mu = (XMSONG*)(XM_SngAddress[Song_ID]);
-		//		mu=&XM_Song[Song_ID];
-		//		mu->SongVolume=Vol;
+		mu = XM_SngAddress[Song_ID];
+		//mu->SongVolume=Vol;
 		mu->MasterVolume = Vol;
 	}
 }
@@ -3179,15 +3167,29 @@ int XM_GetSongSize(void)
 
 void XM_SetSongAddress(u_char *Address)
 {
-	XM_SngAddress[XM_NSA] = Address;
-	mu = ((XMSONG*)(Address));
+#ifdef SOME_KIND_OF_DREAM
+	if (XM_NSA < 24)
+	{
+#endif
+	XM_SngAddress[XM_NSA] = (XMSONG*)Address;
+	mu = XM_SngAddress[XM_NSA];
 	mu->Status = 0;				/* Turn off song */
 	mu->XMPlay = XM_STOPPED;
 	XM_NSA++;
+#ifdef SOME_KIND_OF_DREAM
+	}
+#endif
 }
 
 void XM_FreeAllSongIDs(void)
 {
+#ifdef SOME_KIND_OF_DREAM
+	for (int i = 0; i < 24; i++)
+	{
+	    XM_SngAddress[i] = 0;
+		XMSongIDs[i] = -1;
+	}
+#endif
 	XM_NSA = 0;
 }
 
@@ -3204,7 +3206,7 @@ void XM_SetFileHeaderAddress(u_char *Address)
 {
 	if (XM_HA<8)
 	{
-	 	XM_HeaderAddress[XM_HA]=Address;
+	 	XM_HeaderAddress[XM_HA]=(XMHEADER*)Address;
 		XM_HA++;
 	}
 }
@@ -3212,8 +3214,29 @@ void XM_SetFileHeaderAddress(u_char *Address)
 
 // The following doesn't exist in the original distribution
 
+void XM_FreeSongID(void)
+{
+	if (XM_NSA == 0) // after freeing 0 there is no more to free
+		return;
+	XM_SngAddress[XM_NSA] = 0;
+	XMSongIDs[XM_NSA] = -1;
+	XM_NSA--;
+}
+
 void XM_FreeFileHeaderID()
 {
+	if (XM_HA == 0) // after freeing 0 there is no more to free
+		return;
+	XM_HeaderAddress[XM_HA] = 0;
+	XM_HA--;
+}
+
+void XM_FreeAllFileHeaderIDs()
+{
+	for (int i = 0; i < 8; i++)
+	{
+	    XM_HeaderAddress[i] = 0;
+	}
 	XM_HA = 0;
 }
 
@@ -3224,8 +3247,8 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
     if (XMSongIDs[SongID] == -1)
         return 0;
 
-	XMSONG *ms = (XMSONG*)(XM_SngAddress[SongID]);
-	XMHEADER *mhu = (XMHEADER*)(XM_HeaderAddress[SongID]);
+	ms = XM_SngAddress[SongID];
+	mhu = XM_HeaderAddress[SongID];
 	Feedback->Status = ms->XMPlay;
 	Feedback->SongPos = ms->SongPos;
 	Feedback->PatternPos = ms->PatternPos;
@@ -3233,7 +3256,7 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->SongSpeed = ms->SongSpeed;
 	Feedback->SongLength = mhu->songlength;
 	Feedback->SongLoop = ms->SongLoop;
-	Feedback->Volume = ms->MasterVolume;
+	Feedback->Volume = ms->SongVolume*ms->MasterVolume/128;
 	Feedback->Panning = ms->UserPan;
 	Feedback->ActiveVoices = ms->XMActiveVoices;
 	Feedback->PlayNext = ms->PlayNext;
