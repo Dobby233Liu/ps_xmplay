@@ -1859,6 +1859,11 @@ void UpdateXMData(void)
 	if(JP_Do_Nothing)			/* Failsafe switch - if called on interrupt */
 		return;
 
+#ifdef XMPLAY_ENABLE_FIXES
+	/* we may waste a lot of time here */
+	JP_Do_Nothing = 1;
+#endif
+
 	for (SC=0;SC<XM_NSA;SC++)
 	{
 		ms=XM_SngAddress[SC];
@@ -1869,6 +1874,10 @@ void UpdateXMData(void)
 			ms->PCounter=0;
 		}
 	}
+
+#ifdef XMPLAY_ENABLE_FIXES
+	JP_Do_Nothing = 0;
+#endif
 }
 
 
