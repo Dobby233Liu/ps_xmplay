@@ -23,7 +23,8 @@
     "megalovania": {
         "xm": "megalovania",
         "position": 0,
-        "rough_xm_subsong": 0
+        "rough_xm_subsong": 0,
+        "xmplay_enable_fixes": true
     },
     "friendinsideme_youvegota": {
         "xm": "friendinsideme",

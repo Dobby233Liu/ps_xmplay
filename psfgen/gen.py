@@ -14,7 +14,7 @@ LICENSES = [
     ("REDriver2", "psexe/xmplay/src/LICENSE.REDriver2") if XMPLAY_VARIANT == "redriver2" else (None, None)
 ]
 USE_ZOPFLI = sys.argv[3] == "1" if len(sys.argv) > 3 else False
-XMPLAY_ENABLE_FIXES = True
+XMPLAY_ENABLE_FIXES = False
 
 
 # cd to script directory / .. because otherwise everything will explode
@@ -56,8 +56,11 @@ def main():
             else:
                 print(song_name)
 
-            # TODO: variant setting should not be located there in info json
-            lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR, info.get("xmplay_variant", XMPLAY_VARIANT), XMPLAY_ENABLE_FIXES)
+            lib = modify_driver._make_psflib_elf(info["xm"], SONGDATA_DIR,
+                                                # TODO: variant should not be located there in info json
+                                                 info.get("xmplay_variant", XMPLAY_VARIANT),
+                                                 info.get("xmplay_enable_fixes", XMPLAY_ENABLE_FIXES)
+                                                )
             if not making_psf:
                 lib_psf = modify_driver.make_psflib_psf(lib)
                 with open(f"{outdir}/{lib_fn}", "wb") as libf:
