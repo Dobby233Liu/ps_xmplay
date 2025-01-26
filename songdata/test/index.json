@@ -68,5 +68,20 @@
         "rough_xm_subsong": 0,
         "loop_count": 0,
         "xmplay_enable_fixes": true
+    },
+    "dream_on": {
+        "xm": "dream_on",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "xmplay_enable_fixes": true,
+        "loop_count": 0
+    },
+    "tempo_-_underground_people": {
+        "xm": "tempo_-_underground_people",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "xmplay_enable_fixes": true,
+        "loop_count": 0,
+        "fade": 0
     }
 }
