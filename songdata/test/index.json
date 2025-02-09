@@ -12,13 +12,13 @@
         "rough_xm_subsong": 1,
         "panning_type": 1,
         "module_ext": "it",
-        "loop": false
+        "loop": "force_stop"
     },
     "icefront": {
         "xm": "icefront",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop": false
+        "loop": "force_stop"
     },
     "megalovania": {
         "xm": "megalovania",
@@ -76,7 +76,6 @@
         "xm": "tempo_-_underground_people",
         "position": 0,
         "rough_xm_subsong": 0,
-        "loop_count": 0,
-        "fade": 0
+        "loop": false
     }
 }

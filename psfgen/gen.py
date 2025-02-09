@@ -86,11 +86,19 @@ def main():
         sound_type = modify_driver.XMType.Music
 
         song_length = info.get("length", None)
-        loop = info.get("loop", True)
+        loop_option = info.get("loop", True)
+        loop_count = info.get("loop_count", 1)
+        fade = info.get("fade", 10)
+        loop = True
+        if loop_option == "force_stop":
+            loop = False
+        elif not loop_option:
+            loop_count = 0
+            fade = 0
         if not song_length:
             if mod and (subsong := info.get("rough_xm_subsong", None)) is not None:
                 mod.subsong = subsong
-                mod.repeat_count = info.get("loop_count", 1) if loop else 0
+                mod.repeat_count = loop_count if loop else 0
                 song_length = mod.estimate_duration() or song_length
             else:
                 song_length = 3.0 * 60
@@ -104,7 +112,7 @@ def main():
                 psf1 = modify_driver._make_psf_patch_lib(lib, sound_type, loop, info.get("position", 0), panning_type)
             if song_length:
                 psf1.tags["length"] = song_length
-            psf1.tags["fade"] = info.get("fade", 10) if loop else 0
+            psf1.tags["fade"] = fade if loop else 0
             psf1.tags["psfby"] = "ps_xmplay psfgen"
             #psf1.tags["origfilename"] = song_name
             psf1.write(outf, use_zopfli=USE_ZOPFLI)

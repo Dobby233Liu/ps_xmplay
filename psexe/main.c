@@ -126,7 +126,8 @@ void main() {
         while (true);
     } else {
         VSyncCallback(on_vsync);
-        while (!stop);
+        while (!stop)
+            VSync(-1);
     }
 
     // Quit XMPlay

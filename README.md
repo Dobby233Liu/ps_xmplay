@@ -40,7 +40,6 @@ Data:
     // and so on
 }
 ```
-** Regarding disabling loop: If the song can end properly, it's suggested that you set loop_count and fade to 0 instead
 
 ## Usage
 
