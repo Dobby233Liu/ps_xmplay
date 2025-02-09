@@ -78,6 +78,8 @@ Other known issues include:
   XMPLAY_ENABLE_FIXES in xmplay.c to fix it, which also enables support for the
   finer portamento adjusting commands.
 - Not all commands are implemented. XMPLAY_ENABLE_FIXES mode implements some more.
+- Note-mapped sample setup for instruments is unimplemented, relevant samples
+  are stripped at build time.
 - If a non-looping track doesn't stop properly, the driver will not try to stop it
   by itself.
 
