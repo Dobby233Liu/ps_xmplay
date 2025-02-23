@@ -3323,7 +3323,7 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->SongSpeed = ms->SongSpeed;
 	Feedback->SongLength = mhu->songlength;
 	Feedback->SongLoop = ms->SongLoop;
-	Feedback->Volume = ms->SongVolume*ms->MasterVolume/128;
+	Feedback->Volume = (short)(ms->SongVolume*ms->MasterVolume)/128;
 	Feedback->Panning = ms->UserPan;
 	Feedback->ActiveVoices = ms->XMActiveVoices;
 	Feedback->PlayNext = ms->PlayNext;
