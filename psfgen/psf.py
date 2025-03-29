@@ -72,10 +72,9 @@ class PSF():
     def _build_tags_internal(self: Self) -> None:
         tags = { "utf8": True }
 
-        if len(self.libs) == 1:
+        if len(self.libs) > 0:
             tags["_lib"] = self.libs[0]
-        else:
-            for i, lib in enumerate(self.libs):
+            for i, lib in enumerate(self.libs[1:]):
                 tags[f"_lib{i + 2}"] = lib
 
         return tags
