@@ -117,7 +117,7 @@ def main():
             #psf1.tags["origfilename"] = song_name
             psf1.write(outf, use_zopfli=USE_ZOPFLI)
 
-    with open(f"{outdir}/!3RD_LICENSES.txt", "w") as f:
+    with open(f"{outdir}/!PSFDRV_LICENSES.txt", "w") as f:
         for (sw_name, license_fp) in LICENSES:
             if license_fp is None: continue
             print(sw_name, file=f)
