@@ -77,5 +77,23 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": false
+    },
+    "drop_pop": {
+        "xm": "drop_pop",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
+    },
+    "hyperventilation": {
+        "xm": "hyperventilation",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
+    },
+    "hyperventilation.opt": {
+        "xm": "hyperventilation.opt",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
     }
 }
