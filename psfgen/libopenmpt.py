@@ -275,13 +275,15 @@ class Module():
             )
         else:
             self._stream_cb = _StreamCallbacks(stream)
-            self._module = LIB.openmpt_module_create2(
-                self._stream_cb, self._stream_cb.hash_ptr,
-                self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
-                pointer(err), pointer(err_msg_c),
-                self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
-            )
-            self._stream_cb = None
+            try:
+                self._module = LIB.openmpt_module_create2(
+                    self._stream_cb, self._stream_cb.hash_ptr,
+                    self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
+                    pointer(err), pointer(err_msg_c),
+                    self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
+                )
+            finally:
+                self._stream_cb = None
         if self._module is None:
             try:
                 err_msg = err_msg_c.value.decode("utf-8")
