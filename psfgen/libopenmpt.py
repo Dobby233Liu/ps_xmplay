@@ -263,6 +263,7 @@ class Module():
         self._err_cb = ERR_CB(self._err)
 
         self._module = None
+        # these are only used during the module create call
         err = c_int()
         err_msg_c = c_char_p()
         if read_stream_into_memory:
@@ -294,6 +295,7 @@ class Module():
         self.ctl = self._Ctl(self)
 
     def __del__(self):
+        # TODO: support explicit closing?
         if self._module is not None:
             LIB.openmpt_module_destroy(self._module)
 
