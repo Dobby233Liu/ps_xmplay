@@ -1,5 +1,5 @@
 from ctypes import *
-import ctypes
+from ctypes import _Pointer
 import enum
 import os
 import io
@@ -238,7 +238,7 @@ class Module():
                 self._module._raise_last_error()
 
     @classmethod
-    def _build_initial_ctls(cls, ctls: dict[str, str|float|int|bool]) -> ctypes._Pointer:
+    def _build_initial_ctls(cls, ctls: dict[str, str|float|int|bool]) -> _Pointer:
         initial_ctls = (_InitialCtl * (len(ctls) + 1))()
 
         for i, (ctl, value) in enumerate(ctls.items()):
