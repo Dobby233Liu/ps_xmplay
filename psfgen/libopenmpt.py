@@ -47,9 +47,9 @@ class _StreamCallbacks(Structure):
         ("_tell", openmpt_stream_tell_proc)
     ]
 
-    _stream: io.BytesIO
+    _stream: io.RawIOBase
 
-    def __init__(self, stream: io.BytesIO) -> None:
+    def __init__(self, stream: io.RawIOBase) -> None:
         super().__init__()
 
         self.hash = c_int(id(self))
@@ -257,7 +257,7 @@ class Module():
         return cast(pointer(initial_ctls), POINTER(_InitialCtl))
 
 
-    def __init__(self, stream: io.BytesIO, initial_ctls: dict[str, str|float|int|bool] = None, read_stream_into_memory: bool = True) -> None:
+    def __init__(self, stream: io.RawIOBase, initial_ctls: dict[str, str|float|int|bool] = None, read_stream_into_memory: bool = True) -> None:
         self._hash_ptr = pointer(c_int(id(self)))
         self._log_cb = LOG_CB(self._log)
         self._err_cb = ERR_CB(self._err)
