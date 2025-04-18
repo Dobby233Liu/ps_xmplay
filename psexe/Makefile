@@ -97,5 +97,5 @@ clean-songdata:
 clean-all-exe:
 	rm -f xmplayer_*.elf xmplayer_*.ps-exe
 
-clean: clean-songdata clean-all-exe
+clean:: clean-songdata clean-all-exe
 endif
