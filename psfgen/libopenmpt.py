@@ -9,6 +9,7 @@ import traceback
 
 """
 Very incomplete libopenmpt interop
+Wasn't meant to be complete anyway
 """
 
 LIB = None
@@ -189,7 +190,7 @@ LIB.openmpt_module_read_mono.restype = c_size_t
 
 class Module():
     class _Ctl():
-        def __init__(self, module: "Module", *args: Any, **kwargs: Any) -> None:
+        def __init__(self, module: "Module") -> None:
             assert module is not None
             self._module = module
 
@@ -207,12 +208,16 @@ class Module():
                 case "integer": value = LIB.openmpt_module_ctl_get_integer(self._module._module, key.encode("utf-8"))
                 case "text":
                     ptr = cast(LIB.openmpt_module_ctl_get_text(self._module._module, key.encode("utf-8")), c_void_p)
-                    value = cast(ptr, c_char_p).value.decode("utf-8")
-                    LIB.openmpt_free_string(ptr)
+                    try:
+                        value = cast(ptr, c_char_p).value.decode("utf-8")
+                    finally:
+                        LIB.openmpt_free_string(ptr)
                 case _:
                     ptr = cast(LIB.openmpt_module_ctl_get(self._module._module, key.encode("utf-8")), c_void_p)
-                    value = cast(ptr, c_char_p).value.decode("utf-8")
-                    LIB.openmpt_free_string(ptr)
+                    try:
+                        value = cast(ptr, c_char_p).value.decode("utf-8")
+                    finally:
+                        LIB.openmpt_free_string(ptr)
             if value is None:
                 self._module._raise_last_error()
             return value
@@ -269,16 +274,19 @@ class Module():
                 self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
             )
         else:
-            stream_cb = _StreamCallbacks(stream)
+            self._stream_cb = _StreamCallbacks(stream)
             self._module = LIB.openmpt_module_create2(
-                stream_cb, stream_cb.hash_ptr,
+                self._stream_cb, self._stream_cb.hash_ptr,
                 self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
                 pointer(err), pointer(err_msg_c),
                 self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
             )
+            self._stream_cb = None
         if self._module is None:
-            err_msg = err_msg_c.value.decode("utf-8")
-            LIB.openmpt_free_string(err_msg_c)
+            try:
+                err_msg = err_msg_c.value.decode("utf-8")
+            finally:
+                LIB.openmpt_free_string(err_msg_c)
             raise OpenMPTException(err_msg, err.value)
 
         self.ctl = self._Ctl(self)
@@ -300,8 +308,10 @@ class Module():
         msg = None
         msg_c = cast(LIB.openmpt_module_error_get_last_message(self._module), c_void_p)
         if msg_c.value is not None:
-            msg = cast(msg_c, c_char_p).value.decode("utf-8")
-            LIB.openmpt_free_string(msg_c)
+            try:
+                msg = cast(msg_c, c_char_p).value.decode("utf-8")
+            finally:
+                LIB.openmpt_free_string(msg_c)
         LIB.openmpt_module_error_clear(self._module)
         raise OpenMPTException(msg, code)
 
@@ -323,11 +333,11 @@ class Module():
         LIB.openmpt_module_set_position_order_row(self._module, self.current_order, value)
 
     @property
-    def position_seconds(self) -> int:
+    def position_seconds(self) -> float:
         return LIB.openmpt_module_get_position_seconds(self._module)
 
-    @current_row.setter
-    def position_seconds(self, value: int) -> None:
+    @position_seconds.setter
+    def position_seconds(self, value: float) -> None:
         LIB.openmpt_module_set_position_seconds(self._module, value)
 
 
@@ -360,15 +370,22 @@ class Module():
         LIB.openmpt_module_set_repeat_count(self._module, value)
 
 
-    # i'm sorry
+    # i'm sorry, but this has to be implemented like this, because position_seconds doesnt
+    # accomodate for the loop count
     def estimate_duration(self) -> float:
+        last_order, last_row = self.current_order, self.current_row
+
         sample_rate = 48000
         sample_buffer = (c_int16 * 1024)()
         total_samples = 0
 
-        while (rendered_samples := LIB.openmpt_module_read_mono(self._module, sample_rate, len(sample_buffer), sample_buffer)) != 0:
-            if rendered_samples < 0:
-                self._raise_last_error()
-            total_samples += rendered_samples
+        try:
+            while (rendered_samples := LIB.openmpt_module_read_mono(self._module, sample_rate, len(sample_buffer), sample_buffer)) != 0:
+                if rendered_samples < 0:
+                    self._raise_last_error()
+                total_samples += rendered_samples
+        finally:
+            self.current_order = last_order
+            self.current_row = last_row
 
         return total_samples / sample_rate

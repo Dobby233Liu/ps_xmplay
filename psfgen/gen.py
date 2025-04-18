@@ -7,7 +7,7 @@ import lief
 import sys
 
 
-SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "retail"
+SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "prlsr"
 XMPLAY_VARIANT = sys.argv[2] if len(sys.argv) > 2 else "redriver2"
 LICENSES = [
     ("nugget", "psexe/nugget/LICENSE"),
@@ -36,8 +36,10 @@ def main():
     for song_name, info in index.items():
         xm_ref_count[info["xm"]] = xm_ref_count.get(info["xm"], 0) + 1
 
-    bank_info: list[tuple[lief.ELF.Binary, str, libopenmpt.Module]] = {}
+    bank_info: dict[str, tuple[lief.ELF.Binary, str, libopenmpt.Module]] = {}
     for song_name, info in index.items():
+        assert info["xm"]
+
         making_psf = xm_ref_count[info["xm"]] == 1
         lib = None
         lib_fn = None
