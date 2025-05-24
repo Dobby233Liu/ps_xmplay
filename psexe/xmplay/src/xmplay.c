@@ -2019,16 +2019,16 @@ void XM_DoFullUpdate(int SC)
 		}
 		ms->JUp = 0;					/* Clear update flag */
 
-#ifdef XMPLAY_ENABLE_FIXES
+#if 0
 		if (!catching_up)
 		{
 #endif
 			UpdateHardware();			/* Update SPU */
-		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
-			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
-#ifdef XMPLAY_ENABLE_FIXES
+#if 0
 		}
 #endif
+		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
+			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
 
 /****
 	Update song at the end - so it doesn't have to process so much in
