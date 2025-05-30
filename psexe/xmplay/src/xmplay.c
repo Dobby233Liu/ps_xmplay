@@ -3220,6 +3220,10 @@ int i;
 
 void XM_SetVAGAddress(int VabID, int slot, int addr)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+	if (slot >= 0x80)
+		return;
+#endif
 	xm_l_vag_spu_addr[VabID][slot] = addr;
 	iVABID[VabID] = slot + 1;
 }
@@ -3235,17 +3239,14 @@ int XM_GetSongSize(void)
 void XM_SetSongAddress(u_char *Address)
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	if (XM_NSA < 24)
-	{
+	if (XM_NSA >= 24)
+		return;
 #endif
 	XM_SngAddress[XM_NSA] = (XMSONG*)Address;
 	mu = XM_SngAddress[XM_NSA];
 	mu->Status = 0;				/* Turn off song */
 	mu->XMPlay = XM_STOPPED;
 	XM_NSA++;
-#ifdef XMPLAY_ENABLE_FIXES
-	}
-#endif
 }
 
 void XM_FreeAllSongIDs(void)
