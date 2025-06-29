@@ -159,7 +159,6 @@ typedef struct _XMSONG {
 	u_char  SongVolume;	     /* song volume (0-128) */
 	u_char  MasterVolume;	     /* song volume (0-128) */
 #ifdef XMPLAY_ENABLE_FIXES
-	u_char	oldvslide;
 	u_char	oldgvslide;
 #endif
 	int	  XMActiveVoices;	  /* number of voices currently playing */
