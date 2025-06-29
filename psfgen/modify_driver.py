@@ -44,7 +44,7 @@ def _load_driver(xm_dir: str, xm: str) -> lief.ELF.Binary:
 
 
 def _clean_src() -> lief.ELF.Binary:
-    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true",
+    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", "XMPLAY_VARIANT=redriver2",
                     "clean"], check=True)
 
 
