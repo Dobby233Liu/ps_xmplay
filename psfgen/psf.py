@@ -104,7 +104,7 @@ class PSF():
                 raise RuntimeError("zopfli is not installed")
             # Note that uncompressed data tend to be 50-200kb big so numiterations
             # doesn't need to be too high
-            compressed_program = zopfli.compress(self.program, numiterations=20, blocksplittinglast=1)
+            compressed_program = zopfli.compress(self.program, numiterations=25)
         else:
             compressed_program = deflate.zlib_compress(self.program, 12)
         of.write(struct.pack("<L", len(compressed_program)))
