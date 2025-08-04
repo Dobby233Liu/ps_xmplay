@@ -8,7 +8,10 @@
 * tempo_-_underground_people.xm can be found [here](https://modarchive.org/index.php?request=view_by_moduleid&query=198050)
 
 * gadget_room.xm can be found [here](https://modarchive.org/index.php?request=view_by_moduleid&query=206905)
-* megalovania.xm is originally composed by Toby Fox and supposedly arranged by loypoll? (yeahhhh) And I did the quick MIDI to XM conversion with OpenMPT.
+* megalovania.xm is originally composed by Toby Fox and supposedly arranged by Lila? (yeahhhh) And I did the quick MIDI to XM conversion with OpenMPT.
 * friendinsideme.xm is a sloppy edit of toy3.mod, which is supposedly originally by Allister Brimble for the Genesis Toy Story game
 
 * [drop_pop.xm](https://modarchive.org/index.php?request=view_by_moduleid&query=146113) and [hyperventilation.xm](https://modarchive.org/index.php?request=view_by_moduleid&query=153866) are files which were [possibly mentioned](https://www.youtube.com/watch?v=VwH6_mEZhoo) in some early revisions of SBSPSS src
+
+* elektric_funk.xm was converted from [this](https://modarchive.org/index.php?request=view_by_moduleid&query=41529)
+* hybrid_song.xm was taken from [here](https://modarchive.org/index.php?request=view_by_moduleid&query=66187)

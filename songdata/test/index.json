@@ -95,5 +95,17 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": false
+    },
+    "elektric_funk": {
+        "xm": "elektric_funk",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
+    },
+    "hybrid_song": {
+        "xm": "hybrid_song",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": true
     }
 }
