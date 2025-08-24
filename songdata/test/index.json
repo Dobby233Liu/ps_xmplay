@@ -113,5 +113,17 @@
         "position": 0,
         "rough_xm_subsong": 0,
         "loop": true
+    },
+    "unreeeal_superhero_2": {
+        "xm": "unreeeal_superhero_2",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": true
+    },
+    "unreeeal_superhero_3": {
+        "xm": "unreeeal_superhero_3",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": true
     }
 }

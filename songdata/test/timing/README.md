@@ -15,3 +15,4 @@
 
 * elektric_funk.xm was converted from [this](https://modarchive.org/index.php?request=view_by_moduleid&query=41529)
 * hybrid_song.xm was taken from [here](https://modarchive.org/index.php?request=view_by_moduleid&query=66187)
+* unreeeal_superhero_2.xm and unreeeal_superhero_3.xm taken from [here](https://modarchive.org/index.php?request=view_artist_modules&query=84415)
