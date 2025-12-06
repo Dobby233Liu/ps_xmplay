@@ -107,8 +107,9 @@ def main():
         panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
         with open(f"{outdir}/{song_name}.{'mini' if not making_psf else ''}psf", "wb") as outf:
-            assert lib is not None and lib_fn is not None
+            assert lib is not None
             if not making_psf:
+                assert lib_fn is not None
                 psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:
                 psf1 = modify_driver._make_psf_patch_lib(lib, sound_type, loop, info.get("position", 0), panning_type)
