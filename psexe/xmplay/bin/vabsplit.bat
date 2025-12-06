@@ -1,17 +1,27 @@
 @echo off
+setlocal enabledelayedexpansion
 
-shift
-pushd "%~dp0"
-set x=
-for %%i in ("%*") do (
-shift
-set "x=%x% %~nx0"
+set "files="
+set "opts="
+
+for %%i in (%*) do (
+    if "%%~i"=="-v" (
+        set "opts=!opts! -v"
+    ) else if "%%~i"=="-n" (
+        set "opts=!opts! -n"
+    ) else (
+        set "files=!files! "%%~i""
+    )
 )
-call :vabsplit %x%
-set lastel=%errorlevel%
-popd
-exit /b %lastel%
 
-:vabsplit
-call "%~dp0..\..\psyq\bin\msdos" "%~dp0vabsplit.exe" %*
-exit /b %errorlevel%
+set lastel=0
+for %%i in (%files%) do (
+    pushd %%~dpi || goto :fail
+    call "%~dp0..\..\psyq\bin\msdos" "%~dp0vabsplit.exe" %opts% %%~nxi
+    set lastel=!errorlevel!
+    popd
+    if !lastel! neq 0 goto :fail
+)
+
+:fail
+exit /b %lastel%

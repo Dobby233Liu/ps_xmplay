@@ -1,3 +1,3 @@
 @echo off
-%~dp0msdos -x %~dp0psylibd.exe %*
+call "%~dp0msdos" -x "%~dp0psylibd.exe" %*
 exit /b %errorlevel%
