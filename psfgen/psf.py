@@ -1,11 +1,14 @@
-from abc import abstractmethod
 import collections
+import datetime
 import enum
 import io
 import struct
-from typing import Self, Any, Optional
+from abc import abstractmethod
+from typing import Any, Optional, Self
+
 import deflate
-import datetime
+
+zopfli = None
 try:
     import zopfli.zopfli as zopfli
 except ImportError:
@@ -18,7 +21,8 @@ class PSFType(enum.IntEnum):
     SSF = 0x11
     DSF = 0x12
 
-class PSFTags(collections.UserDict):
+
+class PSFTags(collections.UserDict[str, Any]):
     @staticmethod
     def _value_transliterate(value: Any, key: Optional[Any] = None) -> str:
         if isinstance(value, bool):
@@ -30,6 +34,8 @@ class PSFTags(collections.UserDict):
                 seconds = value
             elif isinstance(value, int):
                 seconds = float(value)
+            else:
+                raise Exception("unexpected type for duration value")
 
             m, s = divmod(seconds, 60)
             h, m = divmod(m, 60)
@@ -49,8 +55,9 @@ class PSFTags(collections.UserDict):
 
         return self.data.__setitem__(keystr, self._value_transliterate(value, key))
 
-class PSF():
-    _magic = b'PSF'
+
+class PSF:
+    _magic = b"PSF"
     _type: PSFType
 
     libs: list[str]
@@ -58,19 +65,19 @@ class PSF():
     program: bytes
     reserved: bytes
 
-    tags: PSFTags[str, str]
+    tags: PSFTags
 
     def __init__(self) -> None:
         super().__init__()
 
         self.libs = []
-        self.program = b''
-        self.reserved = b''
+        self.program = b""
+        self.reserved = b""
         self.tags = PSFTags()
 
     @abstractmethod
-    def _build_tags_internal(self: Self) -> None:
-        tags = { "utf8": True }
+    def _build_tags_internal(self: Self) -> dict[str, Any]:
+        tags: dict[str, Any] = {"utf8": True}
 
         if len(self.libs) > 0:
             tags["_lib"] = self.libs[0]
@@ -79,20 +86,15 @@ class PSF():
 
         return tags
 
-    def _build_tags(self: Self) -> str:
+    def _build_tags(self: Self) -> str | None:
         tags = {}
-        tags.update({ key: PSFTags._value_transliterate(value) for key, value in self._build_tags_internal().items() })
+        tags.update({key: PSFTags._value_transliterate(value) for key, value in self._build_tags_internal().items()})
         tags.update(self.tags)
 
         if len(tags) == 0:
             return None
 
-        return "\n".join(
-            "\n".join(
-                f"{key}={line}" for line in value.splitlines(False)
-            )
-            for key, value in tags.items()
-        )
+        return "\n".join("\n".join(f"{key}={line}" for line in value.splitlines(False)) for key, value in tags.items())
 
     def write(self: Self, of: io.BytesIO, use_zopfli: bool = False) -> None:
         of.write(self._magic + struct.pack("<B", self._type))
@@ -123,6 +125,7 @@ class PSF1RefreshRates(enum.IntEnum):
     PAL = 50
     NTSC = 60
 
+
 class PSF1(PSF):
     _type = PSFType.PSF1
     refresh_rate: PSF1RefreshRates
@@ -132,13 +135,13 @@ class PSF1(PSF):
 
         self.refresh_rate = PSF1RefreshRates.NTSC
 
-    def _build_tags_internal(self: Self) -> None:
+    def _build_tags_internal(self: Self) -> dict[str, Any]:
         ret = super()._build_tags_internal()
-        ret.update({ "_refresh": self.refresh_rate })
+        ret.update({"_refresh": self.refresh_rate})
         return ret
 
     def write(self: Self, *args, **kwargs) -> None:
         if len(self.program) > 0x1F0800:
-            raise Exception("Program is too big")
+            raise Exception("program is too big")
 
         super().write(*args, **kwargs)

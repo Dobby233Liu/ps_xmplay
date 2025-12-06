@@ -1,9 +1,11 @@
 import io
 import os
-import lief
-import tempfile
+import shutil
 import subprocess
-from ctypes import *
+import tempfile
+from ctypes import LittleEndianStructure, c_char, c_uint32
+
+import lief
 
 _PREFIX = "mipsel-none-elf"
 PREFIX = _PREFIX
@@ -15,20 +17,22 @@ OBJCOPY = "objcopy"
 MAGIC = b"PS-X EXE"
 
 
-
 class PSXExeHeader(LittleEndianStructure):
     _fields_ = [
         ("magic", c_char * 8),
-        ("text_off", c_uint32), # zeroed
-        ("data_off", c_uint32), # zeroed
-        ("entrypoint", c_uint32), # where our data starts??
-        ("gp_init", c_uint32), # zeroed
-        ("text_addr", c_uint32), ("text_size", c_uint32),
-        ("data_addr", c_uint32), ("data_size", c_uint32), # zeroed
-        ("bss_addr", c_uint32), ("bss_size", c_uint32), # zeroed
-        ("stack_addr", c_uint32), # 0x801FFF00
-        ("stack_size", c_uint32), # zeroed
-        ("padding", c_char * 1992) # zeroed
+        ("text_off", c_uint32),  # zeroed
+        ("data_off", c_uint32),  # zeroed
+        ("entrypoint", c_uint32),  # where our data starts??
+        ("gp_init", c_uint32),  # zeroed
+        ("text_addr", c_uint32),
+        ("text_size", c_uint32),
+        ("data_addr", c_uint32),
+        ("data_size", c_uint32),  # zeroed
+        ("bss_addr", c_uint32),
+        ("bss_size", c_uint32),  # zeroed
+        ("stack_addr", c_uint32),  # 0x801FFF00
+        ("stack_size", c_uint32),  # zeroed
+        ("padding", c_char * 1992),  # zeroed
     ]
 
     def __init__(self, text_addr: int, text_size: int):
@@ -65,6 +69,6 @@ def elf_to_psexe(elf: lief.ELF.Binary) -> io.BytesIO:
         os.close(fd)
         os.remove(exe_fn)
 
-    assert exe_dat[:len(MAGIC)] == MAGIC
+    assert exe_dat[: len(MAGIC)] == MAGIC
 
     return io.BytesIO(exe_dat)

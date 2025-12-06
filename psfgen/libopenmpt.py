@@ -1,37 +1,61 @@
-from ctypes import *
-from ctypes import _Pointer
 import enum
-import os
 import io
+import os
 import sys
-from typing import Any, Self
 import traceback
+from ctypes import (
+    CDLL,
+    CFUNCTYPE,
+    POINTER,
+    Structure,
+    _Pointer,
+    c_bool,
+    c_char,
+    c_char_p,
+    c_double,
+    c_int,
+    c_int16,
+    c_int32,
+    c_int64,
+    c_size_t,
+    c_void_p,
+    cast,
+    pointer,
+)
+from typing import Any, Self
 
 """
 Very incomplete libopenmpt interop
 Wasn't meant to be complete anyway
 """
 
-LIB = None
-try:
-    if os.name == "nt":
-        LIB = CDLL("libopenmpt.dll")
-    else:
-        LIB = CDLL("libopenmpt.so")
-except OSError:
-    if os.name == "nt":
-        LIB = CDLL(os.path.join(os.path.dirname(__file__), "lib/libopenmpt.dll"))
-if not LIB:
+
+def _get_libopenmpt():
+    try:
+        if os.name == "nt":
+            return CDLL("libopenmpt.dll")
+        else:
+            return CDLL("libopenmpt.so")
+    except OSError:
+        if os.name == "nt":
+            return CDLL(os.path.join(os.path.dirname(__file__), "lib/libopenmpt.dll"))
+    raise OSError("Please install libopenmpt")
+
+
+LIB: CDLL = _get_libopenmpt()
+if LIB is None:
     raise OSError("Please install libopenmpt")
 
 
 LOG_CB = CFUNCTYPE(None, c_char_p, c_void_p)
+
 
 class ErrorFuncResult(enum.IntEnum):
     DoNothing = 0
     Log = 1 << 0
     Store = 1 << 1
     Default = Log | Store
+
 
 ERR_CB = CFUNCTYPE(c_int, c_int, c_void_p)
 
@@ -40,16 +64,17 @@ openmpt_stream_read_func = CFUNCTYPE(c_size_t, c_void_p, c_void_p, c_size_t)
 openmpt_stream_seek_func = CFUNCTYPE(c_int, c_void_p, c_int64, c_int)
 openmpt_stream_tell_proc = CFUNCTYPE(c_int64, c_void_p)
 
+
 class _StreamCallbacks(Structure):
     _fields_ = [
         ("_read", openmpt_stream_read_func),
         ("_seek", openmpt_stream_seek_func),
-        ("_tell", openmpt_stream_tell_proc)
+        ("_tell", openmpt_stream_tell_proc),
     ]
 
-    _stream: io.RawIOBase
+    _stream: io.RawIOBase | io.BufferedIOBase
 
-    def __init__(self, stream: io.RawIOBase) -> None:
+    def __init__(self, stream: io.RawIOBase | io.BufferedIOBase) -> None:
         super().__init__()
 
         self.hash = c_int(id(self))
@@ -62,13 +87,13 @@ class _StreamCallbacks(Structure):
             self._seek = openmpt_stream_seek_func(self._seek_impl)
             self._tell = openmpt_stream_tell_proc(self._tell_impl)
 
-    def _read_impl(self: Self, ptr: int, dst: c_void_p, size: c_size_t) -> c_size_t:
+    def _read_impl(self: Self, ptr: int, dst: int, size: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
 
         return self._stream.readinto((c_char * size).from_address(dst))
 
-    def _seek_impl(self: Self, ptr: int, pos: c_int64, whence: c_int) -> c_int:
+    def _seek_impl(self: Self, ptr: int, pos: int, whence: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
 
@@ -79,7 +104,7 @@ class _StreamCallbacks(Structure):
             return -1
         return 0
 
-    def _tell_impl(self: Self, ptr: int) -> c_int64:
+    def _tell_impl(self: Self, ptr: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
 
@@ -90,7 +115,8 @@ class _StreamCallbacks(Structure):
             return -1
 
 
-c_openmpt_module = c_void_p # it's some kind of struct alright
+c_openmpt_module = c_void_p  # it's some kind of struct alright
+
 
 class _InitialCtl(Structure):
     _fields_ = [
@@ -98,20 +124,29 @@ class _InitialCtl(Structure):
         ("value", c_char_p),
     ]
 
+
 LIB.openmpt_module_create2.argtypes = [
-    _StreamCallbacks, c_void_p,
-    LOG_CB, c_void_p,
-    ERR_CB, c_void_p,
-    POINTER(c_int), POINTER(c_char_p),
-    POINTER(_InitialCtl)
+    _StreamCallbacks,
+    c_void_p,
+    LOG_CB,
+    c_void_p,
+    ERR_CB,
+    c_void_p,
+    POINTER(c_int),
+    POINTER(c_char_p),
+    POINTER(_InitialCtl),
 ]
 LIB.openmpt_module_create2.restype = c_openmpt_module
 LIB.openmpt_module_create_from_memory2.argtypes = [
-    c_void_p, c_size_t,
-    LOG_CB, c_void_p,
-    ERR_CB, c_void_p,
-    POINTER(c_int), POINTER(c_char_p),
-    POINTER(_InitialCtl)
+    c_void_p,
+    c_size_t,
+    LOG_CB,
+    c_void_p,
+    ERR_CB,
+    c_void_p,
+    POINTER(c_int),
+    POINTER(c_char_p),
+    POINTER(_InitialCtl),
 ]
 LIB.openmpt_module_create_from_memory2.restype = c_openmpt_module
 
@@ -125,6 +160,7 @@ LIB.openmpt_module_error_get_last_message.restype = c_void_p
 
 LIB.openmpt_free_string.argtypes = [c_void_p]
 LIB.openmpt_module_error_clear.argtypes = [c_openmpt_module]
+
 
 class OpenMPTException(Exception):
     def __init__(self, message: str, code: int) -> None:
@@ -188,8 +224,8 @@ LIB.openmpt_module_read_mono.argtypes = [c_openmpt_module, c_int32, c_size_t, PO
 LIB.openmpt_module_read_mono.restype = c_size_t
 
 
-class Module():
-    class _Ctl():
+class Module:
+    class _Ctl:
         def __init__(self, module: "Module") -> None:
             assert module is not None
             self._module = module
@@ -198,31 +234,42 @@ class Module():
             item_type = None
 
             match key:
-                case "load.skip_samples": item_type = "boolean"
-                case "play.at_end": item_type = "text"
+                case "load.skip_samples":
+                    item_type = "boolean"
+                case "play.at_end":
+                    item_type = "text"
 
             value = None
             match item_type:
-                case "boolean": value = LIB.openmpt_module_ctl_get_boolean(self._module._module, key.encode("utf-8"))
-                case "floatingpoint": value = LIB.openmpt_module_ctl_get_floatingpoint(self._module._module, key.encode("utf-8"))
-                case "integer": value = LIB.openmpt_module_ctl_get_integer(self._module._module, key.encode("utf-8"))
+                case "boolean":
+                    value = LIB.openmpt_module_ctl_get_boolean(self._module._module, key.encode("utf-8"))
+                case "floatingpoint":
+                    value = LIB.openmpt_module_ctl_get_floatingpoint(self._module._module, key.encode("utf-8"))
+                case "integer":
+                    value = LIB.openmpt_module_ctl_get_integer(self._module._module, key.encode("utf-8"))
                 case "text":
                     ptr = cast(LIB.openmpt_module_ctl_get_text(self._module._module, key.encode("utf-8")), c_void_p)
-                    try:
-                        value = cast(ptr, c_char_p).value.decode("utf-8")
-                    finally:
-                        LIB.openmpt_free_string(ptr)
+                    if ptr is not None:
+                        try:
+                            _value = cast(ptr, c_char_p).value
+                            assert _value is not None
+                            value = _value.decode("utf-8")
+                        finally:
+                            LIB.openmpt_free_string(ptr)
                 case _:
                     ptr = cast(LIB.openmpt_module_ctl_get(self._module._module, key.encode("utf-8")), c_void_p)
-                    try:
-                        value = cast(ptr, c_char_p).value.decode("utf-8")
-                    finally:
-                        LIB.openmpt_free_string(ptr)
+                    if ptr is not None:
+                        try:
+                            _value = cast(ptr, c_char_p).value
+                            assert _value is not None
+                            value = _value.decode("utf-8")
+                        finally:
+                            LIB.openmpt_free_string(ptr)
             if value is None:
                 self._module._raise_last_error()
             return value
 
-        def __setitem__(self, key: str, value: str|float|int|bool) -> None:
+        def __setitem__(self, key: str, value: str | float | int | bool) -> None:
             ok = False
             if isinstance(value, str):
                 ok = LIB.openmpt_module_ctl_set_text(self._module._module, key.encode("utf-8"), value.encode("utf-8"))
@@ -238,7 +285,7 @@ class Module():
                 self._module._raise_last_error()
 
     @classmethod
-    def _build_initial_ctls(cls, ctls: dict[str, str|float|int|bool]) -> _Pointer:
+    def _build_initial_ctls(cls, ctls: dict[str, str | float | int | bool]) -> _Pointer:
         initial_ctls = (_InitialCtl * (len(ctls) + 1))()
 
         for i, (ctl, value) in enumerate(ctls.items()):
@@ -256,8 +303,12 @@ class Module():
 
         return cast(pointer(initial_ctls), POINTER(_InitialCtl))
 
-
-    def __init__(self, stream: io.RawIOBase, initial_ctls: dict[str, str|float|int|bool] = None, read_stream_into_memory: bool = True) -> None:
+    def __init__(
+        self,
+        stream: io.RawIOBase | io.BufferedIOBase,
+        initial_ctls: dict[str, str | float | int | bool] | None = None,
+        read_stream_into_memory: bool = True,
+    ) -> None:
         self._hash_ptr = pointer(c_int(id(self)))
         self._log_cb = LOG_CB(self._log)
         self._err_cb = ERR_CB(self._err)
@@ -269,25 +320,37 @@ class Module():
         if read_stream_into_memory:
             data = stream.read()
             self._module = LIB.openmpt_module_create_from_memory2(
-                data, len(data),
-                self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
-                pointer(err), pointer(err_msg_c),
-                self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
+                data,
+                len(data),
+                self._log_cb,
+                self._hash_ptr,
+                self._err_cb,
+                self._hash_ptr,
+                pointer(err),
+                pointer(err_msg_c),
+                self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None,
             )
         else:
             self._stream_cb = _StreamCallbacks(stream)
             try:
                 self._module = LIB.openmpt_module_create2(
-                    self._stream_cb, self._stream_cb.hash_ptr,
-                    self._log_cb, self._hash_ptr, self._err_cb, self._hash_ptr,
-                    pointer(err), pointer(err_msg_c),
-                    self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None
+                    self._stream_cb,
+                    self._stream_cb.hash_ptr,
+                    self._log_cb,
+                    self._hash_ptr,
+                    self._err_cb,
+                    self._hash_ptr,
+                    pointer(err),
+                    pointer(err_msg_c),
+                    self._build_initial_ctls(initial_ctls) if initial_ctls is not None else None,
                 )
             finally:
                 self._stream_cb = None
         if self._module is None:
+            err_msg = ""  # todo
             try:
-                err_msg = err_msg_c.value.decode("utf-8")
+                if (_err_msg := err_msg_c.value) is not None:
+                    err_msg = _err_msg.decode("utf-8")
             finally:
                 LIB.openmpt_free_string(err_msg_c)
             raise OpenMPTException(err_msg, err.value)
@@ -302,23 +365,24 @@ class Module():
     def _log(self, message: bytes, user: c_void_p):
         print(message.decode("utf-8"), file=sys.stderr)
 
-    def _err(self, code: c_int, user: c_void_p) -> c_int:
+    def _err(self, code: c_int, user: c_void_p) -> int:
         return ErrorFuncResult.Store.value
 
     def _raise_last_error(self):
         assert self._module is not None
         code = LIB.openmpt_module_error_get_last(self._module)
         assert code is not None and code != 0
-        msg = None
+        msg = ""  # todo
         msg_c = cast(LIB.openmpt_module_error_get_last_message(self._module), c_void_p)
         if msg_c.value is not None:
             try:
-                msg = cast(msg_c, c_char_p).value.decode("utf-8")
+                _msg = cast(msg_c, c_char_p).value
+                assert _msg is not None
+                msg = _msg.decode("utf-8")
             finally:
                 LIB.openmpt_free_string(msg_c)
         LIB.openmpt_module_error_clear(self._module)
         raise OpenMPTException(msg, code)
-
 
     @property
     def current_order(self) -> int:
@@ -344,16 +408,13 @@ class Module():
     def position_seconds(self, value: float) -> None:
         LIB.openmpt_module_set_position_seconds(self._module, value)
 
-
     @property
     def length(self) -> float:
         return LIB.openmpt_module_get_duration_seconds(self._module)
 
-
     @property
     def num_subsongs(self) -> int:
         return LIB.openmpt_module_get_num_subsongs(self._module)
-
 
     @property
     def subsong(self) -> int:
@@ -364,7 +425,6 @@ class Module():
         if not LIB.openmpt_module_select_subsong(self._module, value):
             self._raise_last_error()
 
-
     @property
     def repeat_count(self) -> int:
         return LIB.openmpt_module_get_repeat_count(self._module)
@@ -372,7 +432,6 @@ class Module():
     @repeat_count.setter
     def repeat_count(self, value: int) -> None:
         LIB.openmpt_module_set_repeat_count(self._module, value)
-
 
     # i'm sorry, but this has to be implemented like this, because position_seconds doesnt
     # accomodate for the loop count
@@ -384,7 +443,11 @@ class Module():
         total_samples = 0
 
         try:
-            while (rendered_samples := LIB.openmpt_module_read_mono(self._module, sample_rate, len(sample_buffer), sample_buffer)) != 0:
+            while (
+                rendered_samples := LIB.openmpt_module_read_mono(
+                    self._module, sample_rate, len(sample_buffer), sample_buffer
+                )
+            ) != 0:
                 if rendered_samples < 0:
                     self._raise_last_error()
                 total_samples += rendered_samples

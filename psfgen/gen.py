@@ -24,7 +24,7 @@ os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
 
 
 def main():
-    modify_driver._clean_src()
+    modify_driver.clean_src()
 
     with open(f"songdata/{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
@@ -36,7 +36,7 @@ def main():
     for song_name, info in index.items():
         xm_ref_count[info["xm"]] = xm_ref_count.get(info["xm"], 0) + 1
 
-    bank_info: dict[str, tuple[lief.ELF.Binary, str, libopenmpt.Module]] = {}
+    bank_info: dict[str, tuple[lief.ELF.Binary | None, str | None, libopenmpt.Module | None]] = {}
     for song_name, info in index.items():
         assert info["xm"]
 
@@ -107,6 +107,7 @@ def main():
         panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
         with open(f"{outdir}/{song_name}.{'mini' if not making_psf else ''}psf", "wb") as outf:
+            assert lib is not None and lib_fn is not None
             if not making_psf:
                 psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
             else:
