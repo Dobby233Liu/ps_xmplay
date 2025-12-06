@@ -8,7 +8,7 @@ shift
 set "x=%x% %~nx0"
 )
 call :vabsplit %x%
-set el=%errorlevel%
+set lastel=%errorlevel%
 popd
 exit /b %lastel%
 
