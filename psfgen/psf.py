@@ -97,10 +97,6 @@ class PSF:
         return "\n".join("\n".join(f"{key}={line}" for line in value.splitlines(False)) for key, value in tags.items())
 
     def write(self: Self, of: io.BytesIO, use_zopfli: bool = False) -> None:
-        of.write(self._magic + struct.pack("<B", self._type))
-
-        of.write(struct.pack("<L", len(self.reserved)))
-
         if use_zopfli:
             if not zopfli:
                 raise RuntimeError("zopfli is not installed")
@@ -109,9 +105,13 @@ class PSF:
             compressed_program = zopfli.compress(self.program, numiterations=25)
         else:
             compressed_program = deflate.zlib_compress(self.program, 12)
-        of.write(struct.pack("<L", len(compressed_program)))
-        of.write(struct.pack("<L", deflate.crc32(compressed_program)))
 
+        of.write(self._magic)
+        of.write(
+            struct.pack(
+                "<BLLL", self._type, len(self.reserved), len(compressed_program), deflate.crc32(compressed_program)
+            )
+        )
         of.write(self.reserved)
         of.write(compressed_program)
 
