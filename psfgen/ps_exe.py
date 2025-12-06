@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from ctypes import LittleEndianStructure, c_char, c_uint32
+from ctypes import LittleEndianStructure, c_char, c_uint32, sizeof
 
 import lief
 
@@ -51,7 +51,8 @@ class PSXExeHeader(LittleEndianStructure):
         self.bss_size = 0
         self.stack_addr = 0x801FFF00
         self.stack_size = 0
-        self.padding = b"\0" * 1992
+        pad = b"\0"
+        self.padding = pad * (PSXExeHeader.padding.size // sizeof(c_char) // len(pad))
 
 
 # This is wholeheartedly a hack

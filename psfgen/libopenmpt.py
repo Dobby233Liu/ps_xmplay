@@ -82,17 +82,19 @@ class _StreamCallbacks(Structure):
 
         self._stream = stream
 
-        self._read = openmpt_stream_read_func(self._read_impl)
+        self._read = self._read_impl
         if self._stream.seekable():
-            self._seek = openmpt_stream_seek_func(self._seek_impl)
-            self._tell = openmpt_stream_tell_proc(self._tell_impl)
+            self._seek = self._seek_impl
+            self._tell = self._tell_impl
 
+    @openmpt_stream_read_func
     def _read_impl(self: Self, ptr: int, dst: int, size: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
 
         return self._stream.readinto((c_char * size).from_address(dst))
 
+    @openmpt_stream_seek_func
     def _seek_impl(self: Self, ptr: int, pos: int, whence: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
@@ -104,6 +106,7 @@ class _StreamCallbacks(Structure):
             return -1
         return 0
 
+    @openmpt_stream_tell_proc
     def _tell_impl(self: Self, ptr: int) -> int:
         if cast(ptr, c_void_p).value != cast(self.hash_ptr, c_void_p).value:
             raise ValueError("Invalid stream pointer")
@@ -310,8 +313,8 @@ class Module:
         read_stream_into_memory: bool = True,
     ) -> None:
         self._hash_ptr = pointer(c_int(id(self)))
-        self._log_cb = LOG_CB(self._log)
-        self._err_cb = ERR_CB(self._err)
+        self._log_cb = self._log
+        self._err_cb = self._err
 
         self._module = None
         # these are only used during the module create call
@@ -362,9 +365,11 @@ class Module:
         if self._module is not None:
             LIB.openmpt_module_destroy(self._module)
 
+    @LOG_CB
     def _log(self, message: bytes, user: c_void_p):
         print(message.decode("utf-8"), file=sys.stderr)
 
+    @ERR_CB
     def _err(self, code: c_int, user: c_void_p) -> int:
         return ErrorFuncResult.Store.value
 
