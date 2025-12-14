@@ -1,6 +1,6 @@
 import glob
 import os
-from ctypes import LittleEndianStructure, c_short, c_uint8, c_ushort, sizeof
+from ctypes import LittleEndianStructure, c_uint8
 from enum import IntFlag
 from io import BufferedReader, BufferedWriter
 from os import path
@@ -68,7 +68,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         return
 
     outf.write(inf.read(336))  # go to patterns
-    poke(outf, 58, pack("<H", 0x104))
+    poke(outf, 58, pack("<H", 0x104))  # convert XM to standard version
 
     inf.seek(68)
     num_chnl, num_pat = unpack_io(inf, "<HH")
