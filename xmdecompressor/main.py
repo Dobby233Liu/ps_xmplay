@@ -1,6 +1,5 @@
 import glob
 import os
-from ctypes import LittleEndianStructure, c_uint8
 from enum import IntFlag
 from io import BufferedReader, BufferedWriter
 from os import path
