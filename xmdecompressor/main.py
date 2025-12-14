@@ -118,11 +118,11 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
             for chnl in range(num_chnl):
                 note_struct = notes_per_chnl[chnl]
                 if (
-                    note_struct.note > 0
-                    and note_struct.inst > 0
-                    and note_struct.volc > 0
-                    and note_struct.efft > 0
-                    and note_struct.effp > 0
+                    note_struct.note != 0
+                    and note_struct.inst != 0
+                    and note_struct.volc != 0
+                    and note_struct.efft != 0
+                    and note_struct.effp != 0
                 ):
                     # write full note
                     outf.write(
@@ -137,15 +137,15 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     )
                 else:
                     packed_flag = XM_RowPackedFlag.packed
-                    if note_struct.note > 0:
+                    if note_struct.note != 0:
                         packed_flag |= XM_RowPackedFlag.note
-                    if note_struct.inst > 0:
+                    if note_struct.inst != 0:
                         packed_flag |= XM_RowPackedFlag.inst
-                    if note_struct.volc > 0:
+                    if note_struct.volc != 0:
                         packed_flag |= XM_RowPackedFlag.volc
-                    if note_struct.efft > 0:
+                    if note_struct.efft != 0:
                         packed_flag |= XM_RowPackedFlag.efft
-                    if note_struct.effp > 0:
+                    if note_struct.effp != 0:
                         packed_flag |= XM_RowPackedFlag.effp
                     outf.write(pack("<B", packed_flag))
 
