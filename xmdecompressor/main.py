@@ -90,7 +90,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
 
         pat_start_in, pat_start_out = inf.tell(), outf.tell()
         for r in range(pat_len):
-            row_notes = (XM_Note * 32)()  # more for safety
+            row_notes = (XM_Note * max(32, num_chnl))()  # more for safety
 
             while (inf.tell() - pat_start_in) < pat_size:  # don't overflow reading
                 patdat = unpack_io1(inf, "<B")
