@@ -1,0 +1,10 @@
+{
+    "MENUSND": {
+        "xm": "MENUSND",
+        "module_ext": "xm",
+        "rough_xm_subsong": 0,
+        "loop": true,
+        "use_orig_as_timing": false,
+        "position": 0
+    }
+}

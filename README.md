@@ -3,7 +3,7 @@
 Extremely duct-tapey PSF driver and maker kit for SpongeBob SquarePants: SuperSponge.
 Possibly applible to other games using the Jason Page XMPlay library.
 
-SBSPSS BigLump extractor included as a bonus.
+SBSPSS BigLump extractor and XM decompressor (based on DriverSoundTools) included as a bonus.
 
 > [!NOTE]
 > The following documentation is a best-effort attempt to describe my process.
