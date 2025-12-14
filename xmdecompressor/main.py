@@ -149,7 +149,6 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
 
     # copy remaining data
     outf.write(inf.read())
-    return outf.tell()
 
 
 SONGDATA_DIR = "nascarheat"
