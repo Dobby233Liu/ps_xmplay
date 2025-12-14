@@ -67,8 +67,10 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         outf.write(inf.read())
         return
 
-    outf.write(inf.read(336))  # until pattern data
-    poke(outf, ver_start, pack("<H", 0x104))  # convert XM to standard version
+    outf.write(inf.read(ver_start))
+    ver_size = outf.write(pack("<H", 0x104))  # convert XM to standard version
+    inf.seek(ver_size, os.SEEK_CUR)
+    outf.write(inf.read(336 - ver_start - ver_size))  # until pattern data
 
     inf.seek(68)
     num_chnl, num_pat = unpack_io(inf, "<HH")
