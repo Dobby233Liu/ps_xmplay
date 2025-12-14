@@ -59,6 +59,8 @@ class XM_RowPackedFlag(IntFlag):
 # samples are not restored because it doesn't matter here
 def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
     ver_ptr = 58
+    pat_ptr = 336
+
     inf.seek(ver_ptr)
     in_ver = unpack_io1(inf, "<H")
     inf.seek(0)
@@ -70,11 +72,11 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
     outf.write(inf.read(ver_ptr))
     ver_size = outf.write(pack("<H", 0x104))  # convert XM to standard version
     inf.seek(ver_size, os.SEEK_CUR)
-    outf.write(inf.read(336 - ver_ptr - ver_size))  # until pattern data
+    outf.write(inf.read(pat_ptr - ver_ptr - ver_size))  # until pattern data
 
-    inf.seek(68)
+    inf.seek(ver_ptr + 10)
     num_chnl, num_pat = unpack_io(inf, "<HH")
-    inf.seek(264, os.SEEK_CUR)  # skip other header data since they don't change
+    inf.seek(pat_ptr)  # skip other header data since they don't change
     print("Unpacking", num_pat, "patterns")
 
     for pat in range(num_pat):
