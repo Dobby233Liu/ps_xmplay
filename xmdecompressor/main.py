@@ -91,7 +91,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         data_start_in, data_start_out = inf.tell(), outf.tell()
 
         for row in range(num_rows):
-            notes_per_chnl = [XM_Note() for _ in range(num_chnl)]  # more for safety
+            notes_per_chnl = [XM_Note() for _ in range(num_chnl)]
 
             # apparently instead of simply laying out all channels per row, "super-packed" XM
             # only lays out channels that have note data?
