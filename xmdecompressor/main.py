@@ -119,10 +119,10 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     # write full note
                     outf.write(bytes(xmnote))
                 else:
-                    packed_flag_start = outf.tell()
-                    outf.write(b"\x00")
-
                     packed_flag = XM_RowPackedFlag.packed
+                    packed_flag_start = outf.tell()
+                    outf.write(pack("<B", packed_flag))
+
                     if xmnote.note > 0:
                         packed_flag |= XM_RowPackedFlag.note
                         outf.write(pack("<B", xmnote.note))
