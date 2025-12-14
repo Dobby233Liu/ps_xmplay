@@ -45,7 +45,7 @@ class XM_Note(LittleEndianStructure):
     ]
 
 
-class XM_NotePackedFlag(IntFlag):
+class XM_RowPackedFlag(IntFlag):
     packed = 0x80
     note = 0x01
     inst = 0x02
@@ -105,12 +105,12 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
 
                 # unpack it fully
                 note = unpack_io1(inf, "<B")
-                if note & XM_NotePackedFlag.packed:
-                    xmnote.note = unpack_io1(inf, "<B") if note & XM_NotePackedFlag.note else 0
-                    xmnote.inst = unpack_io1(inf, "<B") if note & XM_NotePackedFlag.inst else 0
-                    xmnote.volc = unpack_io1(inf, "<B") if note & XM_NotePackedFlag.volc else 0
-                    xmnote.efft = unpack_io1(inf, "<B") if note & XM_NotePackedFlag.efft else 0
-                    xmnote.effp = unpack_io1(inf, "<B") if note & XM_NotePackedFlag.effp else 0
+                if note & XM_RowPackedFlag.packed:
+                    xmnote.note = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.note else 0
+                    xmnote.inst = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.inst else 0
+                    xmnote.volc = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.volc else 0
+                    xmnote.efft = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.efft else 0
+                    xmnote.effp = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.effp else 0
                 else:
                     xmnote.note = note
                     xmnote.inst, xmnote.volc, xmnote.efft, xmnote.effp = unpack_io(inf, "<BBBB")
@@ -126,21 +126,21 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     packed_flag_start = outf.tell()
                     outf.write(b"\x00")
 
-                    packed_flag = XM_NotePackedFlag.packed
+                    packed_flag = XM_RowPackedFlag.packed
                     if xmnote.note > 0:
-                        packed_flag |= XM_NotePackedFlag.note
+                        packed_flag |= XM_RowPackedFlag.note
                         outf.write(pack("<B", xmnote.note))
                     if xmnote.inst > 0:
-                        packed_flag |= XM_NotePackedFlag.inst
+                        packed_flag |= XM_RowPackedFlag.inst
                         outf.write(pack("<B", xmnote.inst))
                     if xmnote.volc > 0:
-                        packed_flag |= XM_NotePackedFlag.volc
+                        packed_flag |= XM_RowPackedFlag.volc
                         outf.write(pack("<B", xmnote.volc))
                     if xmnote.efft > 0:
-                        packed_flag |= XM_NotePackedFlag.efft
+                        packed_flag |= XM_RowPackedFlag.efft
                         outf.write(pack("<B", xmnote.efft))
                     if xmnote.effp > 0:
-                        packed_flag |= XM_NotePackedFlag.effp
+                        packed_flag |= XM_RowPackedFlag.effp
                         outf.write(pack("<B", xmnote.effp))
 
                     poke(outf, packed_flag_start, pack("<B", packed_flag))
