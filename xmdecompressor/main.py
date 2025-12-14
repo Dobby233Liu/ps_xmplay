@@ -58,19 +58,19 @@ class XM_RowPackedFlag(IntFlag):
 # unreadability is preserved because I don't quite understand what it's doing fully
 # samples are not restored because it doesn't matter here
 def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
-    ver_start = 58
-    inf.seek(ver_start)
+    ver_ptr = 58
+    inf.seek(ver_ptr)
     in_ver = unpack_io1(inf, "<H")
     inf.seek(0)
     if in_ver != 0xDDBA:
-        print("This is a non-superpacked XM")
+        print("Not super-packed")
         outf.write(inf.read())
         return
 
-    outf.write(inf.read(ver_start))
+    outf.write(inf.read(ver_ptr))
     ver_size = outf.write(pack("<H", 0x104))  # convert XM to standard version
     inf.seek(ver_size, os.SEEK_CUR)
-    outf.write(inf.read(336 - ver_start - ver_size))  # until pattern data
+    outf.write(inf.read(336 - ver_ptr - ver_size))  # until pattern data
 
     inf.seek(68)
     num_chnl, num_pat = unpack_io(inf, "<HH")
@@ -84,13 +84,13 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         outf.write(pack("<h", num_rows))
 
         pat_size = unpack_io1(inf, "<h")  # onto pattern data itself
-        final_pat_size_start = outf.tell()
+        final_pat_size_ptr = outf.tell()
         outf.write(pack("<h", pat_size))
 
         if pat_size == 0:
             continue  # no empty reads
 
-        pat_start_in, pat_start_out = inf.tell(), outf.tell()
+        data_start_in, data_start_out = inf.tell(), outf.tell()
 
         for row in range(num_rows):
             # all inited to 0
@@ -99,7 +99,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
             # apparently instead of simply laying out all channels per row, "super-packed" XM
             # only lays out channels that have note data?
             # read notes of layed out channels
-            while (inf.tell() - pat_start_in) < pat_size:  # don't overflow reading
+            while (inf.tell() - data_start_in) < pat_size:  # don't overflow reading
                 chnl = unpack_io1(inf, "<B")
                 if chnl == 0xFF:  # end of data
                     break
@@ -154,7 +154,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     if packed_flag & XM_RowPackedFlag.effp:
                         outf.write(pack("<B", note_struct.effp))
 
-        poke(outf, final_pat_size_start, pack("<h", outf.tell() - pat_start_out))
+        poke(outf, final_pat_size_ptr, pack("<h", outf.tell() - data_start_out))
 
     # copy remaining data
     outf.write(inf.read())
