@@ -34,15 +34,12 @@ def unpack_io1(reader: BufferedReader, format: str, peek: bool = False):
     return data[0]
 
 
-class XM_Note(LittleEndianStructure):
-    _pack_ = 0
-    _fields_ = [
-        ("note", c_uint8),
-        ("inst", c_uint8),
-        ("volc", c_uint8),
-        ("efft", c_uint8),
-        ("effp", c_uint8),
-    ]
+class XM_Note:
+    note: int = 0
+    inst: int = 0
+    volc: int = 0
+    efft: int = 0
+    effp: int = 0
 
 
 class XM_RowPackedFlag(IntFlag):
@@ -95,8 +92,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         data_start_in, data_start_out = inf.tell(), outf.tell()
 
         for row in range(num_rows):
-            # all inited to 0
-            notes_per_chnl = (XM_Note * max(32, num_chnl))()  # more for safety
+            notes_per_chnl = [XM_Note() for _ in range(num_chnl)]  # more for safety
 
             # apparently instead of simply laying out all channels per row, "super-packed" XM
             # only lays out channels that have note data?
@@ -121,7 +117,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
 
             # then pack notes, this time for all channels
             for chnl in range(num_chnl):
-                note_struct: XM_Note = notes_per_chnl[chnl]
+                note_struct = notes_per_chnl[chnl]
                 if (
                     note_struct.note > 0
                     and note_struct.inst > 0
@@ -130,7 +126,16 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     and note_struct.effp > 0
                 ):
                     # write full note
-                    outf.write(bytes(note_struct))
+                    outf.write(
+                        pack(
+                            "<BBBBB",
+                            note_struct.note,
+                            note_struct.inst,
+                            note_struct.volc,
+                            note_struct.efft,
+                            note_struct.effp,
+                        )
+                    )
                 else:
                     packed_flag = XM_RowPackedFlag.packed
                     if note_struct.note > 0:
