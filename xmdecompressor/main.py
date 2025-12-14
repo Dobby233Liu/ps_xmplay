@@ -129,26 +129,28 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     outf.write(bytes(note_struct))
                 else:
                     packed_flag = XM_RowPackedFlag.packed
-                    packed_flag_start = outf.tell()
-                    outf.write(pack("<B", packed_flag))
-
                     if note_struct.note > 0:
                         packed_flag |= XM_RowPackedFlag.note
-                        outf.write(pack("<B", note_struct.note))
                     if note_struct.inst > 0:
                         packed_flag |= XM_RowPackedFlag.inst
-                        outf.write(pack("<B", note_struct.inst))
                     if note_struct.volc > 0:
                         packed_flag |= XM_RowPackedFlag.volc
-                        outf.write(pack("<B", note_struct.volc))
                     if note_struct.efft > 0:
                         packed_flag |= XM_RowPackedFlag.efft
-                        outf.write(pack("<B", note_struct.efft))
                     if note_struct.effp > 0:
                         packed_flag |= XM_RowPackedFlag.effp
-                        outf.write(pack("<B", note_struct.effp))
+                    outf.write(pack("<B", packed_flag))
 
-                    poke(outf, packed_flag_start, pack("<B", packed_flag))
+                    if packed_flag & XM_RowPackedFlag.note:
+                        outf.write(pack("<B", note_struct.note))
+                    if packed_flag & XM_RowPackedFlag.inst:
+                        outf.write(pack("<B", note_struct.inst))
+                    if packed_flag & XM_RowPackedFlag.volc:
+                        outf.write(pack("<B", note_struct.volc))
+                    if packed_flag & XM_RowPackedFlag.efft:
+                        outf.write(pack("<B", note_struct.efft))
+                    if packed_flag & XM_RowPackedFlag.effp:
+                        outf.write(pack("<B", note_struct.effp))
 
         poke(outf, final_pat_size_start, pack("<h", outf.tell() - pat_start_out))
 
@@ -156,9 +158,9 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
     outf.write(inf.read())
 
 
-SONGDATA_DIR = "nascarheat"
-
 if __name__ == "__main__":
+    SONGDATA_DIR = "nascarheat"
+
     os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
     os.chdir("songdata/" + SONGDATA_DIR)
     os.makedirs("timing", exist_ok=True)
