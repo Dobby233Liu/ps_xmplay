@@ -6,20 +6,12 @@ from os import path
 from struct import calcsize, pack, unpack
 
 
-def poke(writer: BufferedWriter, pos: int, data: bytes):
-    old_pos = writer.tell()
-    writer.seek(pos)
-    res = writer.write(data)
-    writer.seek(old_pos)
-    return res
-
-
 def unpack_io(reader: BufferedReader, format: str, peek: bool = False) -> tuple:
     data_size = calcsize(format)
     if not peek:
         buffer = reader.read(data_size)
     else:
-        buffer = reader.peek(data_size)
+        buffer = reader.peek(data_size)[:data_size]
     if len(buffer) != data_size:
         if not peek:
             reader.seek(-len(buffer), os.SEEK_CUR)
@@ -33,15 +25,7 @@ def unpack_io1(reader: BufferedReader, format: str, peek: bool = False):
     return data[0]
 
 
-class XM_Note:
-    note: int = 0
-    inst: int = 0
-    volc: int = 0
-    efft: int = 0
-    effp: int = 0
-
-
-class XM_RowPackedFlag(IntFlag):
+class XM_RowWrittenFieldsFlag(IntFlag):
     packed = 0x80
     note = 0x01
     inst = 0x02
@@ -54,27 +38,21 @@ class XM_RowPackedFlag(IntFlag):
 # unreadability is preserved because I don't quite understand what it's doing fully
 # samples are not restored because it doesn't matter here
 def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
-    ver_ptr = 58
-    pat_ptr = 336
-
-    inf.seek(ver_ptr)
+    outf.write(inf.read(58))
     in_ver = unpack_io1(inf, "<H")
-    inf.seek(0)
     if in_ver != 0xDDBA:
         print("Not super-packed")
+        outf.write(pack("<H", in_ver))
         outf.write(inf.read())
         return
 
-    outf.write(inf.read(ver_ptr))
-    ver_size = outf.write(pack("<H", 0x104))  # convert XM to standard version
-    inf.seek(ver_size, os.SEEK_CUR)
-    outf.write(inf.read(pat_ptr - ver_ptr - ver_size))  # until pattern data
-
-    inf.seek(ver_ptr + 10)
-    num_chnl, num_pat = unpack_io(inf, "<HH")
-    inf.seek(pat_ptr)  # skip other header data since they don't change
+    outf.write(pack("<H", 0x104))  # convert XM to standard version
+    outf.write(inf.read(8))  # skip
+    num_chnl, num_pat = unpack_io(inf, "<HH", peek=True)
+    outf.write(inf.read(336 - inf.tell()))  # skip other header data since they don't change
     print("Unpacking", num_pat, "patterns")
 
+    charsize = calcsize("<B")
     for pat in range(num_pat):
         # copy pattern header properties
         outf.write(inf.read(5))
@@ -82,16 +60,15 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         outf.write(pack("<h", num_rows))
 
         pat_size = unpack_io1(inf, "<h")  # onto pattern data itself
-        final_pat_size_ptr = outf.tell()
-        outf.write(pack("<h", pat_size))
-
         if pat_size == 0:
             continue  # no empty reads
 
-        data_start_in, data_start_out = inf.tell(), outf.tell()
+        data_start_in = inf.tell()
+        no_data = pack("<B", XM_RowWrittenFieldsFlag.packed)
+        new_pat_data_by_row = []
 
         for row in range(num_rows):
-            notes_per_chnl = [XM_Note() for _ in range(num_chnl)]
+            note_per_chnl: list[bytes] = [no_data for _ in range(num_chnl)]
 
             # apparently instead of simply laying out all channels per row, "super-packed" XM
             # only lays out channels that have note data?
@@ -101,66 +78,24 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                 if chnl == 0xFF:  # end of data
                     break
 
-                # unpack note
-                note_struct = notes_per_chnl[chnl]
-                note = unpack_io1(inf, "<B")
-                if note & XM_RowPackedFlag.packed:
-                    note_struct.note = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.note else 0
-                    note_struct.inst = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.inst else 0
-                    note_struct.volc = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.volc else 0
-                    note_struct.efft = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.efft else 0
-                    note_struct.effp = unpack_io1(inf, "<B") if note & XM_RowPackedFlag.effp else 0
-                else:
-                    note_struct.note = note
-                    note_struct.inst, note_struct.volc, note_struct.efft, note_struct.effp = unpack_io(inf, "<BBBB")
+                # copy note data
+                note_size = 5
+                note = unpack_io1(inf, "<B", peek=True)
+                if note & XM_RowWrittenFieldsFlag.packed:
+                    note_size = 1
+                    note_size += 1 if (note & XM_RowWrittenFieldsFlag.note) else 0
+                    note_size += 1 if (note & XM_RowWrittenFieldsFlag.inst) else 0
+                    note_size += 1 if (note & XM_RowWrittenFieldsFlag.volc) else 0
+                    note_size += 1 if (note & XM_RowWrittenFieldsFlag.efft) else 0
+                    note_size += 1 if (note & XM_RowWrittenFieldsFlag.effp) else 0
+                note_per_chnl[chnl] = inf.read(note_size * charsize)
 
-            # then pack notes, this time for all channels
-            for chnl in range(num_chnl):
-                note_struct = notes_per_chnl[chnl]
-                if (
-                    note_struct.note != 0
-                    and note_struct.inst != 0
-                    and note_struct.volc != 0
-                    and note_struct.efft != 0
-                    and note_struct.effp != 0
-                ):
-                    # write full note
-                    outf.write(
-                        pack(
-                            "<BBBBB",
-                            note_struct.note,
-                            note_struct.inst,
-                            note_struct.volc,
-                            note_struct.efft,
-                            note_struct.effp,
-                        )
-                    )
-                else:
-                    packed_flag = XM_RowPackedFlag.packed
-                    if note_struct.note != 0:
-                        packed_flag |= XM_RowPackedFlag.note
-                    if note_struct.inst != 0:
-                        packed_flag |= XM_RowPackedFlag.inst
-                    if note_struct.volc != 0:
-                        packed_flag |= XM_RowPackedFlag.volc
-                    if note_struct.efft != 0:
-                        packed_flag |= XM_RowPackedFlag.efft
-                    if note_struct.effp != 0:
-                        packed_flag |= XM_RowPackedFlag.effp
-                    outf.write(pack("<B", packed_flag))
+            # then write notes for all channels
+            new_pat_data_by_row.append(b"".join(note_per_chnl[chnl] for chnl in range(num_chnl)))
 
-                    if packed_flag & XM_RowPackedFlag.note:
-                        outf.write(pack("<B", note_struct.note))
-                    if packed_flag & XM_RowPackedFlag.inst:
-                        outf.write(pack("<B", note_struct.inst))
-                    if packed_flag & XM_RowPackedFlag.volc:
-                        outf.write(pack("<B", note_struct.volc))
-                    if packed_flag & XM_RowPackedFlag.efft:
-                        outf.write(pack("<B", note_struct.efft))
-                    if packed_flag & XM_RowPackedFlag.effp:
-                        outf.write(pack("<B", note_struct.effp))
-
-        poke(outf, final_pat_size_ptr, pack("<h", outf.tell() - data_start_out))
+        new_pat_data = b"".join(new_pat_data_by_row)
+        outf.write(pack("<h", len(new_pat_data)))
+        outf.write(new_pat_data)
 
     # copy remaining data
     outf.write(inf.read())
