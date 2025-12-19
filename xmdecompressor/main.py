@@ -90,9 +90,9 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.effp) else 0
                 note_per_chnl[chnl] = inf.read(note_size * charsize)
 
-            # then write notes for all channels
             new_pat_data_by_row.append(b"".join(note_per_chnl[chnl] for chnl in range(num_chnl)))
 
+        # then write notes for all channels
         new_pat_data = b"".join(new_pat_data_by_row)
         outf.write(pack("<h", len(new_pat_data)))
         outf.write(new_pat_data)
