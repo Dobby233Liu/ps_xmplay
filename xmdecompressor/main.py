@@ -53,6 +53,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
     print("Unpacking", num_pat, "patterns")
 
     charsize = calcsize("<B")
+    no_data = pack("<B", XM_RowWrittenFieldsFlag.packed)
     for pat in range(num_pat):
         # copy pattern header properties
         outf.write(inf.read(5))
@@ -64,7 +65,6 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
             continue  # no empty reads
 
         data_start_in = inf.tell()
-        no_data = pack("<B", XM_RowWrittenFieldsFlag.packed)
         new_pat_data_by_row = []
 
         for row in range(num_rows):
