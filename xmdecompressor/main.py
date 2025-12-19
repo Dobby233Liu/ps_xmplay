@@ -19,6 +19,12 @@ def unpack_io(reader: BufferedReader, format: str, peek: bool = False) -> tuple:
     return unpack(format, buffer)
 
 
+def unpack1(format: str, *args, **kwargs):
+    data = unpack(format, *args, **kwargs)
+    assert len(data) == 1
+    return data[0]
+
+
 def unpack_io1(reader: BufferedReader, format: str, peek: bool = False):
     data = unpack_io(reader, format, peek=peek)
     assert len(data) == 1
@@ -48,7 +54,9 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
 
     outf.write(pack("<H", 0x104))  # convert XM to standard version
     outf.write(inf.read(8))  # skip
-    num_chnl, num_pat = unpack_io(inf, "<HH", peek=True)
+    chnl_pat_bytes = inf.read(calcsize("<HH"))
+    num_chnl, num_pat = unpack("<HH", chnl_pat_bytes)
+    outf.write(chnl_pat_bytes)
     outf.write(inf.read(336 - inf.tell()))  # skip other header data since they don't change
     print("Unpacking", num_pat, "patterns")
 
@@ -79,8 +87,9 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     break
 
                 # copy note data
+                note_byte = inf.read(charsize)
+                note = unpack1("<B", note_byte)
                 note_size = 5
-                note = unpack_io1(inf, "<B", peek=True)
                 if note & XM_RowWrittenFieldsFlag.packed:
                     note_size = 1
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.note) else 0
@@ -88,7 +97,7 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.volc) else 0
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.efft) else 0
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.effp) else 0
-                note_per_chnl[chnl] = inf.read(note_size * charsize)
+                note_per_chnl[chnl] = note_byte + inf.read((note_size - 1) * charsize)
 
             new_pat_data_by_row[row] = b"".join(note_per_chnl[chnl] for chnl in range(num_chnl))
 
