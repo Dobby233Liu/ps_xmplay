@@ -164,13 +164,14 @@ void main() {
     XM_FreeAllFileHeaderIDs();
 
     // Quit SPU processing
+    // FIXME: free self-allocated vab resources
 #if !defined(XMPLAY_VARIANT_REDRIVER2) || !defined(XMPLAY_ENABLE_FIXES)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
     SpuSetKey(SPU_OFF, SPU_ALLCH);
 #endif
 #if 0
     reverb_attr.mask = SPU_REV_MODE;
-    reverb_attr.mode = SPU_REV_MODE_OFF | SPU_REV_MODE_CLEAR_WA;
+    reverb_attr.mode = SPU_REV_MODE_OFF; // idk if we should clear work area
     SpuSetReverbModeParam(&reverb_attr);
     SpuSetReverb(SPU_OFF);
 #endif
