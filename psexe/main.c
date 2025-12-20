@@ -83,9 +83,20 @@ void main() {
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
 
     SpuInit();
-
     SpuInitMalloc(MAX_SPU_BANKS, spu_heap);
+    SpuSetTransferCallback(NULL);
     SpuSetCommonMasterVolume(0x3FFF, 0x3FFF);
+
+#if 0
+    // init once to alloc reverb work area
+    SpuReverbAttr reverb_attr;
+    reverb_attr.mask = SPU_REV_MODE | SPU_REV_DEPTHL | SPU_REV_DEPTHR;
+    reverb_attr.mode = SPU_REV_MODE_STUDIO_A;
+    reverb_attr.depth.left = 0x1fff;
+    reverb_attr.depth.right = 0x1fff;
+    SpuSetReverbModeParam(&reverb_attr);
+    SpuReserveReverbWorkArea(SPU_ON);
+#endif
 
     XM_OnceOffInit(GetVideoMode());
 
@@ -98,7 +109,6 @@ void main() {
     int xm_id = 0;
     InitXMData(song_info.pxm_ptr, xm_id, song_info.panning_type);
 
-    SpuSetTransferCallback(NULL);
 #ifndef XMPLAY_VARIANT_REDRIVER2
     int voice_bank_id = XM_VABInit(song_info.vh_ptr, song_info.vb_ptr);
 #else
@@ -106,6 +116,14 @@ void main() {
     assert(voice_bank_id != -2, "oom/invalid vab");
 #endif
     assert(voice_bank_id >= 0, "cant load voice");
+
+#if 0
+    // then twice due to how vab_init works
+    SpuSetReverb(SPU_ON);
+    SpuSetReverbModeParam(&reverb_attr);
+    SpuSetReverbDepth(&reverb_attr); // why though
+    SpuSetReverbVoice(SPU_ON, SPU_ALLCH);
+#endif
 
     song_id = XM_Init(
         voice_bank_id, xm_id, -1,
@@ -149,6 +167,12 @@ void main() {
 #if !defined(XMPLAY_VARIANT_REDRIVER2) || !defined(XMPLAY_ENABLE_FIXES)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
     SpuSetKey(SPU_OFF, SPU_ALLCH);
+#endif
+#if 0
+    reverb_attr.mask = SPU_REV_MODE;
+    reverb_attr.mode = SPU_REV_MODE_OFF | SPU_REV_MODE_CLEAR_WA;
+    SpuSetReverbModeParam(&reverb_attr);
+    SpuSetReverb(SPU_OFF);
 #endif
     SpuQuit();
 
