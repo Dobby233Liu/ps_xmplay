@@ -260,7 +260,11 @@ short Interpolate(short p, short p1, short p2, short v1, short v2); // 0x000869E
 
 u_short GetLogPeriod(u_char note, u_short fine); // 0x000863EC
 
+#ifdef XMPLAY_ENABLE_FIXES
+u_short JPGetPeriod(u_char note, u_short fine);
+#else
 u_short JPGetPeriod(u_char note, short fine); // 0x00086A6C
+#endif
 
 u_short GetPeriod(u_char note, u_short c2spd); // 0x00086AA0
 

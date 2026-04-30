@@ -289,7 +289,11 @@ u_short GetLogPeriod(u_char note, u_short fine)
 JPGetPeriod
 	Returns linear period calculated from note and fine.
 *****************************************************************************/
+#ifdef XMPLAY_ENABLE_FIXES
+u_short JPGetPeriod(u_char note, u_short fine)
+#else
 u_short JPGetPeriod(u_char note, short fine)
+#endif
 {
 #ifdef XMPLAY_ENABLE_FIXES
 	return ((120 - note) << 6) - (fine / 2) + 64;
