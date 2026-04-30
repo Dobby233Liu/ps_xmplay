@@ -731,7 +731,11 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 		}
 	}
 
+#ifdef XMPLAY_ENABLE_FIXES
+	for(i=0;i<mhu->XMPSXChannels;i++)
+#else
 	for(i=0;i<mhu->XMChannels;i++)
+#endif
 	{
 		mu->XM_Chnl[i].UserVol=0;
 		mu->XM_Chnl[i].kick=0;
@@ -2924,13 +2928,18 @@ int t;
 
 	JP_Do_Nothing=1;	/* Incase user using interrupt to call player */
 
+#ifdef XMPLAY_ENABLE_FIXES
+	for(t=0;t<mhu->XMPSXChannels;t++)
+#else
 	for(t=0;t<mhu->XMChannels;t++)
+#endif
 	{
 		XMCU=&mu->XM_Chnl[t];
 		XMCU->keyon=0;
 		XMCU->tmpvolume=64;
 
-#if 0							// [A] temporary fix
+#if 0
+        // [A] temporary fix
 		if(XMCU->sample!=254)
 			XMCU->kick=1;
 #endif
