@@ -76,10 +76,20 @@ static inline short getSWord(u_char mpp[2])
 int CurrentCh;
 
 
-short iVABID[XM_MAX_VAB_COUNT] = { -1 }; // amount of VAGs for each VAB
-short XMSongIDs[XM_MAX_SONG_COUNT] = { -1 };
+short iVABID[XM_MAX_VAB_COUNT] = {
+    -1, -1, -1, -1, -1, -1, -1, -1
+}; // amount of VAGs for each VAB
+short XMSongIDs[XM_MAX_SONG_COUNT] = {
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1
+};
 
-short XMSPU_SFX[XM_SPU_CH_COUNT] = { -1 };   // SPU channel -> ID of song occupying it
+short XMSPU_SFX[XM_SPU_CH_COUNT] = {
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1
+};   // SPU channel -> ID of song occupying it
 
 /*****************************************************************************
 LINEAR FREQUENCY TABLE used to calculate final SPU pitch
