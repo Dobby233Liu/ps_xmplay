@@ -15,7 +15,7 @@ LICENSES = [
 ]
 # TODO: make these a part of the global set config
 USE_ZOPFLI = sys.argv[3] == "1" if len(sys.argv) > 3 else False
-XMPLAY_ENABLE_FIXES = False
+XMPLAY_ENABLE_FIXES = True
 
 
 # cd to script directory / .. because otherwise everything will explode

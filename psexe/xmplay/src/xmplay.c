@@ -1,10 +1,11 @@
 /*****************************************************************************
 XMPLAY.C
 	XM (Extended MOD) Player code.
+	Written by Jason Page @ SCEE (c)1998-2000
 
-	Backported version from PS2 and Driver 2 disassembly
-	Written by Jason Page
-	(c)1999 SCEE
+	2020 backport from the PS2 version by SoapyMan, with portions decompiled
+	from Driver 2 (the original PS1 source code is presumed lost)
+	2024-2026 adaptations and bugfixes by Dobby233Liu
 
 ****************************************************************************/
 
@@ -15,19 +16,26 @@ XMPLAY.C
 #include "xmplay.h"
 #include "xmcalls.h"
 
+#define XM_MAX_SONG_COUNT   24  /* MAX 24 XM's playing at once */
+#define XM_MAX_HEADER_COUNT 8   /* MAX 8 XM's files in memory at once */
+#define XM_MAX_VAB_COUNT    8
+#define XM_MAX_VAG_COUNT    128
+#define XM_SPU_CH_COUNT     24
+
+
 /**** PSX SPECIFIC ****/
 
-SpuVoiceAttr xm_g_s_attr; 		/* Structure for individual voice attributes*/
-SpuVoiceAttr uxm_g_s_attr; 		/* Structure for individual voice attributes*/
+SpuVoiceAttr xm_g_s_attr; 		/* Structure for individual voice attributes */
+SpuVoiceAttr uxm_g_s_attr; 		/* Structure for individual voice attributes */
 SpuReverbAttr xm_r_attr;		/* Structure for reverb */
-unsigned int xm_l_vag_spu_addr[8][128];  /* Address in memory for first sound file */
+unsigned int xm_l_vag_spu_addr[XM_MAX_HEADER_COUNT][XM_MAX_VAG_COUNT];  /* Address in memory for sound files */
 
 
 /**** XM SPECIFIC ****/
 
 int JP_Do_Nothing;
 
-#define NTSCBPMLIMIT 150	//150 //750/5	//750/5
+#define NTSCBPMLIMIT 150	//750/5
 int BPMLimit;
 int PALType;
 
@@ -45,9 +53,9 @@ XMSONG	*mu;					/* Pointer used by User routines */
 
 
 int			XM_NSA = 0;				// NEXT SONG ADDRESS
-int			XM_HA = 0;				// NEXT HEADER Address;
-XMSONG		*XM_SngAddress[24];		/* MAX 24 XM's playing at once */
-XMHEADER	*XM_HeaderAddress[8];	/* MAX 8 XM's files in memory at once */
+int			XM_HA = 0;				// NEXT HEADER ADDRESS
+XMSONG		*XM_SngAddress[XM_MAX_SONG_COUNT];
+XMHEADER	*XM_HeaderAddress[XM_MAX_HEADER_COUNT];
 
 #ifdef XMPLAY_ENABLE_FIXES
 // Reading big endian shorts on little endian platform
@@ -68,16 +76,10 @@ static inline short getSWord(u_char mpp[2])
 int CurrentCh;
 
 
-short iVABID[8] = { -1,-1,-1,-1,-1,-1,-1,-1 };
-short XMSongIDs[24] =
-{ -1,-1,-1,-1,-1,-1,-1,-1,
- -1,-1,-1,-1,-1,-1,-1,-1,
- -1,-1,-1,-1,-1,-1,-1,-1};
+short iVABID[XM_MAX_VAB_COUNT] = { -1 }; // amount of VAGs for each VAB
+short XMSongIDs[XM_MAX_SONG_COUNT] = { -1 };
 
-short XMSPU_SFX[24] =
-{ -1,-1,-1,-1,-1,-1,-1,-1,
- -1,-1,-1,-1,-1,-1,-1,-1,
- -1,-1,-1,-1,-1,-1,-1,-1};
+short XMSPU_SFX[XM_SPU_CH_COUNT] = { -1 };   // SPU channel -> ID of song occupying it
 
 /*****************************************************************************
 LINEAR FREQUENCY TABLE used to calculate final SPU pitch
@@ -328,7 +330,7 @@ void XM_Exit(void)
 	{
 		XM_Quit(i);
 	}
-	for (i = 0; i < 8; i++)
+	for (i = 0; i < XM_MAX_VAB_COUNT; i++)
 	{
 		XM_CloseVAB(i);
 	}
@@ -338,6 +340,10 @@ void XM_Exit(void)
 
 void XM_CloseVAB(int VabID)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (VabID < 0 || VabID >= XM_MAX_VAB_COUNT)
+        return;
+#endif
 	if (iVABID[VabID] != -1)
 	{
 		ClearSPU(VabID);
@@ -351,6 +357,10 @@ void XM_CloseVAB2(int VabID)
 {
 	int Amount, i;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (VabID < 0 || VabID >= XM_MAX_VAB_COUNT)
+        return;
+#endif
 	if (iVABID[VabID] != -1)
 	{
 		Amount = iVABID[VabID];
@@ -392,6 +402,10 @@ XM_PlayStart
 
 void XM_PlayStart(int Song_ID, int PlayMask)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 	if (PlayMask != 0)
@@ -412,6 +426,10 @@ XM_PlayStop
 
 void XM_PlayStop(int Song_ID)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
@@ -442,6 +460,10 @@ int InitXMData(u_char *mpp, int XM_ID, int S3MPan)
 	u_short b2;
 
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (XM_ID < 0 || XM_ID >= XM_HA)
+        return 0;
+#endif
 	mhu = XM_HeaderAddress[XM_ID];
 
 	mhu->S3MPanning = S3MPan;
@@ -457,8 +479,8 @@ int InitXMData(u_char *mpp, int XM_ID, int S3MPan)
 	mhu->tempo = getWord(mpp + MD_tempo);
 	mhu->bpm = getWord(mpp + MD_bpm);
 	mhu->XMPSXChannels = mhu->XMChannels;
-	if (mhu->XMPSXChannels > 24)
-		mhu->XMPSXChannels = 24;
+	if (mhu->XMPSXChannels > XM_SPU_CH_COUNT)
+		mhu->XMPSXChannels = XM_SPU_CH_COUNT;
 
 	for (t = 0; t < mhu->songlength; t++)
 	{
@@ -536,7 +558,7 @@ void XM_OnceOffInit(int PAL)
 	XM_NSA = 0;
 	JP_Do_Nothing = 0;				/* Allow XM_Update to process */
 #ifdef XMPLAY_ENABLE_FIXES
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < XM_MAX_SONG_COUNT; i++)
 	{
 		// Since the addresses are externally allocated this doesn't make sense
 		/*if (XM_SngAddress[i])
@@ -581,6 +603,15 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 	int t;
 	int SngID;
 	int fr;
+
+#ifdef XMPLAY_ENABLE_FIXES
+    if (VabID < 0 || VabID >= XM_MAX_VAB_COUNT)
+        return -1;
+    if (XM_ID < 0 || XM_ID >= XM_HA)
+        return -1;
+    if ((SongID != -1 && SongID < 0) || SongID >= XM_NSA)
+        return -1;
+#endif
 
 	if (SongID==-1)
 	{
@@ -654,7 +685,7 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 				XMCU=&mu->XM_Chnl[i];		/* Build list of SPU Channels to use */
 				XMCU->SPUChannel=Chn;		/* Depending on bitmask */
 				mu->MaxChans++;
-				if (Chn<24)
+				if (Chn<XM_SPU_CH_COUNT)
 					InitSPUChannel(Chn);
 				Chn++;
 			}
@@ -670,7 +701,7 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 			{
 				XMCU=&mu->XM_Chnl[i];		/* Build list of SPU Channels to use */
 				fr=0;
-				for (t=0;t<24;t++)
+				for (t=0;t<XM_SPU_CH_COUNT;t++)
 				{
 					if (XMSPU_SFX[t]==0)
 					{
@@ -855,17 +886,17 @@ u_char dat=0;
 			if(vol&0xf)
 				SPE(XMEF_VOLSLD,vol&0xf);				/* Volume slide down */
 			break;
-	
+
 		case 0x7:
 			if(vol&0xf)
 				SPE(XMEF_VOLSLD,vol<<4);				/* Volume slide up */
 			break;
-	
+
 		case 0x8:
 			SPE (XMEF_E,0xb0 | (vol&0xf));	/* Fine volume slide down */
 			break;
 
-		case 0x9:                     
+		case 0x9:
 			SPE (XMEF_E,0xa0 | (vol&0xf));	/* Fine volume slide up */
 			break;
 
@@ -1136,7 +1167,7 @@ int lo;
 			if(ms->vbtick)
 				break;
 			if (dat==0xff)				// 0xff = set user jump flag
-				ms->BPlayFlag=1;	
+				ms->BPlayFlag=1;
 			else if (dat==0xfe)		// 0xfe = clear user jump flag
 				ms->BPlayFlag=0;
 			else if (dat==0xfd)		// 0xfd = force tune to end.
@@ -1456,7 +1487,7 @@ void SetInstr(u_char inst)
 	XMC->sample = inst;
 
 /*#ifdef XMPLAY_ENABLE_FIXES
-// unfortuaturely XM2PSX doesn't preserve the variant samples
+    // unfortunately XM2PSX doesn't preserve the variant samples
 	u_char *inst_info = (u_char*)mh->JAP_InstrumentOffset[inst];
 	u_char sample_cand = *(inst_info + 33 + XMC->note);
 
@@ -1892,7 +1923,7 @@ DoPan
 
 short DoPan(short envpan,short pan)
 {
-	return(pan + (((envpan-128)*(128- ABS(pan-128)))/128));
+	return pan + (envpan - 128) * (128 - ABS(pan - 128)) / 128;
 }
 
 
@@ -1960,6 +1991,10 @@ void UpdateWithTimer(int SC)
 {
 	aa++;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (SC < 0 || SC >= XM_NSA)
+        return;
+#endif
 	ms=XM_SngAddress[SC];
 	if (ms->XMPlay!=XM_PLAYING)
 		return;
@@ -1978,19 +2013,19 @@ void UpdateWithTimer(int SC)
 		{
 			ms->JUp=1;
 			UpdateEffs();		/* If nothing else to do for a frame */
-			ApplyEffs();		/* (spread out processing time */
+			ApplyEffs();		/* (spread out processing time) */
 			UpdateHardware();			/* Update SPU */
 		}
 		return;
 	}
 #ifdef XMPLAY_ENABLE_FIXES
 	/* YES! Update song/hardware */
-	/* in case destinated BPM exceeds frame limit, let's process as much as we should
+	/* in case designated BPM exceeds frame limit, let's process as much as we should
 		(causes small glitches) */
 	while (ms->JBPM>=BPMLimit)
 	{
-		PerformUpdate(SC, (ms->JBPM - BPMLimit)>=BPMLimit);
-		ms->JBPM-=BPMLimit;
+	    ms->JBPM-=BPMLimit;
+		PerformUpdate(SC, ms->JBPM>=BPMLimit);
 	}
 #else
 	ms->JBPM-=BPMLimit;		/* YES! Update song/hardware */
@@ -2001,11 +2036,17 @@ void UpdateWithTimer(int SC)
 
 
 #ifdef XMPLAY_ENABLE_FIXES
+static void _UpdateHardware(int catching_up);
+
 static void PerformUpdate(int SC, int catching_up)
 #else
 void XM_DoFullUpdate(int SC)
 #endif
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (SC < 0 || SC >= XM_NSA)
+        return;
+#endif
 	ms = XM_SngAddress[SC];
 	if (ms->XMPlay == XM_PLAYING)
 	{
@@ -2019,13 +2060,10 @@ void XM_DoFullUpdate(int SC)
 		}
 		ms->JUp = 0;					/* Clear update flag */
 
-#if 0
-		if (!catching_up)
-		{
-#endif
-			UpdateHardware();			/* Update SPU */
-#if 0
-		}
+#if XMPLAY_ENABLE_FIXES
+        _UpdateHardware(catching_up); /* Update SPU */
+#else
+		UpdateHardware();			/* Update SPU */
 #endif
 		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
 			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
@@ -2400,10 +2438,10 @@ void ApplyEffs(void)
 				}
 
 				if ((!XMC->LVol)&&(!XMC->RVol)&&(!XMC->keyon))
-				{ 
+				{
 					StpCh(XMC->SPUChannel);
 					XMC->ChDead=1;			/* Released & 0vol - so kill channel */
-				} 
+				}
 				else if(!XMC->keyon)		/* Key off? - do release on envelope */
 				{
 					XMC->fadevol-=XMC->keyoffspd;
@@ -2506,17 +2544,15 @@ int GetEmpty(int old)
 	int i;
 
 	de++;
-
-	if (mh->XMPSXChannels <= de) 
+	if (mh->XMPSXChannels <= de)
 		de = 0;
 
 	dd = de;
-
 	for (i = 0; i < mh->XMPSXChannels; i++)
 	{
 		j = ms->XM_Chnl + dd;
-		dd++;
 
+		dd++;
 		if (mh->XMPSXChannels <= dd)
 			dd = 0;
 
@@ -2527,6 +2563,7 @@ int GetEmpty(int old)
 			return bVar1;
 		}
 	}
+
 	return -1;
 }
 
@@ -2536,13 +2573,17 @@ UpdateHardware
 *****************************************************************************/
 
 // [D] [A] Half-source, half-decomp
-void UpdateHardware(void) 
+#ifdef XMPLAY_ENABLE_FIXES
+static void _UpdateHardware(int catching_up)
+#else
+void UpdateHardware(void)
+#endif
 {
 	int t;
 	int prd;
 	int SPUKeyOn = 0;
 	int pmsk;
-	int Chnl; 
+	int Chnl;
 	int Ch2;
 	u_char MaxChans;
 
@@ -2561,40 +2602,40 @@ void UpdateHardware(void)
 			if(XMC->kick)
 			{
 				Chnl = XMC->SPUChannel;
-
 				SpuSetKey(0, 1 << XMC->SPUChannel);
 
 				Ch2 = GetEmpty(XMC->SPUChannel);
-
 				if (Ch2 != -1)
 					Chnl = Ch2;
-					
 				XMC->SPUChannel = Chnl;
 
-				prd=XMC->period; 
+				prd=XMC->period;
 				if (ms->NotAmiga==0)
 					prd=((JPPIT<<2)/prd)>>3;		/* Using AMIGA freq table */
 				else
 					prd=GetFreq2(prd);				/* Using LINEAR freq table */
 
-				XMC->OldLVol=XMC->LVol; 
-				XMC->OldRVol=XMC->RVol; 
-				DoDolbySS(); 
+				XMC->OldLVol=XMC->LVol;
+				XMC->OldRVol=XMC->RVol;
+				DoDolbySS();
 				SPUKeyOn|=(1<< Chnl);
-				XMC->SPUPitch=prd; 
-				XMC->OldPeriod=XMC->period; 
+				XMC->SPUPitch=prd;
+				XMC->OldPeriod=XMC->period;
 
 				PlaySFX(ms->VabID,Chnl,XMC->sample,prd,DVL,DVR);
-			} 
-		} 
-	} 
-	if (SPUKeyOn!=0) 
+			}
+		}
+	}
+	if (SPUKeyOn!=0)
 	{
 		//XMTime1 = 1;
 		SpuSetKey(1, SPUKeyOn);
+#ifdef XMPLAY_ENABLE_FIXES
+        if (!catching_up)
+#endif
 		SpuFlush(SPU_EVENT_ALL);
 		aa = 0;
-	} 
+	}
 
 	MaxChans=ms->MaxChans;
 	for(t=0;t<mh->XMPSXChannels;t++)
@@ -2607,8 +2648,8 @@ void UpdateHardware(void)
 		{
 			MaxChans--;
 			XMC=&ms->XM_Chnl[t];
-			if (!XMC->ChDead) 
-			{ 
+			if (!XMC->ChDead)
+			{
 				Ch2=XMC->SPUChannel;
 
 				if (XMC->kick==0)
@@ -2630,17 +2671,17 @@ void UpdateHardware(void)
 //						SetVol(Ch2,XMC->OldLVol,XMC->OldRVol);	/* Update volumes */
 						SetVol(Ch2,DVL,DVR);		/* Update volumes */
 					}
-					if (XMC->period!=XMC->OldPeriod) 
-					{ 
+					if (XMC->period!=XMC->OldPeriod)
+					{
 						XMC->OldPeriod=XMC->period;
-						prd=XMC->period; 
+						prd=XMC->period;
 						if(ms->NotAmiga==0)
 							prd=((JPPIT<<2)/prd)>>3;	/* Using AMIGA freq table */
-						else 
-							prd=GetFreq2(prd); 
-						XMC->SPUPitch=prd; 
+						else
+							prd=GetFreq2(prd);
+						XMC->SPUPitch=prd;
 						SetFrq(Ch2,prd);							/* Update periods */
-					} 
+					}
 				}
 				else
 					XMC->kick=0;
@@ -2649,6 +2690,13 @@ void UpdateHardware(void)
 	}
 }
 
+
+#ifdef XMPLAY_ENABLE_FIXES
+void UpdateHardware(void)
+{
+    _UpdateHardware(0);
+}
+#endif
 
 
 /*****************************************************************************
@@ -2854,6 +2902,10 @@ XM_SetSongPos
 void XM_SetSongPos(int Song_ID,u_short pos)
 {
 int t;
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID]==-1)
 		return;
 
@@ -2901,21 +2953,26 @@ PlaySFX
 ****************************************************************************/
 void PlaySFX(int VBID,int Channel,int Inst,int Pitch,int LV,int RV)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (VBID < 0 || VBID >= XM_MAX_VAB_COUNT)
+        return;
+#endif
+
 	/* Mask which specific voice attributes are to be set */
 	xm_g_s_attr.mask = (SPU_VOICE_VOLL |
-						SPU_VOICE_VOLR | 
+						SPU_VOICE_VOLR |
 						SPU_VOICE_PITCH |
 						SPU_VOICE_WDSA |
 						SPU_VOICE_LSAX);
 
 	xm_g_s_attr.voice = SPU_VOICECH(Channel);	//(1<<Channel);
-	xm_g_s_attr.volume.left  = LV; 
-	xm_g_s_attr.volume.right = RV; 
-	xm_g_s_attr.pitch        = Pitch; 
+	xm_g_s_attr.volume.left  = LV;
+	xm_g_s_attr.volume.right = RV;
+	xm_g_s_attr.pitch        = Pitch;
 
-	xm_g_s_attr.addr         = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset; 
-	xm_g_s_attr.loop_addr    = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset; 
-	SpuSetVoiceAttr(&xm_g_s_attr); 
+	xm_g_s_attr.addr         = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset;
+	xm_g_s_attr.loop_addr    = xm_l_vag_spu_addr[VBID][Inst]+XMC->SOffset;
+	SpuSetVoiceAttr(&xm_g_s_attr);
 }
 
 
@@ -2927,7 +2984,7 @@ InitSPUChannel
 *****************************************************************************/
 
 void InitSPUChannel(int Channel)
-{ 
+{
 	xm_g_s_attr.mask =
 			(SPU_VOICE_WDSA |
 			SPU_VOICE_ADSR_AMODE |
@@ -2962,7 +3019,7 @@ CurrentKeyStat
 void CurrentKeyStat(void)
 {
 	int t;
-	char KeyStat[24];
+	char KeyStat[XM_SPU_CH_COUNT];
 
 	SpuGetAllKeysStatus(KeyStat);
 
@@ -3023,6 +3080,12 @@ void SilenceXM(int Song_ID)
 
 	int pmsk;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID]==-1)
+		return;
+#endif
 
 	mu = XM_SngAddress[Song_ID];
 	mhu = XM_HeaderAddress[mu->HeaderNum];
@@ -3044,8 +3107,7 @@ void SilenceXM(int Song_ID)
 	SpuSetKey(0, i);
 
 #ifdef XMPLAY_ENABLE_FIXES
-	// Prevent repeated calls to this function causing
-	// bogus keyoff calls
+	// Prevent repeated calls to this function causing bogus keyoff calls
 	// If PlayStart is called this would be set correctly
 	mu->PlayMask = 0;
 #endif
@@ -3061,6 +3123,10 @@ XM_Pause
 void XM_Pause(int Song_ID)
 {
 	int t;
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
@@ -3090,6 +3156,10 @@ void XM_Restart(int Song_ID)
 {
 	int t;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 
@@ -3120,6 +3190,10 @@ XM_SetMasterVol
 *****************************************************************************/
 void XM_SetMasterVol(int Song_ID, u_char Vol)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+#endif
 	if (XMSongIDs[Song_ID] == -1)
 		return;
 	if (Vol <= 128)
@@ -3141,6 +3215,10 @@ void ClearSPU(int VBID)
 int i;
 int Amount;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (VBID < 0 || VBID >= XM_MAX_VAB_COUNT)
+        return;
+#endif
 	Amount=iVABID[VBID];
 
 	for (i=0;i<(Amount);i++)
@@ -3184,6 +3262,10 @@ int GetFreeSongID(void)
 
 void XM_Quit(int SongID)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+    if (SongID < 0 || SongID >= XM_NSA)
+        return;
+#endif
 	XM_PlayStop(SongID);
 	XMSongIDs[SongID]=-1;
 	JPClearSPUFlags(SongID+1);
@@ -3195,7 +3277,7 @@ void JPClearSPUFlags(int SongID)
 {
 	int i;
 
-	for (i = 0; i < 24; i++)
+	for (i = 0; i < XM_SPU_CH_COUNT; i++)
 	{
 		if (XMSPU_SFX[i] == SongID)
 			XMSPU_SFX[i] = 0;
@@ -3208,7 +3290,7 @@ int XM_GetFreeVAB(void)
 {
 int i;
 
-	for (i=0;i<8;i++)
+	for (i=0;i<XM_MAX_VAB_COUNT;i++)
 	{
 		if (iVABID[i]==-1)
 			return(i);			/* Free VAB slot */
@@ -3221,10 +3303,13 @@ int i;
 void XM_SetVAGAddress(int VabID, int slot, int addr)
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	if (slot >= 0x80)
+	if (slot < 0 || slot >= XM_MAX_VAG_COUNT)
 		return;
 #endif
 	xm_l_vag_spu_addr[VabID][slot] = addr;
+#ifdef XMPLAY_ENABLE_FIXES
+    if (iVABID[VabID] < (slot + 1))
+#endif
 	iVABID[VabID] = slot + 1;
 }
 
@@ -3239,7 +3324,7 @@ int XM_GetSongSize(void)
 void XM_SetSongAddress(u_char *Address)
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	if (XM_NSA >= 24)
+	if (XM_NSA >= XM_MAX_SONG_COUNT)
 		return;
 #endif
 	XM_SngAddress[XM_NSA] = (XMSONG*)Address;
@@ -3252,7 +3337,7 @@ void XM_SetSongAddress(u_char *Address)
 void XM_FreeAllSongIDs(void)
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	for (int i = 0; i < 24; i++)
+	for (int i = 0; i < XM_MAX_SONG_COUNT; i++)
 	{
 	    XM_SngAddress[i] = 0;
 		XMSongIDs[i] = -1;
@@ -3272,7 +3357,7 @@ int XM_GetFileHeaderSize(void)
 
 void XM_SetFileHeaderAddress(u_char *Address)
 {
-	if (XM_HA<8)
+	if (XM_HA<XM_MAX_HEADER_COUNT)
 	{
 	 	XM_HeaderAddress[XM_HA]=(XMHEADER*)Address;
 		XM_HA++;
@@ -3280,7 +3365,7 @@ void XM_SetFileHeaderAddress(u_char *Address)
 }
 
 
-// The following doesn't exist in the original distribution
+// The following functions don't exist in the original distribution and are reimplemented
 
 void XM_FreeSongID(void)
 {
@@ -3301,7 +3386,7 @@ void XM_FreeFileHeaderID()
 
 void XM_FreeAllFileHeaderIDs()
 {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < XM_MAX_HEADER_COUNT; i++)
 	{
 	    XM_HeaderAddress[i] = 0;
 	}
@@ -3316,7 +3401,7 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
         return 0;
 
 	ms = XM_SngAddress[SongID];
-	mhu = XM_HeaderAddress[SongID];
+	mhu = XM_HeaderAddress[ms->HeaderNum];
 	Feedback->Status = ms->XMPlay;
 	Feedback->SongPos = ms->SongPos;
 	Feedback->PatternPos = ms->PatternPos;

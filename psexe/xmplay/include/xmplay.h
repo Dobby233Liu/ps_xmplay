@@ -69,7 +69,7 @@ void XM_SetSongPos(int Song_ID,unsigned short pos);
 int InitXMData(unsigned char *mpp,int XM_ID,int S3MPan);
 int XM_VABInit(unsigned char* VHData,unsigned char* VBData);
 void XM_OnceOffInit(int PAL);
-// dobby: Return type was labeled as void in the SDK 4.6 version
+// dobby: Return type was labeled as void in the Psy-Q SDK 4.6 version
 int XM_GetFeedback(int Song_ID,XM_Feedback* Feedback);
 void XM_GetHeaderInfo(int XM_ID,XM_HeaderInfo* HeaderInfo);
 int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,

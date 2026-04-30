@@ -96,6 +96,12 @@
         "rough_xm_subsong": 0,
         "loop": false
     },
+    "hyperventilation.novoc": {
+        "xm": "hyperventilation.novoc",
+        "position": 0,
+        "rough_xm_subsong": 0,
+        "loop": false
+    },
     "elektric_funk": {
         "xm": "elektric_funk",
         "position": 0,

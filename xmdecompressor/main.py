@@ -41,8 +41,8 @@ class XM_RowWrittenFieldsFlag(IntFlag):
 
 
 # ported from: https://github.com/OpenDriver2/OpenDriver2Tools/blob/89009f7f4f48f37a886b376292432cdffab4a136/DriverSoundTool/driver_sound.cpp#L181
-# unreadability is preserved because I don't quite understand what it's doing fully
-# samples are not restored because it doesn't matter here
+# slightly more readable, though hardcoded struct sizes are still present
+# samples are not restored because they don't matter to us
 def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
     outf.write(inf.read(58))
     in_ver = unpack_io1(inf, "<H")
@@ -52,42 +52,42 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
         outf.write(inf.read())
         return
 
-    outf.write(pack("<H", 0x104))  # convert XM to standard version
+    outf.write(pack("<H", 0x104))  # change version to a standard one
     outf.write(inf.read(8))  # skip
     chnl_pat_bytes = inf.read(calcsize("<HH"))
     num_chnl, num_pat = unpack("<HH", chnl_pat_bytes)
     outf.write(chnl_pat_bytes)
-    outf.write(inf.read(336 - inf.tell()))  # skip other header data since they don't change
+    outf.write(inf.read(336 - inf.tell()))  # skip the remaining header data, we don't need to change them
     print("Unpacking", num_pat, "patterns")
 
-    charsize = calcsize("<B")
-    no_data = pack("<B", XM_RowWrittenFieldsFlag.packed)
+    CHARSIZE = calcsize("<B")
+    NO_DATA = pack("<B", XM_RowWrittenFieldsFlag.packed)
     for pat in range(num_pat):
-        # copy pattern header properties
+        # copy pattern header
         outf.write(inf.read(5))
         num_rows = unpack_io1(inf, "<h")
         outf.write(pack("<h", num_rows))
 
-        pat_size = unpack_io1(inf, "<h")  # onto pattern data itself
+        pat_size = unpack_io1(inf, "<h")  # proceed to the pattern data
         if pat_size == 0:
-            continue  # no empty reads
+            continue  # nothing to read
 
         data_start_in = inf.tell()
         new_pat_data_by_row = [b""] * num_rows
 
         for row in range(num_rows):
-            note_per_chnl: list[bytes] = [no_data] * num_chnl
+            note_per_chnl: list[bytes] = [NO_DATA] * num_chnl
 
-            # apparently instead of simply laying out all channels per row, "super-packed" XM
-            # only lays out channels that have note data?
-            # read notes of layed out channels
-            while (inf.tell() - data_start_in) < pat_size:  # don't overflow reading
+            # instead of simply laying out all channels per row, "super-packed" XM apparently
+            # only lays out channels that have note data, in order to save memory
+            # read notes of laid out channels
+            while (inf.tell() - data_start_in) < pat_size:  # avoid overflow
                 chnl = unpack_io1(inf, "<B")
                 if chnl == 0xFF:  # end of data
                     break
 
                 # copy note data
-                note_byte = inf.read(charsize)
+                note_byte = inf.read(CHARSIZE)
                 note = unpack1("<B", note_byte)
                 note_size = 5
                 if note & XM_RowWrittenFieldsFlag.packed:
@@ -97,21 +97,22 @@ def decompress_xm(inf: BufferedReader, outf: BufferedWriter):
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.volc) else 0
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.efft) else 0
                     note_size += 1 if (note & XM_RowWrittenFieldsFlag.effp) else 0
-                note_per_chnl[chnl] = note_byte + inf.read((note_size - 1) * charsize)
+                note_per_chnl[chnl] = note_byte + inf.read((note_size - 1) * CHARSIZE)
 
             new_pat_data_by_row[row] = b"".join(note_per_chnl)
 
-        # then write notes for all channels
+        # then write notes of all channels
         new_pat_data = b"".join(new_pat_data_by_row)
         outf.write(pack("<h", len(new_pat_data)))
         outf.write(new_pat_data)
 
-    # copy remaining data
+    # copy the remaining data
     outf.write(inf.read())
 
 
 if __name__ == "__main__":
-    SONGDATA_DIR = "nascarheat"
+    import sys
+    SONGDATA_DIR = sys.argv[1] if len(sys.argv) > 1 else "nascarheat"
 
     os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
     os.chdir("songdata/" + SONGDATA_DIR)
