@@ -3381,7 +3381,8 @@ void XM_SetFileHeaderAddress(u_char *Address)
 }
 
 
-// The following functions don't exist in the original distribution and are reimplemented
+// The following functions are mentioned in calls.txt, but OpenDriver2 doesn't have them implemented
+// They were added for completeness
 
 void XM_FreeSongID(void)
 {
