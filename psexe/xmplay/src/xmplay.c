@@ -572,10 +572,13 @@ void XM_OnceOffInit(int PAL)
 		PALType = 0;
 	else if (PAL == XM_PAL)
 	{
+#ifdef XMPLAY_ENABLE_FIXES
+        // [A] use NTSC handling instead of bodge timer
+		PALType=0;
+		BPMLimit=125;
+#else
 		PALType = 1;					/* Set if PAL or NTSC */
-		// [A] use NTSC handling instead of bodge timer
-		/* PALType=0;
-		BPMLimit=125; */
+#endif
 	}
 }
 
@@ -2021,7 +2024,7 @@ void UpdateWithTimer(int SC)
 #ifdef XMPLAY_ENABLE_FIXES
 	/* YES! Update song/hardware */
 	/* in case designated BPM exceeds frame limit, let's process as much as we should
-		(causes small glitches) */
+		(may cause small glitches) */
 	while (ms->JBPM>=BPMLimit)
 	{
 	    ms->JBPM-=BPMLimit;
