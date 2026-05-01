@@ -1373,7 +1373,9 @@ void DoEEffects(u_char dat)
 		if (ms->vbtick)
 			break;
 		XMC->transpose = (nib - 8) << 4;
-		XMC->period = GetPeriod(XMC->note + XMC->transpose, XMC->c2spd);
+		u_short note = XMC->note + XMC->transpose;
+		if (note > 0xFF) note = 0xFF;
+		XMC->period = GetPeriod(note, XMC->c2spd);
 		XMC->ownper = 1;
 #endif
 		break;
@@ -1621,17 +1623,26 @@ void SetPer(void)
 {
 	u_int *j;
 	u_short period;
+#ifdef XMPLAY_ENABLE_FIXES
+    u_short a;
+#else
 	u_char a;
+#endif
 	if (CurrentCh > XM_SPU_CH_COUNT - 1)
 		return;
 
 	a = XMC->note;
 	a += XMC->transpose;
+#ifdef XMPLAY_ENABLE_FIXES
+    if (a > 0xFF) a = 0xFF;
+    period = GetPeriod(a, XMC->c2spd);
+#else
 
 
 	//	a+=jtt;
 
 	period = GetPeriod(a, XMC->c2spd);
+#endif
 
 	XMC->wantedperiod = period;
 	XMC->tmpperiod = period;
@@ -1687,7 +1698,11 @@ Arpeggio
 
 void Arpeggio(u_char dat)
 {
+#ifdef XMPLAY_ENABLE_FIXES
+	u_short note;
+#else
 	u_char note;
+#endif
 
 	note = XMC->note;
 
@@ -1702,7 +1717,13 @@ void Arpeggio(u_char dat)
 			note += (dat & 0xf);
 			break;
 		}
+#ifdef XMPLAY_ENABLE_FIXES
+        note += XMC->transpose;
+        if (note > 0xFF) note = 0xFF;
+        XMC->period = GetPeriod(note, XMC->c2spd);
+#else
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->c2spd);
+#endif
 		XMC->ownper = 1;
 	}
 }
