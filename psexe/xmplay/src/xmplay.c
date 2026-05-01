@@ -2622,19 +2622,21 @@ void DoDolbySS(void)
 int GetEmpty(int old)
 {
     static int start = 0;
-    int cursor;
+    static int cursor;
+
+    const unsigned short channels = mh->XMPSXChannels;
     int i;
 	XMCHANNEL *chnl;
 	unsigned char new;
 
-    for (i = 0; i < mh->XMPSXChannels; i++)
+    for (i = 0; i < channels; i++)
     {
-        cursor = (start + i) % mh->XMPSXChannels;
-        chnl = &ms->XM_Chnl[cursor];
+        cursor = (start + i) % channels;
 
+        chnl = &ms->XM_Chnl[cursor];
         if (chnl->ChDead && !chnl->kick)
         {
-            start = (cursor + 1) % mh->XMPSXChannels;
+            start = (cursor + 1) % channels;
 
             new = chnl->SPUChannel;
             chnl->SPUChannel = old;
