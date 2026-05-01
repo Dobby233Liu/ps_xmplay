@@ -743,9 +743,31 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 
 #ifdef XMPLAY_ENABLE_FIXES
 	for(i=0;i<mhu->XMPSXChannels;i++)
+	{
+	    XMCU=&mu->XM_Chnl[i];
+		XMCU->UserVol=0;
+		XMCU->kick=0;
+		XMCU->tmpvolume=0+64;
+		XMCU->retrig=0;
+		XMCU->wavecontrol=0;
+		XMCU->glissando=0;
+		XMCU->panning=128;
+		XMCU->note=0;
+		XMCU->vol=0;
+		XMCU->eff=0;
+		XMCU->dat=0;
+		XMCU->ins=0;
+		XMCU->ChDead=1;
+		XMCU->nothing=1;
+		XMCU->OldLVol=-1;
+		XMCU->OldRVol=-1;
+		XMCU->OldPeriod=0;
+		XMCU->sample=254;
+		XMCU->OldSample=-1;
+		XMCU->Dolby=XM_DOLBY_OFF;
+	}
 #else
 	for(i=0;i<mhu->XMChannels;i++)
-#endif
 	{
 		mu->XM_Chnl[i].UserVol=0;
 		mu->XM_Chnl[i].kick=0;
@@ -768,6 +790,7 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 		mu->XM_Chnl[i].OldSample=-1;
 		mu->XM_Chnl[i].Dolby=XM_DOLBY_OFF;
 	}
+#endif
 	if (PlayType<0x80)
 		mu->XMPlay=XM_PLAYING;
 
@@ -1447,7 +1470,7 @@ void SetNote(u_char note)
 	u_char* j;
 	u_char vf;
 
-	if (CurrentCh > 23)
+	if (CurrentCh > XM_SPU_CH_COUNT - 1)
 		return;
 
 	if (note == 96)
@@ -1492,7 +1515,7 @@ void SetInstr(u_char inst)
 	u_char j2;
 	short ddd;
 
-	if (CurrentCh > 23)
+	if (CurrentCh > XM_SPU_CH_COUNT - 1)
 		return;
 
 	if (!XMC->kick)
@@ -1556,7 +1579,7 @@ void SetPer(void)
 	u_int *j;
 	u_short period;
 	u_char a;
-	if (CurrentCh > 23)
+	if (CurrentCh > XM_SPU_CH_COUNT - 1)
 		return;
 
 	a = XMC->note;
@@ -2254,6 +2277,13 @@ void UpdatePatternData(int SC)
 							break;
 
 						CurrentCh = patdat;
+#ifdef XMPLAY_ENABLE_FIXES
+                        if (t > XM_SPU_CH_COUNT - 1)
+                        {
+                            SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
+                            continue;
+                        }
+#endif
 						XMC = &ms->XM_Chnl[patdat];		/* Decode pattern data */
 						pmsk = ms->PlayMask;
 						pmsk &= (1 << patdat);
@@ -2272,6 +2302,13 @@ void UpdatePatternData(int SC)
 					for (t = 0; t < mh->XMChannels; t++)
 					{
 						CurrentCh = t;
+#ifdef XMPLAY_ENABLE_FIXES
+                        if (t > XM_SPU_CH_COUNT - 1)
+                        {
+                            SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
+                            continue;
+                        }
+#endif
 						XMC = &ms->XM_Chnl[t];				/* Decode pattern data */
 						pmsk = ms->PlayMask;
 						pmsk &= (1 << t);
@@ -2296,6 +2333,9 @@ int CalcPlayPos(int StartPos)
 		for (t = 0; t < mh->XMChannels; t++)
 		{
 			CurrentCh = t;
+#ifdef XMPLAY_ENABLE_FIXES
+            if (t <= XM_SPU_CH_COUNT - 1)
+#endif
 			XMC = &ms->XM_Chnl[t];				/* Decode pattern data */
 			SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
 		}
