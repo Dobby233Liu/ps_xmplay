@@ -2279,7 +2279,7 @@ void UpdatePatternData(int SC)
 
 						CurrentCh = patdat;
 #ifdef XMPLAY_ENABLE_FIXES
-                        if (t > XM_SPU_CH_COUNT - 1)
+                        if (patdat > XM_SPU_CH_COUNT - 1)
                         {
                             SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
                             continue;
@@ -2364,6 +2364,9 @@ int PACKEDCalcPlayPos(int StartPos)
 				break;
 
 			CurrentCh = patdat;
+#ifdef XMPLAY_ENABLE_FIXES
+            if (patdat <= XM_SPU_CH_COUNT - 1)
+#endif
 			XMC = &ms->XM_Chnl[patdat];		/* Decode pattern data */
 			SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
 		}
