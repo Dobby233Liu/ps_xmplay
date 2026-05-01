@@ -1474,12 +1474,24 @@ void DoEEffects(u_char dat)
 		break;
 
 	case XMEF_E_NOTEDELAY:			/* D - Note delay */
-
+#ifdef XMPLAY_ENABLE_FIXES
+        // kFT2OutOfRangeDelay
+        if (nib >= ms->SongSpeed)
+            break;
+        if (ms->vbtick < nib)
+        {
+			XMC->kick = 0;
+			XMC->tmpvolume = 64; // HACK
+        }
+        else if (ms->vbtick == nib)
+			XMC->kick = 1;
+#else
 		if (ms->vbtick == nib)
 		{
 			XMC->kick = 1;
 		}
 		else XMC->kick = 0;
+#endif
 		break;
 
 	case XMEF_E_PATDELAY:			/* E - Pattern delay */
@@ -1557,7 +1569,7 @@ void SetInstr(u_char inst)
 	if (!XMC->kick)
 		return;							// Instrument but no note...
 
-	if (inst == 255) // INVESTIGATE: Why not 254?
+	if (inst == 255)
 	{
 		inst = XMC->sample;				// If instrument=0, use last instrument.
 	}
