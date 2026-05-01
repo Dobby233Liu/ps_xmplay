@@ -99,7 +99,11 @@ typedef struct _XMCHANNEL {
 	short fadevol;		/* fading volume */
 	u_char keyon;		/* if 1=key is pressed. */
 	u_char kick;	   	/* if 1=sample has to be restarted */
+#ifdef XMPLAY_ENABLE_FIXES
+    u_char notedly;
+#else
 	u_char kick2;	   	/* if 1=sample has to be restarted */
+#endif
 	u_char sample;		/* which sample number (0-31) */
 	short handle;		/* which sample-handle */
 	u_int start;		/* The start byte index in the sample */

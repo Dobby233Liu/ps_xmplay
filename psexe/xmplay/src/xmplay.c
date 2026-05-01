@@ -1478,13 +1478,7 @@ void DoEEffects(u_char dat)
         // kFT2OutOfRangeDelay
         if (nib >= ms->SongSpeed)
             break;
-        if (ms->vbtick < nib)
-        {
-			XMC->kick = 0;
-			XMC->tmpvolume = 64; // HACK
-        }
-        else if (ms->vbtick == nib)
-			XMC->kick = 1;
+        XMC->notedly = ms->vbtick < nib;
 #else
 		if (ms->vbtick == nib)
 		{
@@ -1539,6 +1533,9 @@ void SetNote(u_char note)
 		}
 	}
 	else
+#ifdef XMPLAY_ENABLE_FIXES
+    if (!XMC->notedly)
+#endif
 	{
 		XMC->note = note;
 		XMC->kick = 1;
