@@ -760,7 +760,11 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 		XMCU->kick=0;
 		XMCU->tmpvolume=0+64;
 		XMCU->retrig=0;
+		XMCU->notedly=0;
 		XMCU->wavecontrol=0;
+		XMCU->vibdepth=0;
+		XMCU->vibspd=0;
+		XMCU->portspeed=0;
 		XMCU->glissando=0;
 		XMCU->panning=128;
 		XMCU->note=0;
@@ -1174,9 +1178,7 @@ int lo;
 			break;
 
 		case XMEF_TONEPORT:		/* 3 */
-#ifndef XMPLAY_ENABLE_FIXES
 			XMC->kick=0;
-#endif
 			if(dat!=0)
 			{
 				XMC->portspeed=dat;
@@ -1197,9 +1199,7 @@ int lo;
 			break;
 
 		case XMEF_PORT_VOLSLD:	/* 5 */
-#ifndef XMPLAY_ENABLE_FIXES
 			XMC->kick=0;
-#endif
 #ifdef XMPLAY_ENABLE_FIXES
 			if (ms->vbtick)
 #endif
