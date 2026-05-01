@@ -3563,8 +3563,8 @@ void XM_FreeSongID(void)
 {
 	if (XM_NSA == 0) // after freeing 0 there is no more to free
 		return;
-	XM_SngAddress[XM_NSA] = 0;
-	XMSongIDs[XM_NSA] = -1;
+	XM_SngAddress[XM_NSA - 1] = 0;
+	XMSongIDs[XM_NSA - 1] = -1;
 	XM_NSA--;
 }
 
@@ -3572,7 +3572,7 @@ void XM_FreeFileHeaderID()
 {
 	if (XM_HA == 0) // after freeing 0 there is no more to free
 		return;
-	XM_HeaderAddress[XM_HA] = 0;
+	XM_HeaderAddress[XM_HA - 1] = 0;
 	XM_HA--;
 }
 
