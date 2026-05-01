@@ -166,7 +166,9 @@ typedef struct _XMSONG {
 	u_char  XMPlay;
 	int	  FirstCh;			  /* First SPU channel to playback on */
 	int	  JBPM;
+#ifndef XMPLAY_ENABLE_FIXES
 	int	  PCounter;
+#endif
 	u_short PatSize;
 	u_int *PatAdr;
 	u_int *PatAdr2;

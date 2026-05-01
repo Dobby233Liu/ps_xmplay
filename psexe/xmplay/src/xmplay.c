@@ -37,7 +37,9 @@ int JP_Do_Nothing;
 
 #define NTSCBPMLIMIT 150	//750/5
 int BPMLimit;
+#ifndef XMPLAY_ENABLE_FIXES
 int PALType;
+#endif
 
 int XM_SCAN = 0;
 int JPError = 0;
@@ -582,13 +584,15 @@ void XM_OnceOffInit(int PAL)
 	}
 #endif
 	BPMLimit = NTSCBPMLIMIT;		/* Set Max limit for BPM */
+#ifndef XMPLAY_ENABLE_FIXES
 	if (PAL == XM_NTSC)
 		PALType = 0;
-	else if (PAL == XM_PAL)
+	else
+#endif
+	if (PAL == XM_PAL)
 	{
 #ifdef XMPLAY_ENABLE_FIXES
         // [A] use NTSC handling instead of bodge timer
-		PALType=0;
 		BPMLimit=125;
 #else
 		PALType = 1;					/* Set if PAL or NTSC */
@@ -662,7 +666,9 @@ int  XM_Init(int VabID,int XM_ID,int SongID, int FirstCh,
 	mu->Status=PlayType&0x7f;
 	mu->HeaderNum=XM_ID;
 	mu->JBPM=0;
+#ifndef XMPLAY_ENABLE_FIXES
 	mu->PCounter=3;
+#endif
 	mu->reppos=mhu->restart;
 	mu->repcnt=0;
 	mu->CurPos=0;
@@ -2013,11 +2019,13 @@ void UpdateXMData(void)
 	{
 		ms=XM_SngAddress[SC];
 		UpdateWithTimer(SC);
+#ifndef XMPLAY_ENABLE_FIXES
 		if (ms->PCounter==5)
 		{
 			UpdateWithTimer(SC);
 			ms->PCounter=0;
 		}
+#endif
 	}
 
 #ifdef XMPLAY_ENABLE_FIXES
@@ -2044,8 +2052,10 @@ void UpdateWithTimer(int SC)
 	if (ms->XMPlay!=XM_PLAYING)
 		return;
 
+#ifndef XMPLAY_ENABLE_FIXES
  	if (PALType==1)
  		ms->PCounter++;		/* PAL Mode stuff...bodge timer */
+#endif
 
 	mh=XM_HeaderAddress[ms->HeaderNum];
 
@@ -2054,7 +2064,11 @@ void UpdateWithTimer(int SC)
 
 	if (ms->JBPM<BPMLimit)	/* Time to process data ? */
 	{
+#ifdef XMPLAY_ENABLE_FIXES
+        if (ms->JUp==0)
+#else
 		if ((ms->JUp==0)&&(PALType!=0))
+#endif
 		{
 			ms->JUp=1;
 			UpdateEffs();		/* If nothing else to do for a frame */
