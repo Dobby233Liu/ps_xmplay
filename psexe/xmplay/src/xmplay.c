@@ -3632,6 +3632,7 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->ActiveVoices = ms->XMActiveVoices;
 	Feedback->PlayNext = ms->PlayNext;
 	Feedback->CurrentStart = ms->CurrentStart;
+	Feedback->CurrentPattern = ms->CurrentPattern;
 	return 1;
 }
 

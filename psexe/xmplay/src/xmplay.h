@@ -89,7 +89,9 @@ typedef struct _XMCHANNEL {
 	u_char dat;
 	u_char datold;
 	u_char eff;
+#ifndef XMPLAY_ENABLE_FIXES
 	u_char not_;
+#endif
 	u_char oldvslide;
 	u_char oldfvslide;
 	u_char oldfslide;
