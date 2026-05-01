@@ -1,5 +1,11 @@
 #pragma once
 
+#define XM_MAX_SONG_COUNT   24  /* MAX 24 XM's playing at once */
+#define XM_MAX_HEADER_COUNT 8   /* MAX 8 XM's files in memory at once */
+#define XM_MAX_VAB_COUNT    8
+#define XM_MAX_VAG_COUNT    128
+#define XM_SPU_CH_COUNT     24
+
 #define XM_NTSC 0				/* Machine type */
 #define XM_PAL 1
 
@@ -180,7 +186,7 @@ typedef struct _XMSONG {
 	u_int *PatAdr2;
 	int	  PlayMask;
 	int	  SFXNum;
-	XMCHANNEL XM_Chnl[24];	  /* max 24 channels per song */
+	XMCHANNEL XM_Chnl[XM_SPU_CH_COUNT];	  /* max 24 channels per song */
 	int JUp;
 	short	  PlayNext;
 	short BPlayNext;

@@ -16,12 +16,6 @@ XMPLAY.C
 #include "xmplay.h"
 #include "xmcalls.h"
 
-#define XM_MAX_SONG_COUNT   24  /* MAX 24 XM's playing at once */
-#define XM_MAX_HEADER_COUNT 8   /* MAX 8 XM's files in memory at once */
-#define XM_MAX_VAB_COUNT    8
-#define XM_MAX_VAG_COUNT    128
-#define XM_SPU_CH_COUNT     24
-
 
 /**** PSX SPECIFIC ****/
 
@@ -1533,12 +1527,13 @@ void SetNote(u_char note)
 		}
 	}
 	else
-#ifdef XMPLAY_ENABLE_FIXES
-    if (!XMC->notedly)
-#endif
 	{
 		XMC->note = note;
+#ifdef XMPLAY_ENABLE_FIXES
+        XMC->kick = !XMC->notedly;
+#else
 		XMC->kick = 1;
+#endif
 
 		if (!(XMC->wavecontrol & 0x80))	/* retrig tremolo and vibrato waves ? */
 			XMC->trmpos = 0;
@@ -3618,21 +3613,21 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
     if (XMSongIDs[SongID] == -1)
         return 0;
 
-	ms = XM_SngAddress[SongID];
-	mhu = XM_HeaderAddress[ms->HeaderNum];
-	Feedback->Status = ms->XMPlay;
-	Feedback->SongPos = ms->SongPos;
-	Feedback->PatternPos = ms->PatternPos;
-	Feedback->SongBPM = ms->SongBPM;
-	Feedback->SongSpeed = ms->SongSpeed;
+	mu = XM_SngAddress[SongID];
+	mhu = XM_HeaderAddress[mu->HeaderNum];
+	Feedback->Status = mu->XMPlay;
+	Feedback->SongPos = mu->SongPos;
+	Feedback->PatternPos = mu->PatternPos;
+	Feedback->SongBPM = mu->SongBPM;
+	Feedback->SongSpeed = mu->SongSpeed;
 	Feedback->SongLength = mhu->songlength;
-	Feedback->SongLoop = ms->SongLoop;
-	Feedback->Volume = (ms->SongVolume*ms->MasterVolume-64)*2;
-	Feedback->Panning = ms->UserPan;
-	Feedback->ActiveVoices = ms->XMActiveVoices;
-	Feedback->PlayNext = ms->PlayNext;
-	Feedback->CurrentStart = ms->CurrentStart;
-	Feedback->CurrentPattern = ms->CurrentPattern;
+	Feedback->SongLoop = mu->SongLoop;
+	Feedback->Volume = (mu->SongVolume*mu->MasterVolume-64)*2;
+	Feedback->Panning = mu->UserPan;
+	Feedback->ActiveVoices = mu->XMActiveVoices;
+	Feedback->PlayNext = mu->PlayNext;
+	Feedback->CurrentStart = mu->CurrentStart;
+	Feedback->CurrentPattern = mu->CurrentPattern;
 	return 1;
 }
 
