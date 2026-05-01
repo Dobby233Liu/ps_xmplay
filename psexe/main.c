@@ -191,7 +191,7 @@ void main() {
     }
 
     // Quit XMPlay
-#if defined(XMPLAY_VARIANT_REDRIVER2) && defined(XMPLAY_ENABLE_FIXES)
+#if defined(XMPLAY_VARIANT_REDRIVER2)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
     XM_PlayStop(song_id);
 #endif
@@ -205,8 +205,9 @@ void main() {
 
     // Quit SPU processing
     // FIXME: free self-allocated vab resources
-#if !defined(XMPLAY_VARIANT_REDRIVER2) || !defined(XMPLAY_ENABLE_FIXES)
+#if !defined(XMPLAY_VARIANT_REDRIVER2)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
+    // TODO: check if PlayStop does this
     SpuSetKey(SPU_OFF, SPU_ALLCH);
 #endif
 #ifdef REVERB_TEST
