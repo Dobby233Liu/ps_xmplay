@@ -2632,7 +2632,7 @@ int GetEmpty(int old)
         cursor = (start + i) % mh->XMPSXChannels;
         chnl = &ms->XM_Chnl[cursor];
 
-        if (!chnl->kick && chnl->ChDead)
+        if (chnl->ChDead && !chnl->kick)
         {
             start = (cursor + 1) % mh->XMPSXChannels;
 
