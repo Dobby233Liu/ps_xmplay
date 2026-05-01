@@ -13,8 +13,6 @@ __attribute__((noreturn)) void abort(const char* msg) {
     ramsyscall_printf("\n");
 
     pcsx_debugbreak();
-    pcsx_exit(-1);
 
     while (1);
-    __builtin_unreachable();
 }
