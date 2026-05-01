@@ -2043,11 +2043,15 @@ void UpdateXMData(void)
 static void PerformUpdate(int SC, int catching_up);
 #endif
 
+#ifndef XMPLAY_ENABLE_FIXES
 int tt=0;
 int aa=0;
+#endif
 void UpdateWithTimer(int SC)
 {
+#ifndef XMPLAY_ENABLE_FIXES
 	aa++;
+#endif
 
 #ifdef XMPLAY_ENABLE_FIXES
     if (SC < 0 || SC >= XM_NSA)
@@ -2749,7 +2753,9 @@ void UpdateHardware(void)
         if (!catching_up)
 #endif
 		SpuFlush(SPU_EVENT_ALL);
+#ifndef XMPLAY_ENABLE_FIXES
 		aa = 0;
+#endif
 	}
 
 	MaxChans=ms->MaxChans;
