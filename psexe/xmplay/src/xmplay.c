@@ -2535,7 +2535,7 @@ void ApplyEffs(void)
  			{											/* If channel not dead */
  				ms->XMActiveVoices++;
 
-#if 0
+#ifdef XMPLAY_ENABLE_FIXES
 				if(XMC->period<0)					/* Cap period */
 					XMC->period=0;
                 else if(XMC->period>0xffff)
@@ -3607,4 +3607,14 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->PlayNext = ms->PlayNext;
 	Feedback->CurrentStart = ms->CurrentStart;
 	return 1;
+}
+
+void XM_SetMono()
+{
+    MonoMode = XM_MONO;
+}
+
+void XM_SetStereo()
+{
+    MonoMode = XM_STEREO;
 }
