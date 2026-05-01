@@ -2120,12 +2120,11 @@ void XM_DoFullUpdate(int SC)
 		ms->JUp = 0;					/* Clear update flag */
 
 #if XMPLAY_ENABLE_FIXES
-        _UpdateHardware(catching_up);           /* Update SPU */
-        if (!catching_up && ms->vbtick == 1)    /* Check for zero volume,keyed off channels*/
+        _UpdateHardware(catching_up);   /* Update SPU */
 #else
 		UpdateHardware();			/* Update SPU */
-		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
 #endif
+		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
 			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
 
 /****
