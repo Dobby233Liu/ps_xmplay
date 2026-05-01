@@ -191,10 +191,6 @@ void main() {
     }
 
     // Quit XMPlay
-#if defined(XMPLAY_VARIANT_REDRIVER2)
-    // Calling XM_Exit is not enough to make sure all channels are keyed off
-    XM_PlayStop(song_id);
-#endif
     XM_Exit();
     VSyncCallback(NULL);
 
