@@ -452,9 +452,10 @@ void XM_PlayStop(int Song_ID)
 	mu = XM_SngAddress[Song_ID];
 #ifdef XMPLAY_ENABLE_FIXES
 	SilenceXM(Song_ID);
-#endif
-	if (!mu->XMPlay)
+#else
+    if (!mu->XMPlay)
 		return;
+#endif
 	mu->XMPlay = XM_STOPPED;
 #ifndef XMPLAY_ENABLE_FIXES
 	SilenceXM(Song_ID);
