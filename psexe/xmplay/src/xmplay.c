@@ -1343,8 +1343,9 @@ void DoEEffects(u_char dat)
 		if (ms->vbtick)
 			break;
 		XMC->transpose = (nib - 8) << 4;
-		XMC->period = GetPeriod(XMC->note + XMC->transpose, XMC->c2spd);
-		XMC->ownper = 1;
+		// FIXME
+		/*XMC->period = GetPeriod(XMC->note + XMC->transpose, XMC->c2spd);
+		XMC->ownper = 1;*/
 #endif
 		break;
 
