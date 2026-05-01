@@ -599,7 +599,7 @@ void XM_OnceOffInit(int PAL)
 	{
 #ifdef XMPLAY_ENABLE_FIXES
         // [A] use NTSC handling instead of bodge timer
-		BPMLimit=125;
+		BPMLimit = 125;
 #else
 		PALType = 1;					/* Set if PAL or NTSC */
 #endif
@@ -2126,10 +2126,11 @@ void XM_DoFullUpdate(int SC)
 
 #if XMPLAY_ENABLE_FIXES
         _UpdateHardware(catching_up);   /* Update SPU */
+        if (ms->vbtick)		            /* Check for zero volume,keyed off channels*/
 #else
 		UpdateHardware();			/* Update SPU */
-#endif
 		if (ms->vbtick == 1)		/* Check for zero volume,keyed off channels*/
+#endif
 			CurrentKeyStat();		/* BUT not on first tick - wait for keyons */
 
 /****
@@ -2631,13 +2632,12 @@ int GetEmpty(int old)
         cursor = (start + i) % mh->XMPSXChannels;
         chnl = &ms->XM_Chnl[cursor];
 
-        if (chnl->kick == 0 && chnl->ChDead == 1)
+        if (!chnl->kick && chnl->ChDead)
         {
-            new = chnl->SPUChannel;
-            chnl->SPUChannel = old;
-
             start = (cursor + 1) % mh->XMPSXChannels;
 
+            new = chnl->SPUChannel;
+            chnl->SPUChannel = old;
             return new;
         }
     }
@@ -3145,7 +3145,11 @@ void CurrentKeyStat(void)
 	{
 		XMC = &ms->XM_Chnl[t];
 
+#ifdef XMPLAY_ENABLE_FIXES
+		if (KeyStat[XMC->SPUChannel] == SPU_OFF && !XMC->ChDead)
+#else
 		if (KeyStat[XMC->SPUChannel] != 1 && XMC->ChDead == 0)
+#endif
 		{
 			XMC->ChDead = 1;
 			XMC->nothing = 1;
