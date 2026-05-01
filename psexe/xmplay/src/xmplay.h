@@ -102,7 +102,9 @@ typedef struct _XMCHANNEL {
 	u_char oldfvslide;
 	u_char oldfslide;
 #ifdef XMPLAY_ENABLE_FIXES
+    u_char oldfslidedown;
 	u_char oldfslidex;
+	u_char oldfslidexdown;
 #endif
 	short fadevol;		/* fading volume */
 	u_char keyon;		/* if 1=key is pressed. */

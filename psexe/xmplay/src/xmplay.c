@@ -1070,20 +1070,30 @@ u_char dat=0;
 				u_char hi = dat>>4;
 				if (hi > 2) break;
 				u_char nib = dat&0xf;
-				if (nib == 0)
-					nib = XMC->oldfslidex;
-				XMC->oldfslidex = nib;
+				switch(hi)
+				{
+					case 1: // X1 - Extra Fine Portamento Up
+        				if (nib == 0)
+       					nib = XMC->oldfslidex;
+        				XMC->oldfslidex = nib;
+                        break;
+                    case 2: // X2 - Extra Fine Portamento Down
+        				if (nib == 0)
+           					nib = XMC->oldfslidexdown;
+        				XMC->oldfslidexdown = nib;
+                        break;
+				}
 				if (ms->vbtick)
 					break;
 				switch(hi)
 				{
-					case 1: // X1 - Extra Fine Portamento Up
+					case 1:
     					if ((int)XMC->tmpperiod - nib < 0)
     						XMC->tmpperiod = 0;
     					else
     						XMC->tmpperiod -= nib;
 						break;
-					case 2: // X2 - Extra Fine Portamento Down
+					case 2:
 						if ((int)XMC->tmpperiod + nib > 0xFFFF)
 							XMC->tmpperiod = 0xFFFF;
 						else
@@ -1348,8 +1358,6 @@ void DoEEffects(u_char dat)
 #ifdef XMPLAY_ENABLE_FIXES
 		if (ms->vbtick)
 			break;
-#endif
-#ifdef XMPLAY_ENABLE_FIXES
         ofs = nib << 2;
         if((int)XMC->tmpperiod - ofs < 0)
             XMC->tmpperiod = 0;
@@ -1364,11 +1372,13 @@ void DoEEffects(u_char dat)
 #ifndef XMPLAY_ENABLE_FIXES
 		if (ms->vbtick)
 			break;
-#endif
 		if (nib == 0)
 			nib = XMC->oldfslide;
 		XMC->oldfslide = nib;
-#ifdef XMPLAY_ENABLE_FIXES
+#else
+        if (nib == 0)
+			nib = XMC->oldfslidedown;
+		XMC->oldfslidedown = nib;
 		if (ms->vbtick)
 			break;
 #endif
