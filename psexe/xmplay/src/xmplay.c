@@ -1899,10 +1899,24 @@ int dist;
 	}
 	else if(dist>0)
 	{		                                 /* dist>0 ? */
+#ifdef XMPLAY_ENABLE_FIXES
+        if ((int)XMC->period - XMC->portspeed < 0)
+            XMC->period = 0;
+        else
+#endif
 		XMC->period-=XMC->portspeed;        /* then slide up */
 	}
 	else
+#ifdef XMPLAY_ENABLE_FIXES
+    {
+        if ((int)XMC->period + XMC->portspeed > 0xFFFF)
+            XMC->period = 0xFFFF;
+        else
+            XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
+    }
+#else
 		XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
+#endif
 
 	XMC->tmpperiod=XMC->period;				/* Store new period */
 }
