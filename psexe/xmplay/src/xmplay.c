@@ -956,8 +956,12 @@ u_char dat=0;
 			break;
 
 		case 0xa:
+#ifdef XMPLAY_ENABLE_FIXES
 			// OpenMPT: "FT2 does not automatically enable vibrato with the "set vibrato speed" command"
+            if(vol<<2&0xf) XMC->vibspd=vol<<2&0xf;
+#else
 			SPE (XMEF_VIBRATO,vol<<4);					/* Set Vibrato speed */
+#endif
 			break;
 
 		case 0xb:
@@ -1141,25 +1145,36 @@ int lo;
 
 		case XMEF_PORTDOWN:		/* 2 */
 			if(dat!=0)
+#ifdef XMPLAY_ENABLE_FIXES
+                XMC->slidedownspeed=(u_short)(dat)<<2;
+#else
 				XMC->slidespeed=(u_short)(dat)<<2;
+#endif
 			if(ms->vbtick)
 			{
 #ifdef XMPLAY_ENABLE_FIXES
-                if((int)XMC->tmpperiod + XMC->slidespeed > 0xFFFF)
+                if((int)XMC->tmpperiod + XMC->slidedownspeed > 0xFFFF)
                     XMC->tmpperiod = 0xFFFF;
                 else
-#endif
+                    XMC->tmpperiod+=XMC->slidedownspeed;
+#else
 				XMC->tmpperiod+=XMC->slidespeed;
+#endif
 			}
 			break;
 
 		case XMEF_TONEPORT:		/* 3 */
+#ifndef XMPLAY_ENABLE_FIXES
 			XMC->kick=0;
+#endif
 			if(dat!=0)
 			{
 				XMC->portspeed=dat;
 				XMC->portspeed<<=2;
 			}
+#ifdef XMPLAY_ENABLE_FIXES
+			if (ms->vbtick)
+#endif
 			DoToneSlide();
 			XMC->ownper=1;
 			break;
@@ -1172,11 +1187,19 @@ int lo;
 			break;
 
 		case XMEF_PORT_VOLSLD:	/* 5 */
+#ifndef XMPLAY_ENABLE_FIXES
 			XMC->kick=0;
+#endif
+#ifdef XMPLAY_ENABLE_FIXES
+			if (ms->vbtick)
+#endif
 			DoToneSlide();
 			if (dat==0)
 				dat=XMC->oldvslide;
 			XMC->oldvslide=dat;
+#ifdef XMPLAY_ENABLE_FIXES
+			if (ms->vbtick)
+#endif
 			DoVolSlide(dat);
 			XMC->ownper=1;
 			break;
@@ -1186,6 +1209,9 @@ int lo;
 			if (dat==0)
 				dat=XMC->oldvslide;
 			XMC->oldvslide=dat;
+#ifdef XMPLAY_ENABLE_FIXES
+			if (ms->vbtick)
+#endif
 			DoVolSlide(dat);
 			XMC->ownper=1;
 			break;
@@ -1364,7 +1390,7 @@ void DoEEffects(u_char dat)
 
 	case XMEF_E_VIB_WAVE:			/* 4 Set vibrato waveform */
 		XMC->wavecontrol &= 0xf0;
-		XMC->wavecontrol |= nib;
+		XMC->wavecontrol |= nib; /* TODO: nib&0x7 */
 		break;
 
 	case XMEF_E_FINETUNE:			/* 5 Set finetune */
@@ -1936,14 +1962,20 @@ int dist;
         else
 #endif
 		XMC->period-=XMC->portspeed;        /* then slide up */
+#ifdef XMPLAY_ENABLE_FIXES
+        if (XMC->period < XMC->wantedperiod) XMC->period = XMC->wantedperiod;
+#endif
 	}
 	else
 #ifdef XMPLAY_ENABLE_FIXES
     {
+        // TODO: "Reaching portamento target from below forces subsequent portamentos on the same note
+        // to use the logic for reaching the note from above instead." (???)
         if ((int)XMC->period + XMC->portspeed > 0xFFFF)
             XMC->period = 0xFFFF;
         else
             XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
+        if (XMC->period > XMC->wantedperiod) XMC->period = XMC->wantedperiod;
     }
 #else
 		XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */

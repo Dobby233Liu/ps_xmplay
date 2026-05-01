@@ -113,8 +113,10 @@ typedef struct _XMCHANNEL {
 	u_char kick2;	   	/* if 1=sample has to be restarted */
 #endif
 	u_char sample;		/* which sample number (0-31) */
+#ifndef XMPLAY_ENABLE_FIXES
 	short handle;		/* which sample-handle */
 	u_int start;		/* The start byte index in the sample */
+#endif
 	u_char panning;		/* panning position */
 	u_char pansspd;		/* panslide speed */
 	u_char volume;		/* volume (0 - 64) to play the sample at */
@@ -131,6 +133,9 @@ typedef struct _XMCHANNEL {
 	u_short tmpperiod;	/* tmp period */
 	u_short wantedperiod;	/* period to slide to (with effect 3 or 5) */
 	u_short slidespeed;	/* */
+#ifdef XMPLAY_ENABLE_FIXES
+    u_short slidedownspeed;	/* */
+#endif
 	u_short portspeed;	/* noteslide speed (toneportamento) */
 	u_char s3mtremor;	/* s3m tremor (effect I) counter */
 	u_char s3mvolslide;	/* last used volslide */
