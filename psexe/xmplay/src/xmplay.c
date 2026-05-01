@@ -1074,7 +1074,7 @@ u_char dat=0;
 				{
 					case 1: // X1 - Extra Fine Portamento Up
         				if (nib == 0)
-       					nib = XMC->oldfslidex;
+           					nib = XMC->oldfslidex;
         				XMC->oldfslidex = nib;
                         break;
                     case 2: // X2 - Extra Fine Portamento Down
