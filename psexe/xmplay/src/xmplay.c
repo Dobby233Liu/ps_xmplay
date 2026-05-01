@@ -310,7 +310,10 @@ u_short JPGetPeriod(u_char note, short fine)
 #endif
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	return ((120 - note) << 6) - (fine / 2) + 64;
+	int per = ((120 - note) << 6) - (fine / 2) + 64;
+	if (per < 0) per = 0;
+	if (per > 0xFFFF) per = 0xFFFF;
+	return (u_short)per;
 #else
 	return((10L * 12 * 16 * 4) - ((u_short)note * 16 * 4) - (fine / 2) + 64);
 #endif
@@ -1077,11 +1080,13 @@ u_char dat=0;
 				switch(hi)
 				{
 					case 1: // X1 - Extra Fine Portamento Up
-						XMC->tmpperiod -= nib;
+    					if ((int)XMC->tmpperiod - nib < 0)
+    						XMC->tmpperiod = 0;
+    					else
+    						XMC->tmpperiod -= nib;
 						break;
 					case 2: // X2 - Extra Fine Portamento Down
-						u_int anti_overflow_hack = XMC->tmpperiod + nib;
-						if (anti_overflow_hack > 0xFFFF)
+						if ((int)XMC->tmpperiod + nib > 0xFFFF)
 							XMC->tmpperiod = 0xFFFF;
 						else
 							XMC->tmpperiod += nib;
@@ -1131,6 +1136,11 @@ int lo;
 				XMC->slidespeed=((u_short)(dat))<<2;
 			if(ms->vbtick)
 			{
+#ifdef XMPLAY_ENABLE_FIXES
+                if((int)XMC->tmpperiod - XMC->slidespeed < 0)
+                    XMC->tmpperiod = 0;
+                else
+#endif
 				XMC->tmpperiod-=XMC->slidespeed;
 			}
 			break;
@@ -1140,6 +1150,11 @@ int lo;
 				XMC->slidespeed=(u_short)(dat)<<2;
 			if(ms->vbtick)
 			{
+#ifdef XMPLAY_ENABLE_FIXES
+                if((int)XMC->tmpperiod + XMC->slidespeed > 0xFFFF)
+                    XMC->tmpperiod = 0xFFFF;
+                else
+#endif
 				XMC->tmpperiod+=XMC->slidespeed;
 			}
 			break;
@@ -1291,6 +1306,9 @@ See: OpenMPT CSoundFile::ExtendedMODCommands
 void DoEEffects(u_char dat)
 {
 	u_char nib;
+#ifdef XMPLAY_ENABLE_FIXES
+	u_short ofs;
+#endif
 
 	nib = dat & 0xf;
 
@@ -1312,7 +1330,11 @@ void DoEEffects(u_char dat)
 			break;
 #endif
 #ifdef XMPLAY_ENABLE_FIXES
-		XMC->tmpperiod -= (nib << 2);
+        ofs = nib << 2;
+        if((int)XMC->tmpperiod - ofs < 0)
+            XMC->tmpperiod = 0;
+        else
+            XMC->tmpperiod -= ofs;
 #else
 		XMC->tmpperiod += (nib << 2);
 #endif
@@ -1331,11 +1353,11 @@ void DoEEffects(u_char dat)
 			break;
 #endif
 #ifdef XMPLAY_ENABLE_FIXES
-		u_int anti_overflow_hack = XMC->tmpperiod + (nib << 2);
-		if (anti_overflow_hack > 0xFFFF)
+        ofs = nib << 2;
+		if ((int)XMC->tmpperiod + ofs > 0xFFFF)
 			XMC->tmpperiod = 0xFFFF;
 		else
-			XMC->tmpperiod += (nib << 2);
+			XMC->tmpperiod += ofs;
 #else
 		XMC->tmpperiod -= (nib << 2);
 #endif
@@ -1922,10 +1944,27 @@ u_short temp=0;
 	temp>>=7;
 	temp<<=2;
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if(XMC->vibpos<128)
+    {
+        if ((int)XMC->tmpperiod+temp > 0xFFFF)
+    		XMC->period = 0xFFFF;
+        else
+    		XMC->period=XMC->tmpperiod+temp;
+    }
+    else
+    {
+        if ((int)XMC->tmpperiod-temp < 0)
+    		XMC->period = 0;
+        else
+           	XMC->period=XMC->tmpperiod-temp;
+    }
+#else
 	if(XMC->vibpos<128)
 		XMC->period=XMC->tmpperiod+temp;
 	else
 		XMC->period=XMC->tmpperiod-temp;
+#endif
 
 	if(ms->vbtick) XMC->vibpos+=XMC->vibspd;        /* do not update when vbtick==0 */
 }
@@ -2496,10 +2535,17 @@ void ApplyEffs(void)
  			{											/* If channel not dead */
  				ms->XMActiveVoices++;
 
+#if 0
+				if(XMC->period<0)					/* Cap period */
+					XMC->period=0;
+                else if(XMC->period>0xffff)
+					XMC->period=0xffff;
+#else
 				if(XMC->period<1)					/* Cap period */
 					XMC->period=1;
 				else if(XMC->period>32768)
 					XMC->period=32768;
+#endif
 
 				if(XMC->envflg & EF_ON)
 					envvol=ProcessEnvelope(256,XMC->keyon,XMC->sample);
@@ -2871,9 +2917,16 @@ int GetFreq2(int period)
 	int frequency;
 
 	period = JPPer - period;
+#ifdef XMPLAY_ENABLE_FIXES
+	if (period < 0) period = 0;
+#endif
 	okt = period / 768;
 	frequency = lintab[period % 768];
 
+#ifdef XMPLAY_ENABLE_FIXES
+    if (okt > joc)
+        return frequency << (okt - joc);
+#endif
 	return(frequency >> (joc - okt));		/* Final SPU pitch */
 }
 
