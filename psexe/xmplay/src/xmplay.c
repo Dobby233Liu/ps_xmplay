@@ -2651,9 +2651,9 @@ int EmptyChkStart = 0;
 // [D] [T]
 int GetEmpty(int old)
 {
-	unsigned char new;
+    int i;
 	XMCHANNEL *chnl;
-	int i;
+	unsigned char new;
 
 	EmptyChkStart++;
 	if (mh->XMPSXChannels <= EmptyChkStart)
