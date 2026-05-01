@@ -83,13 +83,13 @@ short XMSongIDs[XM_MAX_SONG_COUNT] = {
     -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1
-};
+}; // 0 = allocated
 
 short XMSPU_SFX[XM_SPU_CH_COUNT] = {
     -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1
-};   // SPU channel -> ID of song occupying it
+};   // SPU channel -> ID of song occupying it (+1)
 
 /*****************************************************************************
 LINEAR FREQUENCY TABLE used to calculate final SPU pitch
