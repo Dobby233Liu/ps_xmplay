@@ -2617,6 +2617,28 @@ void DoDolbySS(void)
 
 }
 
+#ifdef XMPLAY_ENABLE_FIXES
+// idk we use C99
+int GetEmpty(int old)
+{
+    static int start = 0;
+
+    for (int i = 0; i < mh->XMPSXChannels; i++)
+    {
+        int chnlNo = (start + i) % mh->XMPSXChannels;
+        XMCHANNEL *chnl = &ms->XM_Chnl[chnlNo];
+        if (chnl->kick == 0 && chnl->ChDead == 1)
+        {
+            int new = chnl->SPUChannel;
+            chnl->SPUChannel = old;
+            start = (chnlNo + 1) % mh->XMPSXChannels;
+            return new;
+        }
+    }
+
+    return -1;
+}
+#else
 int dd = 0;
 int de = 0;
 
@@ -2650,6 +2672,7 @@ int GetEmpty(int old)
 
 	return -1;
 }
+#endif
 
 /*****************************************************************************
 UpdateHardware
