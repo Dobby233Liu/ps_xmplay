@@ -73,7 +73,8 @@ Other known issues include:
   If you enable XMPLAY_ENABLE_FIXES, there will be a mitigation.
 - As Jason Page said in the readme of the PS2 version, samples with a very short
   looping period will be detuned. He said this is related to the ADPCM format,
-  but I think it may just be because of the SPU pitch cap? Not sure personally.
+  I think it's also related to the SPU pitch cap. Upsample and bake in repeats in
+  your samples if necessary.
 - E1/E2 works incorrectly. If you use the REDriver2 lib, you can manually enable
   XMPLAY_ENABLE_FIXES in xmplay.c to fix it, which also enables support for the
   finer portamento adjusting commands.
