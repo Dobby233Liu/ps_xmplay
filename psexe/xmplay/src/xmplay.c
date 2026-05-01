@@ -2618,20 +2618,26 @@ void DoDolbySS(void)
 }
 
 #ifdef XMPLAY_ENABLE_FIXES
-// idk we use C99
 int GetEmpty(int old)
 {
     static int start = 0;
+    int cursor;
+    int i;
+	XMCHANNEL *chnl;
+	unsigned char new;
 
-    for (int i = 0; i < mh->XMPSXChannels; i++)
+    for (i = 0; i < mh->XMPSXChannels; i++)
     {
-        int chnlNo = (start + i) % mh->XMPSXChannels;
-        XMCHANNEL *chnl = &ms->XM_Chnl[chnlNo];
+        cursor = (start + i) % mh->XMPSXChannels;
+        chnl = &ms->XM_Chnl[cursor];
+
         if (chnl->kick == 0 && chnl->ChDead == 1)
         {
-            int new = chnl->SPUChannel;
+            new = chnl->SPUChannel;
             chnl->SPUChannel = old;
-            start = (chnlNo + 1) % mh->XMPSXChannels;
+
+            start = (cursor + 1) % mh->XMPSXChannels;
+
             return new;
         }
     }
@@ -2639,34 +2645,34 @@ int GetEmpty(int old)
     return -1;
 }
 #else
-int dd = 0;
-int de = 0;
+int EmptyChkCursor = 0;
+int EmptyChkStart = 0;
 
 // [D] [T]
 int GetEmpty(int old)
 {
-	unsigned char bVar1;
-	XMCHANNEL *j;
+	unsigned char new;
+	XMCHANNEL *chnl;
 	int i;
 
-	de++;
-	if (mh->XMPSXChannels <= de)
-		de = 0;
+	EmptyChkStart++;
+	if (mh->XMPSXChannels <= EmptyChkStart)
+		EmptyChkStart = 0;
 
-	dd = de;
+	EmptyChkCursor = EmptyChkStart;
 	for (i = 0; i < mh->XMPSXChannels; i++)
 	{
-		j = ms->XM_Chnl + dd;
+		chnl = ms->XM_Chnl + EmptyChkCursor;
 
-		dd++;
-		if (mh->XMPSXChannels <= dd)
-			dd = 0;
+		EmptyChkCursor++;
+		if (mh->XMPSXChannels <= EmptyChkCursor)
+			EmptyChkCursor = 0;
 
-		if (j->kick == 0 && j->ChDead == 1)
+		if (chnl->kick == 0 && chnl->ChDead == 1)
 		{
-			bVar1 = j->SPUChannel;
-			j->SPUChannel = old;
-			return bVar1;
+			new = chnl->SPUChannel;
+			chnl->SPUChannel = old;
+			return new;
 		}
 	}
 
