@@ -100,7 +100,7 @@ typedef struct _XMCHANNEL {
 	u_char keyon;		/* if 1=key is pressed. */
 	u_char kick;	   	/* if 1=sample has to be restarted */
 #ifdef XMPLAY_ENABLE_FIXES
-    u_char notedly;
+    u_char notedly;     /* 1=note delay in effect */
 #else
 	u_char kick2;	   	/* if 1=sample has to be restarted */
 #endif
