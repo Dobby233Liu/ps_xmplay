@@ -4,7 +4,7 @@ from os import path
 
 import libopenmpt
 
-SONGDATA_DIR = "nascarheat"
+SONGDATA_DIR = "test2"
 
 
 def main():

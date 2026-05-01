@@ -32,6 +32,16 @@ def main():
     outdir = f"out/{SONGDATA_DIR}"
     os.makedirs(outdir, exist_ok=True)
 
+    with open(f"{outdir}/!PSFDRV_LICENSES.txt", "w") as f:
+        for sw_name, license_fp in LICENSES:
+            if license_fp is None:
+                continue
+            print(sw_name, file=f)
+            print("-" * 80, file=f)
+            with open(license_fp, "r") as f2:
+                print(f2.read().strip(), file=f)
+            print(file=f)
+
     xm_ref_count: dict[str, int] = {}
     for song_name, info in index.items():
         xm_ref_count[info["xm"]] = xm_ref_count.get(info["xm"], 0) + 1
@@ -119,16 +129,6 @@ def main():
             psf1.tags["psfby"] = "ps_xmplay psfgen"
             # psf1.tags["origfilename"] = song_name
             psf1.write(outf, use_zopfli=USE_ZOPFLI)
-
-    with open(f"{outdir}/!PSFDRV_LICENSES.txt", "w") as f:
-        for sw_name, license_fp in LICENSES:
-            if license_fp is None:
-                continue
-            print(sw_name, file=f)
-            print("-" * 80, file=f)
-            with open(license_fp, "r") as f2:
-                print(f2.read().strip(), file=f)
-            print(file=f)
 
 
 if __name__ == "__main__":

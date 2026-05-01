@@ -41,8 +41,10 @@ int BPMLimit;
 int PALType;
 #endif
 
+#ifndef XMPLAY_ENABLE_FIXES
 int XM_SCAN = 0;
 int JPError = 0;
+#endif
 
 char MonoMode = XM_STEREO;
 
@@ -1688,8 +1690,13 @@ void DoVolSlide(u_char dat)
 	if (!ms->vbtick) return;				 /* do not update when vbtick==0 */
 
 	XMC->tmpvolume += dat >> 4;           /* volume slide */
+#ifndef XMPLAY_ENABLE_FIXES
 	if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
+#endif
 	XMC->tmpvolume -= dat & 0xf;
+#ifdef XMPLAY_ENABLE_FIXES
+    if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
+#endif
 	if (XMC->tmpvolume < 64) XMC->tmpvolume = 64;
 }
 
@@ -1817,8 +1824,10 @@ void DoS3MRetrig(u_char inf)
 
 					case 7:
 						XMC->tmpvolume=XMC->tmpvolume>>1;
+#ifndef XMPLAY_ENABLE_FIXES
 						if (XMC->tmpvolume<64)
 							XMC->tmpvolume=64;
+#endif
 						break;
 
 					case 9:
@@ -3540,7 +3549,7 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->SongSpeed = ms->SongSpeed;
 	Feedback->SongLength = mhu->songlength;
 	Feedback->SongLoop = ms->SongLoop;
-	Feedback->Volume = (short)(ms->SongVolume*ms->MasterVolume)/128;
+	Feedback->Volume = (ms->SongVolume*ms->MasterVolume-64)*2;
 	Feedback->Panning = ms->UserPan;
 	Feedback->ActiveVoices = ms->XMActiveVoices;
 	Feedback->PlayNext = ms->PlayNext;
