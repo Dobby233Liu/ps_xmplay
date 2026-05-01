@@ -1373,7 +1373,8 @@ void DoEEffects(u_char dat)
 		if (ms->vbtick)
 			break;
 		XMC->transpose = (nib - 8) << 4;
-		u_short note = XMC->note + XMC->transpose;
+		short note = XMC->note + XMC->transpose;
+		if (note < 0) note = 0;
 		if (note > 0xFF) note = 0xFF;
 		XMC->period = GetPeriod(note, XMC->c2spd);
 		XMC->ownper = 1;
@@ -1624,7 +1625,7 @@ void SetPer(void)
 	u_int *j;
 	u_short period;
 #ifdef XMPLAY_ENABLE_FIXES
-    u_short a;
+    short a;
 #else
 	u_char a;
 #endif
@@ -1634,6 +1635,7 @@ void SetPer(void)
 	a = XMC->note;
 	a += XMC->transpose;
 #ifdef XMPLAY_ENABLE_FIXES
+    if (a < 0) a = 0;
     if (a > 0xFF) a = 0xFF;
     period = GetPeriod(a, XMC->c2spd);
 #else
@@ -1699,7 +1701,7 @@ Arpeggio
 void Arpeggio(u_char dat)
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	u_short note;
+	short note;
 #else
 	u_char note;
 #endif
@@ -1719,6 +1721,7 @@ void Arpeggio(u_char dat)
 		}
 #ifdef XMPLAY_ENABLE_FIXES
         note += XMC->transpose;
+        if (note < 0) note = 0;
         if (note > 0xFF) note = 0xFF;
         XMC->period = GetPeriod(note, XMC->c2spd);
 #else
