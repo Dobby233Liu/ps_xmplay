@@ -2907,9 +2907,8 @@ GetFreq2
 *****************************************************************************/
 
 #define joc 8
-//int JPPer = 6578;	//6578  Driver 1 has this value, breaking the game's soundtrack
 
-int JPPer = 7350;	//6578
+int JPPer = 7350;	//6578   Driver 1 has this value, breaking the game's soundtrack
 
 int GetFreq2(int period)
 {
