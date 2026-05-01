@@ -2622,7 +2622,7 @@ void DoDolbySS(void)
 int GetEmpty(int old)
 {
     static int start = 0;
-    static int cursor;
+    int cursor;
 
     const unsigned short channels = mh->XMPSXChannels;
     int i;
