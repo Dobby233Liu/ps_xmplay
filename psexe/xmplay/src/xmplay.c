@@ -2621,7 +2621,8 @@ void DoDolbySS(void)
 #ifdef XMPLAY_ENABLE_FIXES
 int GetEmpty(int old)
 {
-    static int cursor = 0;
+    static int start = 0;
+    static int cursor;
 
     const unsigned short channels = mh->XMPSXChannels;
     int i;
@@ -2630,15 +2631,17 @@ int GetEmpty(int old)
 
     for (i = 0; i < channels; i++)
     {
+        cursor = (start + i) % channels;
+
         chnl = &ms->XM_Chnl[cursor];
         if (chnl->ChDead && !chnl->kick)
         {
+            start = (cursor + 1) % channels;
+
             new = chnl->SPUChannel;
             chnl->SPUChannel = old;
             return new;
         }
-
-        cursor = (cursor + 1) % channels;
     }
 
     return -1;
