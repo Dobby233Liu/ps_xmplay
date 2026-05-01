@@ -203,7 +203,6 @@ void main() {
     // FIXME: free self-allocated vab resources
 #if !defined(XMPLAY_VARIANT_REDRIVER2)
     // Calling XM_Exit is not enough to make sure all channels are keyed off
-    // TODO: check if PlayStop does this
     SpuSetKey(SPU_OFF, SPU_ALLCH);
 #endif
 #ifdef REVERB_TEST
