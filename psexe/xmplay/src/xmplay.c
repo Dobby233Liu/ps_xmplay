@@ -1600,6 +1600,9 @@ void SetInstr(u_char inst)
 	XMC->volume = j2 + 64;
 	XMC->vol = j2 + 0x10;
 	XMC->retrig = 0;
+#ifdef XMPLAY_ENABLE_FIXES
+	XMC->notedly = 0;
+#endif
 
 	if (mh->S3MPanning == XM_UseXMPanning)
 		XMC->panning = *((u_char*)j + 15);
