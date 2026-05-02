@@ -42,7 +42,9 @@ typedef struct _XMHEADER {
 	u_short version;
 	u_short songlength;               /* (word) Song length (in patten order table) */
 	u_short restart;                  /* (word) Restart position */
+#ifndef XMPLAY_ENABLE_FIXES
 	u_short numchn;                   /* (word) Number of channels (2,4,6,8,10,...,32) */
+#endif
 	u_short numpat;                   /* (word) Number of patterns (max 256) */
 	u_short numins;                   /* (word) Number of instruments (max 128) */
 	u_short flags;                    /* (word) Flags: bit 0: 0 = Amiga freq */
@@ -53,7 +55,9 @@ typedef struct _XMHEADER {
 	u_int *JAP_PAT_ADDR[256];     /* Pattern Start Addresses (maxpatt*chnls)*/
 	u_int *JAP_PAT_ADDR2[256];     /* Pattern Start Addresses (maxpatt*chnls)*/
 	u_int *JAP_InstrumentOffset[128];
+#ifndef XMPLAY_ENABLE_FIXES
 	u_int *JAP_SampAddr[128];
+#endif
 	u_int *JAP_SampHdrAddr[128];
 	u_char jorders[256];		/* list of patterns */
 	int	  S3MPanning;
@@ -61,14 +65,18 @@ typedef struct _XMHEADER {
 
 
 typedef struct _XMCHANNEL {
+#ifndef XMPLAY_ENABLE_FIXES
 	u_short Octave;
+#endif
 	short LVol;
 	short RVol;
 	short OldLVol;
 	short OldRVol;
 	u_short OldPeriod;
 	u_char OldSample;
+#ifndef XMPLAY_ENABLE_FIXES
 	u_int OldSOff;
+#endif
 	u_int SOffset;
 	u_char nothing;
 	u_char ChDead;
@@ -93,7 +101,9 @@ typedef struct _XMCHANNEL {
 	u_char ins;
 	u_char vol;
 	u_char dat;
+#ifndef XMPLAY_ENABLE_FIXES
 	u_char datold;
+#endif
 	u_char eff;
 #ifndef XMPLAY_ENABLE_FIXES
 	u_char not_;
@@ -139,8 +149,10 @@ typedef struct _XMCHANNEL {
     u_short slidedownspeed;	/* */
 #endif
 	u_short portspeed;	/* noteslide speed (toneportamento) */
+#ifndef XMPLAY_ENABLE_FIXES
 	u_char s3mtremor;	/* s3m tremor (effect I) counter */
 	u_char s3mvolslide;	/* last used volslide */
+#endif
 	u_char s3mrtgspeed;	/* last used retrig speed */
 	u_char s3mrtgslide;	/* last used retrig slide */
 	u_char glissando;	/* glissando (0 means off) */
@@ -169,6 +181,9 @@ typedef struct _XMSONG {
 	u_char  patdly2;          /* patterndelay counter */
 	u_short numrow;           /* number of rows on current pattern */
 	short   posjmp;           /* flag to indicate a position jump is needed*/
+#ifdef XMPLAY_ENABLE_FIXES
+	u_char	oldgvslide;
+#endif
 	u_short PatternPos;       /* current row number (0-255) */
 	short   SongPos;          /* current song position */
 	u_short CurrentPattern;
@@ -177,9 +192,6 @@ typedef struct _XMSONG {
 	int	  SongLoop;         /* loop module ? */
 	u_char  SongVolume;	     /* song volume (0-128) */
 	u_char  MasterVolume;	     /* song volume (0-128) */
-#ifdef XMPLAY_ENABLE_FIXES
-	u_char	oldgvslide;
-#endif
 	int	  XMActiveVoices;	  /* number of voices currently playing */
 	int	  NotAmiga;
 	u_char  XMPlay;

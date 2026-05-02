@@ -2,13 +2,18 @@
 
 extern int JPPer;
 
+#if !(defined(XMPLAY_VARIANT_REDRIVER2) && defined(XMPLAY_ENABLE_FIXES))
 extern int XMTime1;
+#endif
+#ifndef XMPLAY_VARIANT_REDRIVER2
 extern int XMTime2;
 extern int XMTime3;
+#endif
 
-// dobby: Added in SBSPSS version
+#ifdef XMPLAY_VARIANT_SBSPSS
 #define XM_PROCESSING 0
 #define XM_NOT_PROCESSED 1
+#endif
 
 #define XM_NTSC 0				/* Machine type */
 #define XM_PAL 1
@@ -26,8 +31,10 @@ extern int XMTime3;
 #define XM_PLAYING 1
 #define XM_PAUSED  2
 
+#if !(defined(XMPLAY_VARIANT_REDRIVER2) && defined(XMPLAY_ENABLE_FIXES))
 extern int XM_SCAN;			/* Scan lines used */
 extern int JPError;			/* Test */
+#endif
 
 
 typedef struct XM_HeaderInfo
@@ -67,7 +74,9 @@ void XM_PlayStop(int Song_ID);
 void XM_PlayStart(int Song_ID,int PlayMask);
 void XM_SetSongPos(int Song_ID,unsigned short pos);
 int InitXMData(unsigned char *mpp,int XM_ID,int S3MPan);
+#ifndef XMPLAY_VARIANT_REDRIVER2 // vab management not present
 int XM_VABInit(unsigned char* VHData,unsigned char* VBData);
+#endif
 void XM_OnceOffInit(int PAL);
 // dobby: Return type was labeled as void in the Psy-Q SDK 4.6 version
 int XM_GetFeedback(int Song_ID,XM_Feedback* Feedback);
@@ -81,22 +90,30 @@ void XM_CPlayNext(int Song_ID,short SongPos);
 void XM_CloseVAB(int VabID);
 void XM_SetMasterPan(int Song_ID,short Pan);
 void XM_SetMasterVol(int Song_ID,unsigned char Vol);
+#ifndef XMPLAY_VARIANT_REDRIVER2 // vab management not present
 int XM_SendVAGToSRAM(unsigned char *addr,int size);
 int XM_SendVAGToSRAM_NoWait(unsigned char *addr,int size);
+#endif
 void XM_FreeVAG(int addr);
 void UpdateWithTimer(int SC);
 void XM_DoFullUpdate(int SC);
 
 void XM_Quit(int SongID);
+#ifndef XMPLAY_VARIANT_REDRIVER2 // support not present
 int XM_SetSFXRange(int FirstCh,int Amount);
 void XM_ClearSFXRange(void);
+#endif
 
 void XM_StopSample(int channel);
+#ifndef XMPLAY_VARIANT_REDRIVER2 // vab management not present
 void XM_PlaySample(int addr,int channel,int voll,int volr,int pitch);
 int XM_GetSampleAddress(int vabid,int samplenum);
+#endif
 int XM_GetFreeVAB(void);
 void XM_SetVAGAddress(int VabID,int slot,int addr);
+#ifndef XMPLAY_VARIANT_REDRIVER2 // TODO?
 int XM_GetVABSampleInfo(XM_VABInfo *VInfo,unsigned char *Header,unsigned char *Body,int slot);
+#endif
 void XM_CloseVAB2(int VabID);
 void XM_PauseAll(void);
 void XM_RestartAll(void);

@@ -8,7 +8,9 @@
 #define XM_STOPPED 0			/* Song/SFX Status */
 #define XM_PLAYING 1
 #define XM_PAUSED  2
+#ifndef XMPLAY_ENABLE_FIXES
 #define XM_NO_SONG_ALLOCATED 3
 #define XM_NOT_INIT 4
+#endif
 
 #endif

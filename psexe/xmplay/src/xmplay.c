@@ -322,8 +322,10 @@ GetPeriod
 
 u_short GetPeriod(u_char note, u_short c2spd)
 {
+#ifndef XMPLAY_ENABLE_FIXES
 	int a;
 	a = mh->flags;
+#endif
 	if (ms->NotAmiga == 1)
 		return (JPGetPeriod(note, c2spd));		// Linear Freq table
 	else
@@ -528,13 +530,17 @@ int InitXMData(u_char *mpp, int XM_ID, int S3MPan)
 		b2 = getWord(mpp + a + 27);
 		if (b2 != 0)
 		{
+#ifndef XMPLAY_ENABLE_FIXES
 			mhu->JAP_SampAddr[t] = (u_int*)(mpp + 29 + a);
+#endif
 			mhu->JAP_SampHdrAddr[t] = (u_int*)(mpp + b + a);
 			b += (40 * b2);
 		}
 		else
 		{
+#ifndef XMPLAY_ENABLE_FIXES
 			mhu->JAP_SampAddr[t] = (u_int*)0xcdcdcdcd;	//(u_int *)(mpp+29+a);
+#endif
 			mhu->JAP_SampHdrAddr[t] = (u_int*)0x01234567;	//(u_int *)(mpp+b+a);
 		}
 		mhu->JAP_InstrumentOffset[t] = (u_int*)(mpp + a);		/* Store Instrument Addr's*/
@@ -2392,6 +2398,7 @@ void UpdatePatternData(int SC)
 				if (!ms->SongLoop)
 				{
 					ms->XMPlay = XM_STOPPED;			/* Once off tune */
+					// XM_PlayStop(SC);
 					return;
 				}
 				ms->SongPos = ms->reppos;				/* Loop to loop point */
@@ -2404,10 +2411,19 @@ void UpdatePatternData(int SC)
 				SP = ms->SFXNum;							/* Pattern from user SFX */
 
 			ms->CurrentPattern = SP;
+#ifndef XMPLAY_ENABLE_FIXES
 			ms->PatAdr = mh->JAP_PAT_ADDR[SP];		/* Addr of pat header */
+#else
+            u_int *PatAdr = mh->JAP_PAT_ADDR[SP];		/* Addr of pat header */
+#endif
 			ms->PatAdr2 = mh->JAP_PAT_ADDR2[SP];	/* Addr of pat data */
+#ifndef XMPLAY_ENABLE_FIXES
 			ms->numrow = getWord((u_char*)ms->PatAdr + 5);	/* Number of rows */
 			ms->PatSize = getWord((u_char*)ms->PatAdr + 7);	/* pattern size */
+#else
+			ms->numrow = getWord((u_char*)PatAdr + 5);	/* Number of rows */
+			ms->PatSize = getWord((u_char*)PatAdr + 7);	/* pattern size */
+#endif
 		}
 		if (!ms->patdly2)
 		{
@@ -2889,7 +2905,9 @@ void UpdateHardware(void)
 	}
 	if (SPUKeyOn!=0)
 	{
+#ifndef XMPLAY_ENABLE_FIXES
 		//XMTime1 = 1;
+#endif
 		SpuSetKey(1, SPUKeyOn);
 #ifdef XMPLAY_ENABLE_FIXES
         if (!catching_up)
@@ -3386,7 +3404,7 @@ void SilenceXM(int Song_ID)
 
 #ifdef XMPLAY_ENABLE_FIXES
 	// Prevent repeated calls to this function causing bogus keyoff calls
-	// If PlayStart is called this would be set correctly
+	// This will be set correctly with PlayStart
 	mu->PlayMask = 0;
 #endif
 }
@@ -3644,6 +3662,7 @@ void XM_SetFileHeaderAddress(u_char *Address)
 
 
 // The following functions are mentioned in calls.txt, but OpenDriver2 doesn't have them implemented
+// (although some of them exist in the PS2 version)
 // They were added for completeness
 
 void XM_FreeSongID(void)
@@ -3655,7 +3674,7 @@ void XM_FreeSongID(void)
 	XM_NSA--;
 }
 
-void XM_FreeFileHeaderID()
+void XM_FreeFileHeaderID(void)
 {
 	if (XM_HA == 0) // after freeing 0 there is no more to free
 		return;
@@ -3676,11 +3695,12 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 {
 	if (Feedback == 0 || (SongID < 0 || SongID >= XM_NSA))
 		return 0;
-    if (XMSongIDs[SongID] == -1)
-        return 0;
-
+    if (XMSongIDs[SongID] == -1) return 0;
+    if (!XM_SngAddress[SongID]) return 0;
 	mu = XM_SngAddress[SongID];
+	if (!XM_HeaderAddress[mu->HeaderNum]) return 0;
 	mhu = XM_HeaderAddress[mu->HeaderNum];
+
 	Feedback->Status = mu->XMPlay;
 	Feedback->SongPos = mu->SongPos;
 	Feedback->PatternPos = mu->PatternPos;
@@ -3688,13 +3708,35 @@ int XM_GetFeedback(int SongID, XM_Feedback *Feedback)
 	Feedback->SongSpeed = mu->SongSpeed;
 	Feedback->SongLength = mhu->songlength;
 	Feedback->SongLoop = mu->SongLoop;
-	Feedback->Volume = (mu->SongVolume*mu->MasterVolume-64)*2;
+	Feedback->Volume = mu->MasterVolume;
 	Feedback->Panning = mu->UserPan;
 	Feedback->ActiveVoices = mu->XMActiveVoices;
 	Feedback->PlayNext = mu->PlayNext;
 	Feedback->CurrentStart = mu->CurrentStart;
 	Feedback->CurrentPattern = mu->CurrentPattern;
 	return 1;
+}
+
+void XM_SetSpeed(int Song_ID, unsigned short Speed)
+{
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    mu->SongSpeed = Speed;
+}
+
+void XM_SetBPM(int Song_ID, unsigned short BPM)
+{
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    mu->SongBPM = BPM;
 }
 
 void XM_SetMono()
@@ -3705,4 +3747,100 @@ void XM_SetMono()
 void XM_SetStereo()
 {
     MonoMode = XM_STEREO;
+}
+
+void XM_SetMasterPan(int Song_ID, u_char Pan)
+{
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    mu->UserPan = Pan;
+}
+
+void XM_SetChVolume(int Song_ID, int Channel, short Volume)
+{
+    if (Channel < 0) return;
+
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    if (Channel >= XM_SPU_CH_COUNT) return;
+    XMCU = &mu->XM_Chnl[Channel];
+    XMCU->UserVol = Volume > 64 ? 64 : Volume;
+}
+
+// actually returns the user-set volume unlike the PS2 ver
+int XM_GetChVolume(int Song_ID, int Channel)
+{
+    if (Channel < 0) return -1;
+
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return -1;
+    if (XMSongIDs[Song_ID] == -1) return -1;
+    if (!XM_SngAddress[Song_ID]) return -1;
+    mu = XM_SngAddress[Song_ID];
+
+    if (Channel >= XM_SPU_CH_COUNT) return -1;
+    XMCU = &mu->XM_Chnl[Channel];
+    return XMCU->UserVol;
+}
+
+void XM_PlayNext(int Song_ID, short SongPos)
+{
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    mu->PlayNext = SongPos;
+}
+
+void XM_CPlayNext(int Song_ID, short SongPos)
+{
+    if (Song_ID < 0 || Song_ID >= XM_NSA)
+        return;
+    if (XMSongIDs[Song_ID] == -1) return;
+    if (!XM_SngAddress[Song_ID]) return;
+    mu = XM_SngAddress[Song_ID];
+
+    mu->BPlayNext = SongPos;
+}
+
+void XM_GetHeaderInfo(int XM_ID, XM_HeaderInfo* HeaderInfo)
+{
+    if (XM_ID < 0 || XM_ID >= XM_HA)
+        return;
+    if (!XM_HeaderAddress[XM_ID]) return;
+    mhu = XM_HeaderAddress[XM_ID];
+
+    HeaderInfo->BPM = mhu->bpm;
+    HeaderInfo->Speed = mhu->tempo;
+}
+
+void XM_PauseAll(void)
+{
+    int i;
+    for (i = 0; i < XM_NSA; ++i)
+        XM_Pause(i);
+}
+
+void XM_RestartAll(void)
+{
+    int i;
+    for (i = 0; i < XM_NSA; ++i)
+        XM_Restart(i);
+}
+
+void XM_StopSample(int channel)
+{
+    if (channel < 0 || channel >= XM_SPU_CH_COUNT) return;
+    // PS2 ver seems to do a direct keyoff, this is the closest thing to that
+    StpCh(channel);
 }
