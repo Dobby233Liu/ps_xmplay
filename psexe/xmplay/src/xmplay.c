@@ -1784,6 +1784,11 @@ void DoVolSlide(u_char dat)
 {
 	if (!ms->vbtick) return;				 /* do not update when vbtick==0 */
 
+#ifdef XMPLAY_ENABLE_FIXES
+    // nibble priority
+	dat &= (dat & 0xf0 != 0) ? 0xf0 : 0xf;
+#endif
+
 	XMC->tmpvolume += dat >> 4;           /* volume slide */
 #ifndef XMPLAY_ENABLE_FIXES
 	if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
@@ -1791,6 +1796,7 @@ void DoVolSlide(u_char dat)
 	XMC->tmpvolume -= dat & 0xf;
 #ifdef XMPLAY_ENABLE_FIXES
     if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
+    else
 #endif
 	if (XMC->tmpvolume < 64) XMC->tmpvolume = 64;
 }
