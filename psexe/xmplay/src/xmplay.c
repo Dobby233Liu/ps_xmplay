@@ -968,7 +968,7 @@ u_char dat=0;
 		case 0xa:
 #ifdef XMPLAY_ENABLE_FIXES
 			// OpenMPT: "FT2 does not automatically enable vibrato with the "set vibrato speed" command"
-            if(vol<<2&0xf) XMC->vibspd=vol<<2&0xf;
+            XMC->vibspd=((vol<<4)&0xf0)>>2;
 #else
 			SPE (XMEF_VIBRATO,vol<<4);					/* Set Vibrato speed */
 #endif
@@ -993,7 +993,14 @@ u_char dat=0;
 			break;
 
 		case 0xf:
+#ifdef XMPLAY_ENABLE_FIXES
+            // "If there is a Mx command in the volume column and a normal 3xx command,
+            // the 3xx command is ignored but the Mx command's effectiveness is doubled."
+            SPE(XMEF_TONEPORT,vol<<4<<(eff ? 1 : 0));
+            eff = 0;
+#else
 			SPE (XMEF_TONEPORT,vol<<4);					/* Portamento */
+#endif
 			break;
 
 		default:
@@ -1166,7 +1173,7 @@ int lo;
 		case XMEF_PORTDOWN:		/* 2 */
 			if(dat!=0)
 #ifdef XMPLAY_ENABLE_FIXES
-                XMC->slidedownspeed=(u_short)(dat)<<2;
+                XMC->slidedownspeed=((u_short)(dat))<<2;
 #else
 				XMC->slidespeed=(u_short)(dat)<<2;
 #endif
@@ -1185,7 +1192,12 @@ int lo;
 
 		case XMEF_TONEPORT:		/* 3 */
 			XMC->kick=0;
+#ifdef XMPLAY_ENABLE_FIXES
+            // "If there's a portamento and a note delay, [...] don't update the parameter"
+            if(dat!=0 && !XMC->notedly)
+#else
 			if(dat!=0)
+#endif
 			{
 				XMC->portspeed=dat;
 				XMC->portspeed<<=2;
@@ -1198,8 +1210,13 @@ int lo;
 			break;
 
 		case XMEF_VIBRATO:		/* 4 */
-			if(dat&0x0f) XMC->vibdepth=dat&0x0f;
-			if(dat&0xf0) XMC->vibspd=(dat&0xf0)>>2;
+			if(dat&0x0f) XMC->vibdepth=dat&0x0f; //<<2 to match mpt
+			if(dat&0xf0) XMC->vibspd=(dat&0xf0)>>2; //>>2 to match mpt
+#ifdef XMPLAY_ENABLE_FIXES
+            // "Vibrato should be advanced twice (but not added up) if both volume-column
+            // and effect column vibrato is present."
+            if(eff==0xb&&ms->vbtick) XMC->vibpos+=XMC->vibspd;
+#endif
 			DoVibrato();
 			XMC->ownper=1;
 			break;
@@ -1784,11 +1801,6 @@ void DoVolSlide(u_char dat)
 {
 	if (!ms->vbtick) return;				 /* do not update when vbtick==0 */
 
-#ifdef XMPLAY_ENABLE_FIXES
-    // nibble priority
-	dat &= (dat & 0xf0 != 0) ? 0xf0 : 0xf;
-#endif
-
 	XMC->tmpvolume += dat >> 4;           /* volume slide */
 #ifndef XMPLAY_ENABLE_FIXES
 	if (XMC->tmpvolume > 128) XMC->tmpvolume = 128;
@@ -1971,25 +1983,26 @@ int dist;
 
 	dist=XMC->period-XMC->wantedperiod;
 
+#ifdef XMPLAY_ENABLE_FIXES
+	if(dist==0)/* if they are equal */
+#else
 	if(dist==0 || XMC->portspeed>ABS(dist))/* if they are equal */
+#endif
 	{											      /* or if portamentospeed is too big */
 
 		XMC->period=XMC->wantedperiod;      /* make tmpperiod equal tperiod */
 	}
-	else if(dist>0)
-	{		                                 /* dist>0 ? */
-#ifdef XMPLAY_ENABLE_FIXES
-        if ((int)XMC->period - XMC->portspeed < 0)
-            XMC->period = 0;
-        else
-#endif
-		XMC->period-=XMC->portspeed;        /* then slide up */
-#ifdef XMPLAY_ENABLE_FIXES
-        if (XMC->period < XMC->wantedperiod) XMC->period = XMC->wantedperiod;
-#endif
-	}
 	else
 #ifdef XMPLAY_ENABLE_FIXES
+    if(dist>0)
+	{		                                 /* dist>0 ? */
+       if ((int)XMC->period - XMC->portspeed < 1)
+           XMC->period = 1;
+       else
+		XMC->period-=XMC->portspeed;        /* then slide up */
+       if (XMC->period < XMC->wantedperiod) XMC->period = XMC->wantedperiod;
+	}
+    else
     {
         // TODO: "Reaching portamento target from below forces subsequent portamentos on the same note
         // to use the logic for reaching the note from above instead." (???)
@@ -2000,6 +2013,11 @@ int dist;
         if (XMC->period > XMC->wantedperiod) XMC->period = XMC->wantedperiod;
     }
 #else
+    if(dist>0)
+	{		                                 /* dist>0 ? */
+		XMC->period-=XMC->portspeed;        /* then slide up */
+	}
+    else
 		XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
 #endif
 
@@ -2024,14 +2042,23 @@ u_short temp=0;
 	{
 
 		case 0: /* sine */
+#ifdef XMPLAY_ENABLE_FIXES
+        default:
+#endif
 			temp=VibratoTable[q];
 			break;
 
 		case 1: /* ramp down */
+#ifdef XMPLAY_ENABLE_FIXES
+            temp = ((XMC->vibpos>127 ? 255 : 0) - (q<<2)) << 1;
+            // "Vibrato ramp down table is upside down."
+            temp = -temp;
+#else
 			q<<=3;
 			if(XMC->vibpos>127)
 				q=255-q;
 			temp=q;
+#endif
 			break;
 
 		case 2: /* square wave */
@@ -2044,7 +2071,7 @@ u_short temp=0;
 	temp<<=2;
 
 #ifdef XMPLAY_ENABLE_FIXES
-    if(XMC->vibpos<128)
+    if(XMC->vibpos<=127)
     {
         if ((int)XMC->tmpperiod+temp > 0xFFFF)
     		XMC->period = 0xFFFF;
@@ -2645,8 +2672,8 @@ void ApplyEffs(void)
  				ms->XMActiveVoices++;
 
 #ifdef XMPLAY_ENABLE_FIXES
-				if(XMC->period<0)					/* Cap period */
-					XMC->period=0;
+				if(XMC->period<1)					/* Cap period */
+					XMC->period=1;
                 else if(XMC->period>0xffff)
 					XMC->period=0xffff;
 #else
