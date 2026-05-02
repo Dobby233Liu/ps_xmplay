@@ -304,7 +304,7 @@ u_short JPGetPeriod(u_char note, short fine)
 #endif
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	return ((120 - note) << 6) - (fine / 2) + 64;
+	return ((u_short)(120 - note) << 6) - (fine / 2) + 64;
 #else
 	return((10L * 12 * 16 * 4) - ((u_short)note * 16 * 4) - (fine / 2) + 64);
 #endif
