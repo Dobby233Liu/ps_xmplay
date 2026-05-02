@@ -304,10 +304,7 @@ u_short JPGetPeriod(u_char note, short fine)
 #endif
 {
 #ifdef XMPLAY_ENABLE_FIXES
-	int per = ((120 - note) << 6) - (fine / 2) + 64;
-	if (per < 0) per = 0;
-	if (per > 0xFFFF) per = 0xFFFF;
-	return (u_short)per;
+	return ((120 - note) << 6) - (fine / 2) + 64;
 #else
 	return((10L * 12 * 16 * 4) - ((u_short)note * 16 * 4) - (fine / 2) + 64);
 #endif
@@ -1105,16 +1102,10 @@ u_char dat=0;
 				switch(hi)
 				{
 					case 1:
-    					if ((int)XMC->tmpperiod - nib < 1)
-    						XMC->tmpperiod = 1;
-    					else
-    						XMC->tmpperiod -= nib;
+    					XMC->tmpperiod -= nib;
 						break;
 					case 2:
-						if ((int)XMC->tmpperiod + nib > 0xFFFF)
-							XMC->tmpperiod = 0xFFFF;
-						else
-							XMC->tmpperiod += nib;
+						XMC->tmpperiod += nib;
 						break;
 				}
 #endif
@@ -1161,11 +1152,6 @@ int lo;
 				XMC->slidespeed=((u_short)(dat))<<2;
 			if(ms->vbtick)
 			{
-#ifdef XMPLAY_ENABLE_FIXES
-                if((int)XMC->tmpperiod - XMC->slidespeed < 1)
-                    XMC->tmpperiod = 1;
-                else
-#endif
 				XMC->tmpperiod-=XMC->slidespeed;
 			}
 			break;
@@ -1180,10 +1166,7 @@ int lo;
 			if(ms->vbtick)
 			{
 #ifdef XMPLAY_ENABLE_FIXES
-                if((int)XMC->tmpperiod + XMC->slidedownspeed > 0xFFFF)
-                    XMC->tmpperiod = 0xFFFF;
-                else
-                    XMC->tmpperiod+=XMC->slidedownspeed;
+                XMC->tmpperiod+=XMC->slidedownspeed;
 #else
 				XMC->tmpperiod+=XMC->slidespeed;
 #endif
@@ -1381,11 +1364,7 @@ void DoEEffects(u_char dat)
 #ifdef XMPLAY_ENABLE_FIXES
 		if (ms->vbtick)
 			break;
-        ofs = nib << 2;
-        if((int)XMC->tmpperiod - ofs < 1)
-            XMC->tmpperiod = 1;
-        else
-            XMC->tmpperiod -= ofs;
+        XMC->tmpperiod -= (nib << 2);
 #else
 		XMC->tmpperiod += (nib << 2);
 #endif
@@ -1406,11 +1385,7 @@ void DoEEffects(u_char dat)
 			break;
 #endif
 #ifdef XMPLAY_ENABLE_FIXES
-        ofs = nib << 2;
-		if ((int)XMC->tmpperiod + ofs > 0xFFFF)
-			XMC->tmpperiod = 0xFFFF;
-		else
-			XMC->tmpperiod += ofs;
+        XMC->tmpperiod += (nib << 2);
 #else
 		XMC->tmpperiod -= (nib << 2);
 #endif
@@ -1693,17 +1668,11 @@ void SetPer(void)
 
 	a = XMC->note;
 	a += XMC->transpose;
-#ifdef XMPLAY_ENABLE_FIXES
-    if (a < 0) a = 0;
-    if (a > 0xFF) a = 0xFF;
-    period = GetPeriod(a, XMC->c2spd);
-#else
 
 
 	//	a+=jtt;
 
 	period = GetPeriod(a, XMC->c2spd);
-#endif
 
 	XMC->wantedperiod = period;
 	XMC->tmpperiod = period;
@@ -1778,14 +1747,7 @@ void Arpeggio(u_char dat)
 			note += (dat & 0xf);
 			break;
 		}
-#ifdef XMPLAY_ENABLE_FIXES
-        note += XMC->transpose;
-        if (note < 0) note = 0;
-        if (note > 0xFF) note = 0xFF;
-        XMC->period = GetPeriod(note, XMC->c2spd);
-#else
 		XMC->period = GetPeriod(note + XMC->transpose, XMC->c2spd);
-#endif
 		XMC->ownper = 1;
 	}
 }
@@ -1996,20 +1958,14 @@ int dist;
 #ifdef XMPLAY_ENABLE_FIXES
     if(dist>0)
 	{		                                 /* dist>0 ? */
-       if ((int)XMC->period - XMC->portspeed < 1)
-           XMC->period = 1;
-       else
-		XMC->period-=XMC->portspeed;        /* then slide up */
+       XMC->period-=XMC->portspeed;        /* then slide up */
        if (XMC->period < XMC->wantedperiod) XMC->period = XMC->wantedperiod;
 	}
     else
     {
         // TODO: "Reaching portamento target from below forces subsequent portamentos on the same note
         // to use the logic for reaching the note from above instead." (???)
-        if ((int)XMC->period + XMC->portspeed > 0xFFFF)
-            XMC->period = 0xFFFF;
-        else
-            XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
+        XMC->period+=XMC->portspeed;        /* dist<0 -> slide down */
         if (XMC->period > XMC->wantedperiod) XMC->period = XMC->wantedperiod;
     }
 #else
@@ -2070,27 +2026,10 @@ u_short temp=0;
 	temp>>=7;
 	temp<<=2;
 
-#ifdef XMPLAY_ENABLE_FIXES
-    if(XMC->vibpos<=127)
-    {
-        if ((int)XMC->tmpperiod+temp > 0xFFFF)
-    		XMC->period = 0xFFFF;
-        else
-    		XMC->period=XMC->tmpperiod+temp;
-    }
-    else
-    {
-        if ((int)XMC->tmpperiod-temp < 1)
-    		XMC->period = 1;
-        else
-           	XMC->period=XMC->tmpperiod-temp;
-    }
-#else
 	if(XMC->vibpos<128)
 		XMC->period=XMC->tmpperiod+temp;
 	else
 		XMC->period=XMC->tmpperiod-temp;
-#endif
 
 	if(ms->vbtick) XMC->vibpos+=XMC->vibspd;        /* do not update when vbtick==0 */
 }
