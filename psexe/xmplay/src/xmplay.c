@@ -2992,11 +2992,20 @@ int GetFreq2(int period)
 	int okt;
 	int frequency;
 
-	period = JPPer - period;
 #ifdef XMPLAY_ENABLE_FIXES
+    int div;
+
+    period = JPPer - (period & 0xffff);
 	if (period < 1) period = 1;
-#endif
+	// if(period > 29*768) return 0;
+
+	// FT2-style broken octave calc
+	div = (9216u + 767u - period) / 768;
+	okt = (12 - div) & 0x1f;
+#else
+	period = JPPer - period;
 	okt = period / 768;
+#endif
 	frequency = lintab[period % 768];
 
 #ifdef XMPLAY_ENABLE_FIXES
