@@ -1105,8 +1105,8 @@ u_char dat=0;
 				switch(hi)
 				{
 					case 1:
-    					if ((int)XMC->tmpperiod - nib < 0)
-    						XMC->tmpperiod = 0;
+    					if ((int)XMC->tmpperiod - nib < 1)
+    						XMC->tmpperiod = 1;
     					else
     						XMC->tmpperiod -= nib;
 						break;
@@ -1162,8 +1162,8 @@ int lo;
 			if(ms->vbtick)
 			{
 #ifdef XMPLAY_ENABLE_FIXES
-                if((int)XMC->tmpperiod - XMC->slidespeed < 0)
-                    XMC->tmpperiod = 0;
+                if((int)XMC->tmpperiod - XMC->slidespeed < 1)
+                    XMC->tmpperiod = 1;
                 else
 #endif
 				XMC->tmpperiod-=XMC->slidespeed;
@@ -1382,8 +1382,8 @@ void DoEEffects(u_char dat)
 		if (ms->vbtick)
 			break;
         ofs = nib << 2;
-        if((int)XMC->tmpperiod - ofs < 0)
-            XMC->tmpperiod = 0;
+        if((int)XMC->tmpperiod - ofs < 1)
+            XMC->tmpperiod = 1;
         else
             XMC->tmpperiod -= ofs;
 #else
@@ -2080,8 +2080,8 @@ u_short temp=0;
     }
     else
     {
-        if ((int)XMC->tmpperiod-temp < 0)
-    		XMC->period = 0;
+        if ((int)XMC->tmpperiod-temp < 1)
+    		XMC->period = 1;
         else
            	XMC->period=XMC->tmpperiod-temp;
     }
@@ -3055,7 +3055,7 @@ int GetFreq2(int period)
 
 	period = JPPer - period;
 #ifdef XMPLAY_ENABLE_FIXES
-	if (period < 0) period = 0;
+	if (period < 1) period = 1;
 #endif
 	okt = period / 768;
 	frequency = lintab[period % 768];
