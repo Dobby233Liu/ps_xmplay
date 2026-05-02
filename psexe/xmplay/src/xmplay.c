@@ -3771,8 +3771,7 @@ void XM_SetChVolume(int Song_ID, int Channel, short Volume)
     mu = XM_SngAddress[Song_ID];
 
     if (Channel >= XM_SPU_CH_COUNT) return;
-    XMCU = &mu->XM_Chnl[Channel];
-    XMCU->UserVol = Volume > 64 ? 64 : Volume;
+    mu->XM_Chnl[Channel].UserVol = Volume > 64 ? 64 : Volume;
 }
 
 // actually returns the user-set volume unlike the PS2 ver
@@ -3787,8 +3786,7 @@ int XM_GetChVolume(int Song_ID, int Channel)
     mu = XM_SngAddress[Song_ID];
 
     if (Channel >= XM_SPU_CH_COUNT) return -1;
-    XMCU = &mu->XM_Chnl[Channel];
-    return XMCU->UserVol;
+    return mu->XM_Chnl[Channel].UserVol;
 }
 
 void XM_PlayNext(int Song_ID, short SongPos)
@@ -3817,7 +3815,7 @@ void XM_GetHeaderInfo(int XM_ID, XM_HeaderInfo* HeaderInfo)
 {
     if (XM_ID < 0 || XM_ID >= XM_HA)
         return;
-    if (!XM_HeaderAddress[XM_ID]) return;
+    if (!HeaderInfo || !XM_HeaderAddress[XM_ID]) return;
     mhu = XM_HeaderAddress[XM_ID];
 
     HeaderInfo->BPM = mhu->bpm;
