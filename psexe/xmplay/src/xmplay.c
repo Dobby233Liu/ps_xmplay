@@ -3842,5 +3842,5 @@ void XM_StopSample(int channel)
 {
     if (channel < 0 || channel >= XM_SPU_CH_COUNT) return;
     // PS2 ver seems to do a direct keyoff, this is the closest thing to that
-    SpuSetKey(SPU_OFF, 1 << channel);
+    SpuSetKey(SPU_OFF, SPU_KEYCH(channel));
 }
