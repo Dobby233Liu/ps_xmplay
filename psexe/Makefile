@@ -18,9 +18,12 @@ XM_POSITION ?= 0
 XM_PANNING_TYPE ?= $(XM_PANNING_XM)
 
 SONG_DIR = ../songdata/$(XM_DIR)/
-XM_FILENAME_SYM = $(subst /,_,$(subst .,_,$(subst -,_,$(XM_DIR)/$(XM))))
+# my substs are complicated for make
+subsym = $(subst /,_,$(subst .,_,$(subst -,_,$(1))))
+#$(shell python replacecharactersidk.py "$(1)")
+XM_FILENAME_SYM := $(call subsym,$(XM_DIR)/$(XM))
 # HACK to make sure the change is reflected
-TARGET = xmplayer_$(XM_FILENAME_SYM)
+TARGET := xmplayer_$(XM_FILENAME_SYM)
 endif
 
 XMPLAY_VARIANT ?= sbspss
@@ -77,7 +80,7 @@ ifeq ($(XM_BUILTIN),true)
 define SONG_TO_OBJ
 	$(PREFIX)-objcopy -I binary --set-section-alignment .data=4 \
 		--rename-section .data=.rodata,alloc,load,readonly,data,contents \
-		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(subst -,_,$(1))))_start=_song_$(2)_start \
+		--redefine-sym _binary_$(call subsym,$(1))_start=_song_$(2)_start \
 		-O $(FORMAT) -B mips $(1) $@
 endef
 

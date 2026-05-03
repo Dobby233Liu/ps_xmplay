@@ -24,8 +24,6 @@ os.chdir(path.join(path.dirname(path.abspath(__file__)), ".."))
 
 
 def main():
-    modify_driver.clean_src()
-
     with open(f"songdata/{SONGDATA_DIR}/index.json", "r") as f:
         index = json.load(f)
 
@@ -41,6 +39,8 @@ def main():
             with open(license_fp, "r") as f2:
                 print(f2.read().strip(), file=f)
             print(file=f)
+
+    modify_driver.clean_src()
 
     xm_ref_count: dict[str, int] = {}
     for song_name, info in index.items():

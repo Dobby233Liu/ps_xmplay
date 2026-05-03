@@ -1,3 +1,4 @@
+import re
 import subprocess
 from ctypes import LittleEndianStructure, c_int32, c_uint32, sizeof
 from enum import IntEnum
@@ -38,10 +39,14 @@ class SongInfoStruct(LittleEndianStructure):
         self.version = SONGINFO_VERSION
 
 
+# be consistent with makefile
+DIFF_MARK_REGEX = re.compile(r"[\-\./]")  # \(\)
+
+
 def _load_driver(xm_dir: str, xm: str) -> lief.ELF.Binary:
     lets_go_gambling_aw_dangit = lief.ELF.ParserConfig()
     lets_go_gambling_aw_dangit.parse_notes = False
-    diff_mark = f"{xm_dir}_{xm}".replace("/", "_").replace(".", "_").replace("-", "_")
+    diff_mark = re.sub(DIFF_MARK_REGEX, "_", f"{xm_dir}_{xm}")
     elf: lief.ELF.Binary | None = lief.ELF.parse(f"psexe/xmplayer_{diff_mark}.elf", lets_go_gambling_aw_dangit)
     if elf is None:
         raise Exception("failed to load driver ELF")
