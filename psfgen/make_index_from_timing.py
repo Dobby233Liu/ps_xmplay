@@ -15,13 +15,12 @@ def main():
     ):
         if path.splitext(timing_fn)[1] == ".bak":
             continue
-        with open(timing_fn, "rb") as timing_f:
+        with open(timing_fn, "rb") as timing_f, libopenmpt.Module(timing_f) as timing:
             timing_fnn = path.splitext(path.basename(timing_fn))[0]
             timing_fnn2 = timing_fnn
             # torment = glob.glob(f"out/{SONGDATA_DIR}/*{timing_fnn}.psf")
             # if len(torment) > 0:
             #    timing_fnn2 = path.splitext(path.basename(torment[0]))[0]
-            timing = libopenmpt.Module(timing_f)
             for i in range(timing.num_subsongs):
                 minipsf_fn = timing_fnn2 + ("_" + str(i) if timing.num_subsongs != 1 else "")
                 index[minipsf_fn] = {

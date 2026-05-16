@@ -3,6 +3,7 @@ import io
 import os
 import sys
 import traceback
+from contextlib import AbstractContextManager
 from ctypes import (
     CDLL,
     CFUNCTYPE,
@@ -227,7 +228,7 @@ LIB.openmpt_module_read_mono.argtypes = [c_openmpt_module, c_int32, c_size_t, PO
 LIB.openmpt_module_read_mono.restype = c_size_t
 
 
-class Module:
+class Module(AbstractContextManager):
     class _Ctl:
         def __init__(self, module: "Module") -> None:
             assert module is not None
@@ -360,10 +361,16 @@ class Module:
 
         self.ctl = self._Ctl(self)
 
-    def __del__(self):
-        # TODO: support explicit closing?
+    def close(self):
         if self._module is not None:
             LIB.openmpt_module_destroy(self._module)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return None
 
     @LOG_CB
     def _log(self, message: bytes, user: c_void_p):

@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from contextlib import ExitStack
 from os import path
 
 import libopenmpt
@@ -47,88 +48,95 @@ def main():
         xm_ref_count[info["xm"]] = xm_ref_count.get(info["xm"], 0) + 1
 
     bank_info: dict[str, tuple[lief.ELF.Binary | None, str | None, libopenmpt.Module | None]] = {}
-    for song_name, info in index.items():
-        assert info["xm"]
+    with ExitStack() as stack:
+        for song_name, info in index.items():
+            assert info["xm"]
 
-        making_psf = xm_ref_count[info["xm"]] == 1
-        lib = None
-        lib_fn = None
-        mod = None
-
-        if bank_info.get(info["xm"], None) is None:
-            print("")
-
+            making_psf = xm_ref_count[info["xm"]] == 1
+            lib = None
+            lib_fn = None
             mod = None
-            path_timing = f"songdata/{SONGDATA_DIR}/timing/{info['xm']}.{info.get('module_ext', 'xm')}"
-            if info.get("use_orig_as_timing", False):
-                path_timing = f"songdata/{SONGDATA_DIR}/{info['xm']}.xm"
+
+            if bank_info.get(info["xm"], None) is None:
+                print("")
+
+                mod = None
+                path_timing = f"songdata/{SONGDATA_DIR}/timing/{info['xm']}.{info.get('module_ext', 'xm')}"
+                if info.get("use_orig_as_timing", False):
+                    path_timing = f"songdata/{SONGDATA_DIR}/{info['xm']}.xm"
+
+                if not making_psf:
+                    lib_fn = f"{info['xm']}.psflib"
+                    print(lib_fn)
+                else:
+                    print(song_name)
+
+                lib = modify_driver._make_psflib_elf(
+                    info["xm"],
+                    SONGDATA_DIR,
+                    # TODO: variant should not be located there in info json
+                    info.get("xmplay_variant", XMPLAY_VARIANT),
+                    XMPLAY_ENABLE_FIXES,
+                )
+                if not making_psf:
+                    lib_psf = modify_driver.make_psflib_psf(lib)
+                    with open(f"{outdir}/{lib_fn}", "wb") as libf:
+                        lib_psf.write(libf, use_zopfli=USE_ZOPFLI)
+
+                if path.exists(path_timing):
+                    with open(path_timing, "rb") as mod_f:
+                        mod = stack.enter_context(
+                            libopenmpt.Module(mod_f, {"load.skip_samples": True, "play.at_end": "stop"})
+                        )
+
+                bank_info[info["xm"]] = (lib, lib_fn, mod)
+
+                print("")
+            else:
+                lib, lib_fn, mod = bank_info[info["xm"]]
 
             if not making_psf:
-                lib_fn = f"{info['xm']}.psflib"
-                print(lib_fn)
-            else:
                 print(song_name)
 
-            lib = modify_driver._make_psflib_elf(
-                info["xm"],
-                SONGDATA_DIR,
-                # TODO: variant should not be located there in info json
-                info.get("xmplay_variant", XMPLAY_VARIANT),
-                XMPLAY_ENABLE_FIXES,
-            )
-            if not making_psf:
-                lib_psf = modify_driver.make_psflib_psf(lib)
-                with open(f"{outdir}/{lib_fn}", "wb") as libf:
-                    lib_psf.write(libf, use_zopfli=USE_ZOPFLI)
+            sound_type = modify_driver.XMType.Music
 
-            if path.exists(path_timing):
-                with open(path_timing, "rb") as mod_f:
-                    mod = libopenmpt.Module(mod_f, {"load.skip_samples": True, "play.at_end": "stop"})
+            song_length = info.get("length", None)
+            loop_option = info.get("loop", True)
+            loop_count = info.get("loop_count", 1)
+            fade = info.get("fade", 10)
+            loop = True
+            if loop_option == "force_stop":
+                loop = False
+            elif not loop_option:
+                loop_count = 0
+                fade = 0
+            if not song_length:
+                if mod and (subsong := info.get("rough_xm_subsong", None)) is not None:
+                    mod.subsong = subsong
+                    mod.repeat_count = loop_count if loop else 0
+                    song_length = mod.estimate_duration() or song_length
+                else:
+                    song_length = 3.0 * 60
 
-            bank_info[info["xm"]] = (lib, lib_fn, mod)
+            panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
 
-            print("")
-        else:
-            lib, lib_fn, mod = bank_info[info["xm"]]
-
-        if not making_psf:
-            print(song_name)
-
-        sound_type = modify_driver.XMType.Music
-
-        song_length = info.get("length", None)
-        loop_option = info.get("loop", True)
-        loop_count = info.get("loop_count", 1)
-        fade = info.get("fade", 10)
-        loop = True
-        if loop_option == "force_stop":
-            loop = False
-        elif not loop_option:
-            loop_count = 0
-            fade = 0
-        if not song_length:
-            if mod and (subsong := info.get("rough_xm_subsong", None)) is not None:
-                mod.subsong = subsong
-                mod.repeat_count = loop_count if loop else 0
-                song_length = mod.estimate_duration() or song_length
-            else:
-                song_length = 3.0 * 60
-
-        panning_type: modify_driver.XMPanningType = info.get("panning_type", modify_driver.XMPanningType.XM)
-
-        with open(f"{outdir}/{song_name}.{'mini' if not making_psf else ''}psf", "wb") as outf:
-            assert lib is not None
-            if not making_psf:
-                assert lib_fn is not None
-                psf1 = modify_driver.make_minipsf(lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type)
-            else:
-                psf1 = modify_driver._make_psf_patch_lib(lib, sound_type, loop, info.get("position", 0), panning_type)
-            if song_length:
-                psf1.tags["length"] = song_length
-            psf1.tags["fade"] = fade if loop else 0
-            psf1.tags["psfby"] = "ps_xmplay psfgen"
-            # psf1.tags["origfilename"] = song_name
-            psf1.write(outf, use_zopfli=USE_ZOPFLI)
+            with open(f"{outdir}/{song_name}.{'mini' if not making_psf else ''}psf", "wb") as outf:
+                assert lib is not None
+                if not making_psf:
+                    assert lib_fn is not None
+                    psf1 = modify_driver.make_minipsf(
+                        lib, lib_fn, sound_type, loop, info.get("position", 0), panning_type
+                    )
+                else:
+                    psf1 = modify_driver._make_psf_patch_lib(
+                        lib, sound_type, loop, info.get("position", 0), panning_type
+                    )
+                if song_length:
+                    psf1.tags["length"] = song_length
+                psf1.tags["fade"] = fade if loop else 0
+                psf1.tags["psfby"] = "ps_xmplay psfgen"
+                # psf1.tags["origfilename"] = song_name
+                psf1.write(outf, use_zopfli=USE_ZOPFLI)
 
 
 if __name__ == "__main__":
