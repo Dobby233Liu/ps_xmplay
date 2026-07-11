@@ -57,13 +57,15 @@ static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
 #else
 static int vab_init(unsigned char *vh_ptr, unsigned char *vb_ptr) {
     int ret = -1;
+    int vab_id_xmplay = -1;
+    int vab_id_libsnd = -1;
 
     SsInit();
 
-    int vab_id_xmplay = XM_GetFreeVAB();
+    vab_id_xmplay = XM_GetFreeVAB();
     if (vab_id_xmplay == -1) goto done;
 
-    int vab_id_libsnd = SsVabTransfer(vh_ptr, vb_ptr, 0, SS_WAIT_COMPLETED);
+    vab_id_libsnd = SsVabTransfer(vh_ptr, vb_ptr, 0, SS_WAIT_COMPLETED);
     if (vab_id_libsnd < 0) {
         ret = vab_id_libsnd - 1;
         goto done;
@@ -109,8 +111,8 @@ void main() {
     SetVideoMode(BIOS_PAL ? MODE_PAL : MODE_NTSC);
 
     assert(song_info.pxm_ptr && song_info.vh_ptr && song_info.vb_ptr, "xm/voice unset");
-    assert(syscall_strncmp(song_info.pxm_ptr, "Extended Module:", 16) == 0, "bad xm");
-    assert(syscall_strncmp(song_info.vh_ptr, "pBAV", 4) == 0, "bad vab");
+    assert(syscall_strncmp((char*)song_info.pxm_ptr, "Extended Module:", 16) == 0, "bad xm");
+    assert(syscall_strncmp((char*)song_info.vh_ptr, "pBAV", 4) == 0, "bad vab");
 
     locked = enterCriticalSection();
     InitHeap((unsigned long*)heap, sizeof(heap));

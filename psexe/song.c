@@ -1,6 +1,12 @@
 #include <xmplay.h>
 #include "song.h"
 
+#ifdef XM_BUILTIN
+extern unsigned char _song_xm_start[];
+extern unsigned char _song_vh_start[];
+extern unsigned char _song_vb_start[];
+#endif
+
 song_info_t song_info __attribute__((__used__)) =
 {
     .version = 1,

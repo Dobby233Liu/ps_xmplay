@@ -270,7 +270,9 @@ u_short GetLogPeriod(u_char note, u_short fine)
 	u_char n, o;
 	u_short p1, p2, i;
 	short j;
+#ifndef XMPLAY_ENABLE_FIXES
 	int f;
+#endif
 
 	n = note % 12;
 	o = (note / 12);
@@ -283,10 +285,12 @@ u_short GetLogPeriod(u_char note, u_short fine)
 
 	j = (Interpolate(fine / 16, 0, 15, p1, p2) >> o);
 
+#ifndef XMPLAY_ENABLE_FIXES
 	if (j == 0)
 	{
 		f = 1;
 	}
+#endif
 
 	return(j);
 
@@ -586,7 +590,7 @@ void XM_OnceOffInit(int PAL)
 	{
 		// Since the addresses are externally allocated this doesn't make sense
 		/*if (XM_SngAddress[i])
-			XM_SngAddress[i]->XMPlay = XM_STOPPED;	/* Turn off every song */
+			XM_SngAddress[i]->XMPlay = XM_STOPPED;	// Turn off every song */
 		XM_SngAddress[i] = 0;
 		XMSongIDs[i] = -1;
 	}
@@ -927,17 +931,23 @@ See: OpenMPT CSoundFile::ProcessEffects
 
 void JPlayEffects(void)
 {
+#ifndef XMPLAY_ENABLE_FIXES
 u_char note=0;
 u_char ins=0;
+#endif
 u_char vol=0;
 u_char eff=0;
 u_char dat=0;
 
+#ifndef XMPLAY_ENABLE_FIXES
 	note=XMC->note;
+#endif
 	vol=XMC->vol;
 	eff=XMC->eff;
 	dat=XMC->dat;
+#ifndef XMPLAY_ENABLE_FIXES
 	ins=XMC->ins;
+#endif
 
 	XMC->ownper=0;
 	XMC->ownvol=0;
@@ -1342,9 +1352,6 @@ See: OpenMPT CSoundFile::ExtendedMODCommands
 void DoEEffects(u_char dat)
 {
 	u_char nib;
-#ifdef XMPLAY_ENABLE_FIXES
-	u_short ofs;
-#endif
 
 	nib = dat & 0xf;
 
@@ -2483,8 +2490,12 @@ int CalcPlayPos(int StartPos)
 			CurrentCh = t;
 #ifdef XMPLAY_ENABLE_FIXES
             if (t <= XM_SPU_CH_COUNT - 1)
+            {
 #endif
 			XMC = &ms->XM_Chnl[t];				/* Decode pattern data */
+#ifdef XMPLAY_ENABLE_FIXES
+            }
+#endif
 			SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
 		}
 	}
@@ -2513,8 +2524,12 @@ int PACKEDCalcPlayPos(int StartPos)
 			CurrentCh = patdat;
 #ifdef XMPLAY_ENABLE_FIXES
             if (patdat <= XM_SPU_CH_COUNT - 1)
+            {
 #endif
 			XMC = &ms->XM_Chnl[patdat];		/* Decode pattern data */
+#ifdef XMPLAY_ENABLE_FIXES
+            }
+#endif
 			SP += JCalcPat((u_char*)ms->PatAdr2 + SP);
 		}
 	}
