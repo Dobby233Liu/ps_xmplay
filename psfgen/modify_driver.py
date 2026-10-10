@@ -54,7 +54,7 @@ def _load_driver(xm_dir: str, xm: str) -> lief.ELF.Binary:
 
 
 def clean_src():
-    subprocess.run(["make", "-C", "psexe", "XM_BUILTIN=true", "XMPLAY_VARIANT=redriver2", "clean"], check=True)
+    subprocess.run(["make", "-j", "-C", "psexe", "XM_BUILTIN=true", "XMPLAY_VARIANT=redriver2", "clean"], check=True)
 
 
 def _make_psflib_elf(
@@ -66,6 +66,7 @@ def _make_psflib_elf(
     subprocess.run(
         [
             "make",
+            "-j",
             "-C",
             "psexe",
             "XM_BUILTIN=true",

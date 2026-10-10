@@ -10,7 +10,7 @@ XM_PANNING_XM = 0
 XM_PANNING_S3M = 1
 
 ifeq ($(XM_BUILTIN),true)
-XM ?= chapter1
+XM ?=
 
 XM_TYPE ?= $(XM_TYPE_MUSIC)
 XM_LOOP ?= 1
@@ -18,11 +18,9 @@ XM_POSITION ?= 0
 XM_PANNING_TYPE ?= $(XM_PANNING_XM)
 
 SONG_DIR = ../songdata/$(XM_DIR)/
-# my substs are complicated for make
 subsym = $(subst /,_,$(subst .,_,$(subst -,_,$(1))))
-#$(shell python replacecharactersidk.py "$(1)")
 XM_FILENAME_SYM := $(call subsym,$(XM_DIR)/$(XM))
-# HACK to make sure the change is reflected
+# This also kind of makes sure the file is always built
 TARGET := xmplayer_$(XM_FILENAME_SYM)
 endif
 
@@ -40,7 +38,11 @@ main.c \
 song.c
 
 ifeq ($(XM_BUILTIN),true)
-OBJS += song_$(XM_FILENAME_SYM)_xm.o song_$(XM_FILENAME_SYM)_vh.o song_$(XM_FILENAME_SYM)_vb.o
+SONG_OBJ_ROOT = songobjs/
+ifneq ($(XM),)
+OBJS += $(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_xm.o $(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_vh.o \
+	$(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_vb.o
+endif
 endif
 
 CPPFLAGS += -Inugget -Ipsyq/include -Ixmplay/include
@@ -84,21 +86,21 @@ define SONG_TO_OBJ
 		-O $(FORMAT) -B mips $(1) $@
 endef
 
-song_$(XM_FILENAME_SYM)_xm.o: $(SONG_DIR)$(XM).xm
+$(SONG_OBJ_ROOT):
+	mkdir "$@"
+
+$(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_xm.o: $(SONG_DIR)$(XM).xm $(SONG_OBJ_ROOT)
 	$(call SONG_TO_OBJ,$<,xm)
 
-song_$(XM_FILENAME_SYM)_vh.o: $(SONG_DIR)$(XM).vh
+$(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_vh.o: $(SONG_DIR)$(XM).vh $(SONG_OBJ_ROOT)
 	$(call SONG_TO_OBJ,$<,vh)
 
-song_$(XM_FILENAME_SYM)_vb.o: $(SONG_DIR)$(XM).vb
+$(SONG_OBJ_ROOT)$(XM_FILENAME_SYM)_vb.o: $(SONG_DIR)$(XM).vb $(SONG_OBJ_ROOT)
 	$(call SONG_TO_OBJ,$<,vb)
 
 .PHONY: clean-songdata
 clean-songdata:
-	rm -f song_*_xm.o song_*_vh.o song_*_vb.o
+	rm -rf "$(SONG_OBJ_ROOT)"
 
-clean-all-exe:
-	rm -f xmplayer_*.elf xmplayer_*.ps-exe
-
-clean:: clean-songdata clean-all-exe
+clean:: clean-songdata
 endif
