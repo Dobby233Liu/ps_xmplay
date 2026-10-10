@@ -59,7 +59,7 @@ CPPFLAGS += -DXMPLAY_ENABLE_FIXES
 endif
 endif
 
-#CPPFLAGS += -Wall -Wno-unused-function
+CPPFLAGS += -Wall -Wextra -Wno-unused-function -Wpedantic
 
 LDFLAGS += -Lpsyq/lib -Lxmplay/lib
 LDFLAGS += -Wl,--start-group -lc -lapi -letc -lgpu -lspu

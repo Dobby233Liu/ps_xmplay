@@ -2628,8 +2628,6 @@ void ApplyEffs(void)
 #ifdef XMPLAY_ENABLE_FIXES
 				if(XMC->period<1)					/* Cap period */
 					XMC->period=1;
-                else if(XMC->period>0xffff)
-					XMC->period=0xffff;
 #else
 				if(XMC->period<1)					/* Cap period */
 					XMC->period=1;
